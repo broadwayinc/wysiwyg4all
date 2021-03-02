@@ -1,4 +1,4 @@
-import {ColorMangle} from '../colormangle/colormangle-export.js';
+import {ColorMangle} from '../colormangle/colormangle.js';
 export class Wysiwyg4All {
     /**
      * Wysiwyg4All is a simple framework for building a text editor for your website.
