@@ -1,3 +1,4 @@
+// To test locally on browser, remove import, export, fetch https://broadwayinc.dev/jslib/colormangle/0.1.0/colormangle.js script in header
 import {ColorMangle} from '../colormangle/colormangle.js';
 export class Wysiwyg4All {
     /**
