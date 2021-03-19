@@ -111,8 +111,7 @@ let input_color_string = () => {
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img%20%EC%97%B4%EA%B8%B0.PNG" style="zoom:10%;" />
 
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img%20inserted.PNG" style="zoom:10%;" />
-
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img%20inserted.PNG" style="zoom:60%;" />
 
 
 
