@@ -131,19 +131,6 @@ let input_color_string = () => {
 ![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/Restore.gif)
 
 
-
-### 
-
-```
-@param {{}} action - Custom element object.
-@param {{}} action.element - Custom element DOM.
-@param {string} [action.elementId] - Set custom element parent id. Otherwise auto generated.
-@param {{}} [action.style] - Set custom element parent css style.
-@param {'append' | 'inline'} [action.insertMode='append'] - Set custom element insert mode. When 'append' the custom element is added as block element. Otherwise as inline element.
-```
-
-
-
 ### Default setting parameters for wysiwyg
 
 ```
@@ -247,16 +234,11 @@ let export_data = () => {
 ```
 
 
-
-
-
-
-
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/carat position text area.PNG" style="zoom:50%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/carat position text area.PNG" width="500" />
 
 `c.caratPosition`  automatically tracks the cursor position. In the console panel, cursor position in the above text area can be viewed under commandTracker/ caratPosition.
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/cursor position.PNG"  />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/cursor position.PNG" width="500" />
 
 
 
