@@ -79,9 +79,9 @@ let input_color_string = () => {
 
 #### **Divider**
 
-`wysiwyg.command('divider')`adds <hr> line below .
+`wysiwyg.command('divider')`adds horizontal line below .
 
-![](C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\divider.gif)
+![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/divider.gif)
 
 
 
