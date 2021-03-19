@@ -2,7 +2,7 @@
 
 # Wysiwyg4all
 
-[Getting started](#getting-started) | [Text style editing](#text-style-editing) | [Text color](#text-color-editing) | [Divider](#divider) | [Quote](#quote) | [List](#list) | [Image insertion](#image-insertion) | [Text alignment](#text-alignment) | [Restore cursor position](#restore-cursor-position) | [Default setting parameters](#default-setting-parameters) | [License](#license) </br> 
+[Getting started](#getting-started) | [Text style](#text-style) | [Text color](#text-color) | [Divider](#divider) | [Quote](#quote) | [List](#list) | [Image insertion](#image-insertion) | [Text alignment](#text-alignment) | [Restore cursor position](#restore-cursor-position) | [Default setting parameters](#default-setting-parameters) | [License](#license) </br> 
 
 **Wysiwyg4all** ('what you see is what you get for all') is a simple framework for building a text editor for your website. It is highly expandable and customizable.
 
@@ -47,13 +47,13 @@ The command function edit text styles or perform diverse functions. The list of 
 
 ### List of Wysiwyg commands
 
-#### Text style editing
+#### Text style
 
 `wysiwyg.command('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'small' | 'bold' | 'italic' | 'underline' | 'strike')` changes the text style by heading level, small letter, bold, italic, underline or strike.
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/style3.gif" style="zoom:100%;" />
 
-#### **Text color editing**
+#### **Text color**
 
 `wysiwyg.command('color')` changes the text color ('black') to **wysiwyg** color scheme ('teal'). If you want to use other colors, HTML color name string can be given by input typing.
 
@@ -123,7 +123,7 @@ let input_color_string = () => {
 ![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/Restore.gif)
 
 
-### Default setting parameters for wysiwyg
+### Default setting parameters
 
 ```
 let wysiwyg = new Wysiwyg4all({
