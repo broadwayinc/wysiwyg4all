@@ -105,13 +105,13 @@ let input_color_string = () => {
 
 `wysiwyg.command('image')` adds image below selected line. By clicking the 'photo' command button, directory panel pops up and if the image file opened, the image is inserted into the text area.
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/photo%20add%20screen.png" style="zoom:10%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/photo%20add%20screen.png"  width="200" />
 
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img%20%EC%97%B4%EA%B8%B0.PNG" style="zoom:10%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img%20%EC%97%B4%EA%B8%B0.PNG"  width="200" />
 
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img%20inserted.PNG" style="zoom:20%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img%20inserted.PNG"  width="200" />
 
 
 
@@ -256,7 +256,7 @@ let export_data = () => {
 
 `c.caratPosition`  automatically tracks the cursor position. In the console panel, cursor position in the above text area can be viewed under commandTracker/ caratPosition.
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/cursor position.PNG" width="200"  />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/cursor position.PNG"  />
 
 
 
