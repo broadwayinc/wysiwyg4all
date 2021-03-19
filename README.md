@@ -89,7 +89,7 @@ let input_color_string = () => {
 
 `wysiwyg.command('quote')`adds block quote on the selected line.
 
-![](C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\Quote.gif)
+![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/Quote.gif)
 
 
 
@@ -97,7 +97,7 @@ let input_color_string = () => {
 
 `wysiwyg.command('unorderedList')` adds unordered list and`wysiwyg.command('orderedList')`adds ordered list one the selected line.
 
-![](C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\listing.gif)
+![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/listing.gif)
 
 
 
@@ -105,11 +105,11 @@ let input_color_string = () => {
 
 `wysiwyg.command('image')` adds image below selected line. By clicking the 'photo' command button, directory panel pops up and if the image file opened, the image is inserted into the text area.
 
-<img src="C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\photo add screen.PNG" style="zoom:60%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/photo add screen.png" style="zoom:60%;" />
 
-<img src="C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\img 열기.PNG" style="zoom:50%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img 열기.png" style="zoom:50%;" />
 
-<img src="C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\img inserted.PNG" style="zoom:60%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/img inserted.png" style="zoom:60%;" />
 
 
 
@@ -117,7 +117,7 @@ let input_color_string = () => {
 
 `wysiwyg.command('alignLeft')` , `wysiwyg.command('alignCenter')`  or `wysiwyg.command('alignRight')`aligns selected text to the left, center or to the right.
 
-![](C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\alignment.gif)
+![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/alignment.gif)
 
 
 
@@ -125,7 +125,7 @@ let input_color_string = () => {
 
 `wysiwyg.restoreLastSelection()` restores the last caret position or  the last selection range after losing focus.
 
-![](C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\Restore.gif)
+![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/Restore.gif)
 
 
 
@@ -249,11 +249,11 @@ let export_data = () => {
 
 
 
-<img src="C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\carat position text area.PNG" style="zoom:80%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/carat position text area.PNG" style="zoom:80%;" />
 
 `c.caratPosition`  automatically tracks the cursor position. In the console panel, cursor position in the above text area can be viewed under commandTracker/ caratPosition.
 
-![](C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\cursor position.PNG)
+![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/cursor position.PNG)
 
 
 
