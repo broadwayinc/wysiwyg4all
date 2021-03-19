@@ -56,7 +56,7 @@ The command function edit text styles or perform diverse functions. The list of 
 
 
 
-<img src="C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\style3.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/style3.gif" style="zoom:100%;" />
 
 
 
