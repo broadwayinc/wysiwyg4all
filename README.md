@@ -23,10 +23,8 @@ Additional library **ColorMangle** is required for text colors.
 
 <br />
 
-#### Example for creating text editor####
+#### Example for creating text editor
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/default%20options.png" style="zoom:100%;" />
-
-
 
 ##### An example of HTML code for generating text area and 'H1' command button
 
@@ -47,23 +45,17 @@ Additional library **ColorMangle** is required for text colors.
 The command function edit text styles or perform diverse functions. The list of the command inputs is shown in the following.
 
 
-
 ### List of Wysiwyg commands
 
 #### Text style editing (H1-H6/ small/ bold/ italic/ underline/ strike)
 
 `wysiwyg.command('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'small' | 'bold' | 'italic' | 'underline' | 'strike')` changes the text style by heading level, small letter, bold, italic, underline or strike.
 
-
-
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/style3.gif" style="zoom:100%;" />
-
-
 
 #### **Text color editing**
 
 `wysiwyg.command('color')` changes the text color ('black') to **wysiwyg** color scheme ('teal'). If you want to use other colors, HTML color name string can be given by input typing.
-
 
 
 ```
