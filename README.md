@@ -47,7 +47,7 @@ The command function edit text styles or perform diverse functions. The list of 
 
 ### List of Wysiwyg commands
 
-#### Text style editing (H1-H6/ small/ bold/ italic/ underline/ strike)
+#### Text style editing
 
 `wysiwyg.command('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'small' | 'bold' | 'italic' | 'underline' | 'strike')` changes the text style by heading level, small letter, bold, italic, underline or strike.
 
@@ -85,7 +85,7 @@ let input_color_string = () => {
 
 
 
-#### **List (Unordered/ Ordered)**
+#### **List**
 
 `wysiwyg.command('unorderedList')` adds unordered list and`wysiwyg.command('orderedList')`adds ordered list one the selected line.
 
