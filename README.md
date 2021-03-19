@@ -65,7 +65,7 @@ let input_color_string = () => {
 }
 ```
 
-<img src="C:\Users\슈퍼맨\Documents\figure for MD\wysiwyg\color_resized.gif" style="zoom:100%;" />
+![](https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/color_resized.gif)
 
 
 
