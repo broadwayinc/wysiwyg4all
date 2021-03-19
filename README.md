@@ -24,7 +24,7 @@ Additional library **ColorMangle** is required for text colors.
 <br />
 
 #### Example for creating text editor####
-<img src="https://github.com/broadwayinc/wysiwyg4all/figure for MD/wysiwyg/default options.png" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/figure%20for%20MD/wysiwyg/default%20options.png" style="zoom:100%;" />
 
 
 
