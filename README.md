@@ -9,11 +9,36 @@
 <br />
 
 ## Getting started
+<br />
 
-Additional library **ColorMangle** is required for text colors.
+1. Inside html &lt;head&gt; add below:
+```
+<script src="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.0/wysiwyg4all.js"></script>
+<link rel="stylesheet" type="text/css" href="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.0/wysiwyg4all.css" />
+```
+<br />
+
+2. Create &lt;div&gt; with an id. And add a button for wysiwyg functionality.
+```
+<div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
+<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
+    H1
+</button>
+```
+Here, we have setup our div with id 'myeditor' and gave some custom css styles.
+We also have added a button with onclick event which will make selected text size to 'h1'.
+
 
 <br />
 
+3. Add javascript inside your &lt;script&gt;.
+   The &lt;script&gt; tag should come after the &lt;body&gt; tag.
+   
+```
+let wysiwyg = new Wysiwyg4All({
+        elementId: 'myeditor'
+    });
+```
 
 ## API
 

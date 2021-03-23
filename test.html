@@ -11,8 +11,11 @@
 <body>
 <h1>Wysiwyg4All</h1>
 <hr>
-<div id="sample" style="width: 512px; margin:1rem auto; padding:1rem; border: solid 1px teal"></div>
-<div style="width: 512px; margin:1rem auto;">
+<div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
+<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
+    H1
+</button>
+<!--<div style="width: 512px; margin:1rem auto;">
     <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h4')">
         H4
     </button>
@@ -58,95 +61,95 @@
     <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="export_data()">
         EXPORT
     </button>
-</div>
+</div>-->
 
 </body>
 <script>
 
     let wysiwyg = new Wysiwyg4All({
-        elementId: 'sample',
-        hashtag: true,
-        placeholder: 'HELLO',
-        spellcheck: true,
-        urllink: true,
-        logMutation: false,
-        lastLineBlank: true,
+        elementId: 'myeditor',
+        // hashtag: true,
+        // placeholder: 'HELLO',
+        // spellcheck: true,
+        // urllink: true,
+        // logMutation: false,
+        // lastLineBlank: true,
         callback: async c => {
             if (c.image) {
-                let img = c.image;
-                if (Array.isArray(img))
-                    for (let h of img) {
-                        h.onclick = (e) => {
-                            console.log({e});
-                        };
-                        h.class = ['sample'];
-                        h.style = {};
-                        h.style.width = '50%';
-                        h.style.margin = 'auto';
-                        // let custom = document.createElement('div');
-                        // custom.append(document.createTextNode('SAMPLE'));
-                        // custom.style.backgroundColor = 'teal';
-                        // custom.style.color = 'white';
-                        // h.element = custom;
-                    }
+                // let img = c.image;
+                // if (Array.isArray(img))
+                //     for (let h of img) {
+                //         h.onclick = (e) => {
+                //             console.log({e});
+                //         };
+                //         h.class = ['sample'];
+                //         h.style = {};
+                //         h.style.width = '50%';
+                //         h.style.margin = 'auto';
+                //         // let custom = document.createElement('div');
+                //         // custom.append(document.createTextNode('SAMPLE'));
+                //         // custom.style.backgroundColor = 'teal';
+                //         // custom.style.color = 'white';
+                //         // h.element = custom;
+                //     }
             }
             if (c.hashtag) {
-                let ht = c.hashtag;
-                if (Array.isArray(ht))
-                    for (let h of ht) {
-                        h.onclick = (e) => {
-                            console.log({e});
-                        };
-                        h.class = ['sample'];
-                        // let custom = document.createElement('div');
-                        // custom.append(document.createTextNode('SAMPLE'));
-                        // custom.style.backgroundColor = 'teal';
-                        // custom.style.color = 'white';
-                        // h.element = custom;
-                        // h.custom = true;
-                    }
+                // let ht = c.hashtag;
+                // if (Array.isArray(ht))
+                //     for (let h of ht) {
+                //         h.onclick = (e) => {
+                //             console.log({e});
+                //         };
+                //         h.class = ['sample'];
+                //         // let custom = document.createElement('div');
+                //         // custom.append(document.createTextNode('SAMPLE'));
+                //         // custom.style.backgroundColor = 'teal';
+                //         // custom.style.color = 'white';
+                //         // h.element = custom;
+                //         // h.custom = true;
+                //     }
             }
             if (c.urllink) {
-                let ht = c.urllink;
-                if (Array.isArray(ht))
-                    for (let h of ht) {
-                        h.onclick = (e) => {
-                            console.log({e});
-                        };
-                        h.class = ['sample'];
-
-                        if (c.urllink) {
-                            // for (let u of c.urllink) {
-                            //     console.log({u});
-                            //     let div = document.createElement('div');
-                            //     let frame = document.createElement('iframe');
-                            //
-                            //     frame.setAttribute('scrolling', 'no');
-                            //     frame.setAttribute('frameborder', '0');
-                            //     frame.setAttribute('allow', 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture');
-                            //     frame.setAttribute('allowfullscreen', '');
-                            //
-                            //     div.classList.add(`youtube-embed-container`);
-                            //     frame.src = u.url;
-                            //     div.append(frame);
-                            //     u.element = div;
-                            //     u.custom = true;
-                            // }
-                        }
-
-                        // let custom = document.createElement('div');
-                        // custom.append(document.createTextNode('SAMPLE'));
-                        // custom.style.backgroundColor = 'teal';
-                        // custom.style.color = 'white';
-                        // h.element = custom;
-                        // h.custom = true;
-                    }
+                // let ht = c.urllink;
+                // if (Array.isArray(ht))
+                //     for (let h of ht) {
+                //         h.onclick = (e) => {
+                //             console.log({e});
+                //         };
+                //         h.class = ['sample'];
+                //
+                //         if (c.urllink) {
+                //             // for (let u of c.urllink) {
+                //             //     console.log({u});
+                //             //     let div = document.createElement('div');
+                //             //     let frame = document.createElement('iframe');
+                //             //
+                //             //     frame.setAttribute('scrolling', 'no');
+                //             //     frame.setAttribute('frameborder', '0');
+                //             //     frame.setAttribute('allow', 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture');
+                //             //     frame.setAttribute('allowfullscreen', '');
+                //             //
+                //             //     div.classList.add(`youtube-embed-container`);
+                //             //     frame.src = u.url;
+                //             //     div.append(frame);
+                //             //     u.element = div;
+                //             //     u.custom = true;
+                //             // }
+                //         }
+                //
+                //         // let custom = document.createElement('div');
+                //         // custom.append(document.createTextNode('SAMPLE'));
+                //         // custom.style.backgroundColor = 'teal';
+                //         // custom.style.color = 'white';
+                //         // h.element = custom;
+                //         // h.custom = true;
+                //     }
             }
             if (c.caratPosition) {
-                let viewPortHeight = Math.min(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-                let minusWhenOutOfView = viewPortHeight - c.caratPosition.top;
-                if (minusWhenOutOfView < 0)
-                    window.scrollBy(0, -minusWhenOutOfView);
+                // let viewPortHeight = Math.min(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                // let minusWhenOutOfView = viewPortHeight - c.caratPosition.top;
+                // if (minusWhenOutOfView < 0)
+                //     window.scrollBy(0, -minusWhenOutOfView);
             }
             // console.log(c);
             return c;
