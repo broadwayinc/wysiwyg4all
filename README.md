@@ -31,7 +31,7 @@ We also have added a button with onclick event which will make selected text siz
 
 <br />
 
-3. Add javascript inside your &lt;script&gt;.
+3. Add script inside your &lt;script&gt;.
    The &lt;script&gt; tag should come after the &lt;body&gt; tag.
    
 ```

@@ -1,5 +1,6 @@
 // To test locally on browser, remove import, export, fetch https://broadwayinc.dev/jslib/colormangle/0.1.0/colormangle.js script in header
 import {ColorMangle} from '../colormangle/colormangle.js';
+
 export class Wysiwyg4All {
     /**
      * Wysiwyg4All is a simple framework for building a text editor for your website.
@@ -10,7 +11,7 @@ export class Wysiwyg4All {
      * @param {boolean} [option.editable=true] - When set to false, Wysiwyg will not be editable. By doing this, it can be used as readonly.
      * @param {string} [option.placeholder=''] - Add placeholder string.
      * @param {boolean} [option.spellcheck=false] - Set spellcheck to true/false.
-     * @param {string | object} [option.colorScheme='teal'] - Set color scheme of wysiwyg based on given color (web color name | hex | rgb | hsl). Or can provide custom color scheme object.
+     * @param {string | object} [option.highlightColor='teal'] - Sets the highlight color of the wysiwyg (web color name | hex | rgb | hsl). Or can provide custom color scheme object (more details in api doc).
      * @param {string} [option.html=''] - HTML string to load on initialization.
      * @param {function} [option.callback=(cb)=>{return cb}] - Setup callback function. Callback argument contains array of information such as current text style, added images, hashtags, urllinks, selected range... etc.
      * @param {{} | number} [option.fontSize={desktop:18, tablet: 16, phone: 14}] - Set default font size of each screen size in px. If number is given all screen size will share the same give font size.
@@ -32,7 +33,7 @@ export class Wysiwyg4All {
             editable = true,
             placeholder = '',
             spellcheck = false,
-            colorScheme = 'teal',
+            highlightColor = 'teal',
             html = '',
             callback,
             fontSize = {
@@ -87,10 +88,10 @@ export class Wysiwyg4All {
         this.spellcheck = spellcheck;
         this.lastLineBlank = lastLineBlank;
 
-        if (typeof colorScheme === 'string')
-            colorScheme = new ColorMangle(colorScheme).color;
+        if (typeof highlightColor === 'string')
+            highlightColor = new ColorMangle(highlightColor).color;
 
-        this.colorScheme = colorScheme;
+        this.colorScheme = highlightColor;
         this.callback = callback || null;
 
         this.image_array = [];
@@ -105,7 +106,7 @@ export class Wysiwyg4All {
         this.textBlockElement_queryArray = ['P', 'LI'];
         this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`];
         this.unSelectable_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
-        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`];
+        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_'];
         this.alignClass = ['_alignCenter_', '_alignRight_'];
 
         this.hashtag_flag = false;
@@ -134,6 +135,7 @@ export class Wysiwyg4All {
 
         this.elementComputedStyle = window.getComputedStyle(this.element);
         this.defaultFontColor = new ColorMangle(this.cssVariable['--content-text']).hex();
+        this.highlightColor = new ColorMangle(this.cssVariable['--content-focus']).hex();
 
         if (!this.element.classList.contains('_wysiwyg4all'))
             this.element.classList.add('_wysiwyg4all');
@@ -1249,7 +1251,8 @@ export class Wysiwyg4All {
                 }
 
                 if (mutate.length)
-                    console.log(mutate);
+                    this._callback({mutation: mutate}).catch(_ => {
+                    });
             }
 
             for (const mutation of mutation_array) {
@@ -1876,132 +1879,131 @@ export class Wysiwyg4All {
         }
     }
 
-    _insert(i, after, insertMode = 'after', focusElement) {
+    _append(i, insertAfter, wrap = false, focusElement) {
         let common = this._climbUpToEldestParent(this.range.commonAncestorContainer, this.element);
         let startLine = this._climbUpToEldestParent(this.range.startContainer, this.element);
         let endLine = this._climbUpToEldestParent(this.range.endContainer, this.element);
         let insertRestricted = ['HR', 'UL', 'LI', '._media_', '._custom_'];
-        let _insert = (node) => {
+
+        let append = (node) => {
             if (node === this.element)
                 node = this.element.childNodes[this.element.childNodes.length - 1];
 
             let next = node.nextSibling;
-            if (after)
-                node.parentNode.insertBefore(after, next);
+            if (insertAfter)
+                node.parentNode.insertBefore(insertAfter, next);
 
-            node.parentNode.insertBefore(i, after || next);
+            node.parentNode.insertBefore(i, insertAfter || next);
             if (this._isTextElement(node) && !node.textContent && this.element.lastChild !== node)
                 node.remove();
         };
 
-        switch (insertMode) {
-            case "after":
-                for (let r of insertRestricted) {
-                    if (endLine.closest(r))
-                        endLine = endLine.closest(r);
+        if (wrap) {
+            let nodeToUnwrap = {};
+            let restricted = false;
+
+            let checker = (tag, el) => {
+                if (el && (!nodeToUnwrap[tag] || (() => {
+                    for (let u in nodeToUnwrap) {
+                        if (nodeToUnwrap[u] === el)
+                            return false;
+                    }
+                    return true;
+                })()))
+                    nodeToUnwrap[tag] = el;
+            };
+
+            if (this.range.collapsed) {
+                checker(i.nodeName, startLine.closest(i.nodeName));
+
+                let idx = i.classList.length;
+                while (idx--) {
+                    let className = i.classList[idx];
+                    checker(className, startLine.closest('.' + className));
                 }
+            } else
+                this._nodeCrawler(n => {
+                    let chk = n.nodeType === 3 ? n.parentNode : n;
+                    if (chk.nodeType !== 1) {
+                        restricted = true;
+                        return 'BREAK';
+                    }
 
-                _insert(endLine);
+                    if (n.nodeType === 1) {
+                        for (let notAllowed of insertRestricted)
+                            if (n.nodeName === notAllowed || n.closest(notAllowed)) {
+                                restricted = true;
+                                return 'BREAK';
+                            }
+                    }
 
-                if (after)
-                    this.range = this._adjustSelection({node: focusElement || after});
-
-                break;
-            case "wrap":
-                let nodeToUnwrap = {};
-                let restricted = false;
-
-                let checker = (tag, el) => {
-                    if (el && (!nodeToUnwrap[tag] || (() => {
-                        for (let u in nodeToUnwrap) {
-                            if (nodeToUnwrap[u] === el)
-                                return false;
-                        }
-                        return true;
-                    })()))
-                        nodeToUnwrap[tag] = el;
-                };
-
-                if (this.range.collapsed) {
-                    checker(i.nodeName, startLine.closest(i.nodeName));
+                    checker(i.nodeName, chk.closest(i.nodeName));
 
                     let idx = i.classList.length;
                     while (idx--) {
                         let className = i.classList[idx];
-                        checker(className, startLine.closest('.' + className));
+                        checker(className, chk.closest('.' + className));
                     }
-                } else
-                    this._nodeCrawler(n => {
-                        let chk = n.nodeType === 3 ? n.parentNode : n;
-                        if (chk.nodeType !== 1) {
-                            restricted = true;
-                            return 'BREAK';
-                        }
 
-                        if (n.nodeType === 1) {
-                            for (let notAllowed of insertRestricted)
-                                if (n.nodeName === notAllowed || n.closest(notAllowed)) {
-                                    restricted = true;
-                                    return 'BREAK';
-                                }
-                        }
+                    if (n === this.range.endContainer)
+                        return 'BREAK';
 
-                        checker(i.nodeName, chk.closest(i.nodeName));
+                    return n;
+                }, {node: common, startNode: this.range.startContainer});
 
-                        let idx = i.classList.length;
-                        while (idx--) {
-                            let className = i.classList[idx];
-                            checker(className, chk.closest('.' + className));
-                        }
+            if (restricted)
+                return;
 
-                        if (n === this.range.endContainer)
-                            return 'BREAK';
+            if (Object.keys(nodeToUnwrap).length) {
+                for (let u in nodeToUnwrap)
+                    this._wrapNode(nodeToUnwrap[u]);
 
-                        return n;
-                    }, {node: common, startNode: this.range.startContainer});
+            } else {
 
-                if (restricted)
-                    break;
+                append(endLine);
 
-                if (Object.keys(nodeToUnwrap).length) {
-                    for (let u in nodeToUnwrap)
-                        this._wrapNode(nodeToUnwrap[u]);
+                let extract = this.range.extractContents();
 
-                } else {
-
-                    _insert(endLine);
-
-                    let extract = this.range.extractContents();
-
-                    if (extract.childNodes[0]) {
-                        while (extract.childNodes[0]) {
-                            let t = extract.childNodes[0];
-                            if (!t.textContent)
-                                t.remove();
-                            else
-                                i.append(t);
-                        }
-                    } else i.append(this._createEmptyParagraph());
-
-                    this.range = this._adjustSelection({
-                        node: focusElement || i,
-                        position: false
-                    });
-
-                    //  remove garbage node
-                    let fc = i.previousSibling;
-                    // let lc = i.nextSibling;
-
-                    if (fc) {
-                        fc = fc.nodeType === 3 ? fc.parentNode : fc;
-
-                        if (this._isTextElement(fc) && (!fc.textContent || fc.textContent === '\u200B'))
-                            fc.remove();
+                if (extract.childNodes[0]) {
+                    while (extract.childNodes[0]) {
+                        let t = extract.childNodes[0];
+                        if (!t.textContent)
+                            t.remove();
+                        else
+                            i.append(t);
                     }
+                } else i.append(this._createEmptyParagraph());
+
+                this.range = this._adjustSelection({
+                    node: focusElement || i,
+                    position: false
+                });
+
+                //  remove garbage node
+                let fc = i.previousSibling;
+                // let lc = i.nextSibling;
+
+                if (fc) {
+                    fc = fc.nodeType === 3 ? fc.parentNode : fc;
+
+                    if (this._isTextElement(fc) && (!fc.textContent || fc.textContent === '\u200B'))
+                        fc.remove();
                 }
+            }
 
-                break;
+            return;
         }
+
+        for (let r of insertRestricted) {
+            if (endLine.closest(r))
+                endLine = endLine.closest(r);
+        }
+
+        append(endLine);
+
+        if (insertAfter)
+            this.range = this._adjustSelection({node: focusElement || insertAfter});
+
     }
 
     _callback(data) {
@@ -2019,16 +2021,78 @@ export class Wysiwyg4All {
         });
     }
 
+    async _imageSelected(e) {
+        let files = e.target.files;
+
+        const prepareForCallback = {image: []};
+        let readFile = new FileReader();
+
+        const load = (file) => {
+            return new Promise(res => {
+                readFile.onload = f => {
+                    const {lastModified, name, size, type} = file;
+                    const source = f.target.result;
+
+                    let img = new Image;
+                    img.onload = () => {
+                        res({
+                            dimension: {
+                                width: img.width,
+                                height: img.height
+                            },
+                            lastModified,
+                            filename: name,
+                            fileSize: size,
+                            fileType: type,
+                            source,
+                            elementId: this._generateId('img')
+                        });
+                    };
+                    img.src = source;
+                };
+                readFile.readAsDataURL(file);
+            });
+        };
+
+        this.callback({loading: true});
+        for (let idx = 0; files.length > idx; idx++) {
+            prepareForCallback.image[idx] = await load(files[idx]);
+        }
+        this.callback({loading: false});
+
+        //  reset image input
+        this.imgInput.value = '';
+
+        let feedback = await this._callback(prepareForCallback);
+
+        if (!this.range) {
+            this.restoreLastSelection();
+        }
+        if (!this.range || (() => {
+            let c = this.range.commonAncestorContainer;
+            c = c.nodeType === 3 ? c.parentNode : c;
+            return !c.closest('#' + this.elementId);
+        })())
+            this.element.focus();
+
+        this._modifySelection(() => {
+            for (let img of feedback.image) {
+                let media = this._loadImage(img, document.createElement('div'));
+                this._append(media, this._createEmptyParagraph());
+            }
+        });
+
+    }
+
     _loadImage(imageObject, wrapper) {
         /**
          elementId: "img_uniqueId"
          element: HTML
-         base64clip: "base64 128 char"
          fileSize: 0
          fileType: "image/jpeg"
-         filename: "file.jpg | http://url.com/file.jpg | s3 filename"
+         source: "file.jpg | http://url.com/file.jpg | s3 filename | base 64 string"
          lastModified: 0000000000000
-         name: "selectedLocalFilename.jpg"
+         filename: "selectedLocalFilename.jpg"
          */
 
         if (wrapper instanceof Node) {
@@ -2056,7 +2120,7 @@ export class Wysiwyg4All {
                 image = document.createElement('img');
                 i.element = image;
 
-                let classname = '_img_' + i.filename.substring(i.filename.length - 128).replace(/[/:."'\\@#$%\?= \{\}\|&*`!<>+]/g, '');
+                let classname = '_img_' + i.source.substring(i.source.length - 128).replace(/[/:."'\\@#$%\?= \{\}\|&*`!<>+]/g, '');
                 if (image.classList.contains(classname))
                     image.classList.add(classname);
 
@@ -2066,16 +2130,16 @@ export class Wysiwyg4All {
                 }
 
                 if (image.tagName === 'IMG')
-                    image.setAttribute('src', i.filename);
+                    image.setAttribute('src', i.source);
 
                 if (typeof i.onclick === 'function') {
                     image.addEventListener('click', i.onclick);
                     image.classList.add('_hover_');
                 }
 
-                if (i.style && typeof i.style === 'object' && Object.keys(i.style)) {
+                if (i.style && typeof i.style === 'object' && Object.keys(i.style).length) {
                     for (let st in i.style) {
-                        image.style[st] = i.style[st];
+                        wrapper.style.setProperty(st, i.style[st]);
                     }
                 }
             }
@@ -2288,6 +2352,9 @@ export class Wysiwyg4All {
                     el.setAttribute('id', elementId);
                     let tc = setData(el) || {};
                     tc.elementId = el.id;
+                    tc.element = el;
+
+                    el.removeAttribute('style');
                     collectId.push(el.id);
                     toCallback.push(tc);
                 }
@@ -2303,33 +2370,17 @@ export class Wysiwyg4All {
                         for (let h of e[typeName]) {
                             let dom = document.getElementById(h.elementId);
 
-                            if (h.element instanceof Node) {
-                                dom.innerHTML = '';
+                            dom.setAttribute('id', h.elementId);
+                            dom.setAttribute('contenteditable', 'false');
 
-                                if (h.custom) {
-                                    let div = document.createElement('div');
-                                    div.setAttribute('id', h.elementId);
-                                    div.setAttribute('contenteditable', 'false');
+                            if (typeof h.onclick === 'function') {
+                                dom.addEventListener('click', h.onclick);
+                                dom.classList.add('_hover_');
+                            }
 
-                                    if (!div.classList.contains('_custom_'))
-                                        div.classList.add('_custom_');
-
-                                    this._insert(div, this._createEmptyParagraph());
-                                    div.append(h.element);
-                                    dom.remove();
-                                    dom = div;
-                                } else {
-                                    if (Array.isArray(h.class)) {
-                                        for (let cl of h.class)
-                                            dom.classList.add(cl);
-                                    }
-                                    if (typeof h.onclick === 'function') {
-                                        dom.addEventListener('click', h.onclick);
-                                        dom.classList.add('_hover_');
-                                    }
-
-                                    dom.append(h.element);
-                                }
+                            if (h.style && typeof h.style === 'object' && Object.keys(h.style).length) {
+                                for (let s in h.style)
+                                    dom.style.setProperty(s, h.style[s]);
                             }
 
                             this[`${typeName}_array`].push(h);
@@ -2350,8 +2401,8 @@ export class Wysiwyg4All {
                     }
                     window.open(u, "_blank");
                 });
-                return {url: u};
 
+                return {url: u};
             });
         }
 
@@ -2421,74 +2472,6 @@ export class Wysiwyg4All {
         return (this._isTextBlockElement(node) || node.nodeName === 'SPAN') && !this._isSpecialTextElement(node);
     }
 
-    async _imageSelected(e) {
-        let files = e.target.files;
-
-        const prepareForCallback = {image: []};
-        let readFile = new FileReader();
-
-        const load = (file) => {
-            return new Promise(res => {
-                readFile.onload = f => {
-                    const {lastModified, name, size, type} = file;
-                    const filename = f.target.result;
-                    const base64clip = filename.substring(filename.length - 128);
-
-                    let img = new Image;
-                    img.onload = () => {
-                        console.log(img.width);
-                        console.log(img.height);
-                        res({
-                            dimension: {
-                                width: img.width,
-                                height: img.height
-                            },
-                            base64clip,
-                            lastModified,
-                            name,
-                            fileSize: size,
-                            fileType: type,
-                            filename,
-                            elementId: this._generateId('img')
-                        });
-                    };
-                    img.src = filename;
-                };
-                readFile.readAsDataURL(file);
-            });
-        };
-
-        this.callback({loading: true});
-        for (let idx = 0; files.length > idx; idx++) {
-            prepareForCallback.image[idx] = await load(files[idx]);
-        }
-        this.callback({loading: false});
-
-        //  reset image input
-        this.imgInput.value = '';
-
-        let feedback = await this._callback(prepareForCallback);
-
-
-        if (!this.range) {
-            this.restoreLastSelection();
-        }
-        if (!this.range || (() => {
-            let c = this.range.commonAncestorContainer;
-            c = c.nodeType === 3 ? c.parentNode : c;
-            return !c.closest('#' + this.elementId);
-        })())
-            this.element.focus();
-
-        this._modifySelection(() => {
-            for (let img of feedback.image) {
-                let media = this._loadImage(img, document.createElement('div'));
-                this._insert(media, this._createEmptyParagraph(), "after");
-            }
-        });
-
-    }
-
     /**
      * List of command for editing wysiwyg text.
      * @param {'quote'} action - Add blockquote below selected line.
@@ -2511,21 +2494,22 @@ export class Wysiwyg4All {
      * @also
      * @param {'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'small' | 'bold' | 'italic' | 'underline' | 'strike'} action - Apply style to selection.
      * @also
-     * @param {{}} action - Custom element object.
-     * @param {{}} action.element - Custom element dom.
-     * @param {string} [action.elementId] - Set custom element parent id. Otherwise auto generated.
-     * @param {{}} [action.style] - Set custom element parent css style.
-     * @param {'append' | 'inline'} [action.insertMode='append'] - Set custom element insert mode. When 'append' the custom element is added as block element. Otherwise as inline element.
+     * @param {object} action - Custom element object
+     * @param {object | string} action.element - Custom element can be node objects | html string | string
+     * @param {string} action.elementId - Set custom elements parent id. Otherwise auto generated
+     * @param {object} action.style - Set custom elements parent css style
+     * @param {boolean} action.insert - Set custom element insert mode. If true, inserts element at carat position, otherwise appends on next line
      */
     command(action) {
+
         if (!action)
             return;
 
+        if (!this.range)
+            this.restoreLastSelection();
+
         switch (action) {
             case 'quote':
-                if (!this.range) {
-                    this.restoreLastSelection();
-                }
                 if (!this.range || (() => {
                     let c = this.range.commonAncestorContainer;
                     c = c.nodeType === 3 ? c.parentNode : c;
@@ -2536,13 +2520,10 @@ export class Wysiwyg4All {
                 this._modifySelection(() => {
                     let p = this._createEmptyParagraph(),
                         bq = document.createElement('blockquote');
-                    this._insert(bq, p, "wrap");
+                    this._append(bq, p, true);
                 });
                 return;
             case 'unorderedList':
-                if (!this.range) {
-                    this.restoreLastSelection();
-                }
                 if (!this.range || (() => {
                     let c = this.range.commonAncestorContainer;
                     c = c.nodeType === 3 ? c.parentNode : c;
@@ -2555,14 +2536,11 @@ export class Wysiwyg4All {
                         li = document.createElement('li'),
                         ul = document.createElement('ul');
                     ul.append(li);
-                    this._insert(ul, p, "after", li);
+                    this._append(ul, p, false, li);
                 });
 
                 return;
             case 'orderedList':
-                if (!this.range) {
-                    this.restoreLastSelection();
-                }
                 if (!this.range || (() => {
                     let c = this.range.commonAncestorContainer;
                     c = c.nodeType === 3 ? c.parentNode : c;
@@ -2575,14 +2553,11 @@ export class Wysiwyg4All {
                         li = document.createElement('li'),
                         ul = document.createElement('ol');
                     ul.append(li);
-                    this._insert(ul, p, "after", li);
+                    this._append(ul, p, false, li);
                 });
 
                 return;
             case 'divider':
-                if (!this.range) {
-                    this.restoreLastSelection();
-                }
                 if (!this.range || (() => {
                     let c = this.range.commonAncestorContainer;
                     c = c.nodeType === 3 ? c.parentNode : c;
@@ -2593,7 +2568,7 @@ export class Wysiwyg4All {
                 this._modifySelection(() => {
                     let p = this._createEmptyParagraph(), hr = document.createElement('hr');
                     hr.setAttribute('contenteditable', 'false');
-                    this._insert(hr, p, "after");
+                    this._append(hr, p, false);
                 });
                 return;
             case 'image':
@@ -2604,6 +2579,7 @@ export class Wysiwyg4All {
             case 'alignRight':
                 if (!this.range)
                     return;
+
                 this._modifySelection(() => {
                     let startLine = this.range.startLine;
                     let endLine = this.range.endLine;
@@ -2663,15 +2639,12 @@ export class Wysiwyg4All {
         let isColor;
         try {
             isColor = new ColorMangle(action).hex();
+            action = 'color';
         } catch {
         }
 
-        if (isColor)
-            action = 'color';
-
         //  style command
-        if (typeof action === 'string' && this.styleTagOfCommand[action]) {
-
+        if (this.styleTagOfCommand[action]) {
             this._modifySelection(() => {
                 let wrapper,
                     query = this.styleTagOfCommand[action],
@@ -2884,41 +2857,53 @@ export class Wysiwyg4All {
                    elementId: <string: generated parent element id>,
                    element: <HTMLElement>,
                    style: {<css style object for parent element>},
-                   insertMode: "append | inline"
+                   insert: true | false
                 }
              */
 
-            if (action.element instanceof HTMLElement) {
+            this._modifySelection(() => {
+                //  setup wrapper
+                let custom = document.createElement('div');
+                custom.classList.add('_custom_');
+                custom.setAttribute('contenteditable', false);
+
+                if (action.style)
+                    for (let s in action.style)
+                        custom.style[s] = action.style[s];
+
+                action.elementId = action.elementId || this._generateId('custom');
+                custom.id = action.elementId;
+
+                if (typeof action.element === 'string')
+                    custom.innerHTML = action.element;
+
+                else if (action.element instanceof HTMLElement)
+                    custom.append(action.element);
+
+                if (!custom.children.length)
+                    action.insert = true;
+
                 if (!this.range)
                     this.element.focus();
 
-                this._modifySelection(() => {
-                    //  setup wrapper
-                    let custom = document.createElement('div');
-                    custom.classList.add('_custom_');
-                    custom.setAttribute('contenteditable', false);
+                this.custom_array.push(action);
 
-                    if (action.style)
-                        for (let s in action.style)
-                            custom.style[s] = action.style[s];
-
-                    action.elementId = action.elementId || this._generateId('custom');
-                    custom.id = action.elementId;
-
-                    custom.append(action.element);
-
-                    this.custom_array.push(action);
-
-                    this._callback({custom: action}).then(_ => {
-                        this._insert(custom, this._createEmptyParagraph(), "after");
-                    });
+                this._callback({custom: action}).then(_ => {
+                    if (action.insert) {
+                        this.range.insertNode(custom);
+                        this.range = this._adjustSelection({
+                            node: custom,
+                            position: false
+                        });
+                    } else
+                        this._append(custom, this._createEmptyParagraph(), false);
                 });
-            }
+            });
         }
     }
 
     /**
-     * Restores the last selection range before it has lost focus.
+     * Restores the last selection range
      */
     restoreLastSelection() {
         if (this.range_backup) {
@@ -2947,7 +2932,7 @@ export class Wysiwyg4All {
         const div = document.createElement('div');
         div.innerHTML = html;
 
-        /** image */
+        // image
         const img = div.querySelectorAll('img');
         const imgCallback = [];
         if (img.length)
@@ -2955,12 +2940,12 @@ export class Wysiwyg4All {
                 const imageParent = i.closest('._media_');
 
                 if (imageParent) {
-                    const filename = i.getAttribute('src');
+                    const source = i.getAttribute('src');
                     let imgId = i.id || this._generateId('img');
                     i.setAttribute('id', imgId);
 
                     imgCallback.push({
-                        filename,
+                        source,
                         elementId: imgId,
                         element: i
                     });
@@ -2969,7 +2954,7 @@ export class Wysiwyg4All {
                 this.image_array = JSON.parse(JSON.stringify(imgCallback));
             }
 
-        /** hashtag */
+        // hashtag
         const hashtag = div.querySelectorAll('._hashtag_');
         const hashtagCallback = [];
         if (hashtag.length)
@@ -2987,7 +2972,7 @@ export class Wysiwyg4All {
                     hashtagCallback.push({tag, elementId, element: i});
             }
 
-        /** urllink */
+        // urllink
         const urllink = div.querySelectorAll('._urllink_');
         const urllinkCallback = [];
         if (urllink.length)
@@ -3021,7 +3006,7 @@ export class Wysiwyg4All {
             custom: customCallback
         });
 
-        /** callback */
+        // callback
         for (let f in fb) {
             if (f === 'image') {
                 let img = fb[f];
@@ -3046,7 +3031,7 @@ export class Wysiwyg4All {
     /**
      * Load html string to wysiwyg
      * @param {function} [pre=(p)=>{return p}] - Pre processing callback before export.
-     * @return {{}} - Exported wysiwyg data object
+     * @return {object} - Exported wysiwyg data object
      */
     async export(pre) {
         this._normalizeDocument(true);
@@ -3091,14 +3076,12 @@ export class Wysiwyg4All {
                 let inputText = child.textContent;
                 if (!title) {
                     let titleSearchRegex = /([^\s^.]{2,}[^\s]+[.][^\s^.]{2,})/g;
-
                     let urlArray = inputText.match(titleSearchRegex);
 
-                    /**
-                     * We are replacing the urls with a special text here.
-                     * Then we split the sentences by the dots.
-                     * Then we replace the url with the special text and identify the title and body text
-                     */
+                    // We are replacing the urls with a special text here.
+                    // Then we split the sentences by the dots.
+                    // Then we replace the url with the special text and identify the title and body text
+
                     let split;
                     if (urlArray) {
                         for (let i = 0; i < urlArray.length; i++) {
@@ -3125,7 +3108,8 @@ export class Wysiwyg4All {
                     split.shift();
                     inputText = split.join('.').replace(/\s\s+/g, ' ');
                     text += inputText + ' ';
-                } else text += `${inputText}\n`;
+                } else
+                    text += `${inputText}\n`;
             }
 
             if (child.classList.contains('_media_')) {
@@ -3134,19 +3118,17 @@ export class Wysiwyg4All {
                     let c = child.childNodes[idx];
                     if (c.nodeName === 'IMG') {
                         for (const f of this.image_array) {
-                            if (f.elementId === c.id) {
-                                if (f.filename !== c.getAttribute('src')) {
-                                    c.setAttribute('src', f.filename);
-                                    let cIdx = c.classList.length;
-                                    while (cIdx--) {
-                                        if (c.classList[cIdx].includes('_img_') && c.classList[cIdx].length > 5) {
-                                            c.classList.remove(c.classList[cIdx]);
-                                            let splitUrl = f.filename.split('/');
-                                            let splitTail = splitUrl[splitUrl.length - 1];
-                                            let splitTail_length = splitTail.length - 64;
-                                            const filenameClip = splitUrl[splitUrl.length - 1].substring(splitTail_length > 0 ? splitTail : 0);
-                                            c.classList.add('_img_' + filenameClip);
-                                        }
+                            if (f.elementId === c.id && f.source !== c.getAttribute('src')) {
+                                c.setAttribute('src', f.source);
+                                let cIdx = c.classList.length;
+                                while (cIdx--) {
+                                    if (c.classList[cIdx].includes('_img_') && c.classList[cIdx].length > 5) {
+                                        c.classList.remove(c.classList[cIdx]);
+                                        let splitUrl = f.source.split('/');
+                                        let splitTail = splitUrl[splitUrl.length - 1];
+                                        let splitTail_length = splitTail.length - 64;
+                                        const sourceClip = splitUrl[splitUrl.length - 1].substring(splitTail_length > 0 ? splitTail : 0);
+                                        c.classList.add('_img_' + sourceClip);
                                     }
                                 }
                             }

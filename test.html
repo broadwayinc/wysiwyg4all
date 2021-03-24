@@ -2,9 +2,13 @@
 
 <html lang="en">
 <head>
+    <!--
+    <link rel="stylesheet/less" type="text/css" href="wysiwyg4all.less"/>
+    <script src="//cdn.jsdelivr.net/npm/less@3.13"></script>
+    <script src="wysiwyg4all.js"></script>
+    <script src="https://broadwayinc.dev/jslib/colormangle/0.1.0/colormangle.js"></script>
+    -->
     <script src="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.0/wysiwyg4all.js"></script>
-    <!--<script src="wysiwyg4all.js"></script>
-    <script src="https://broadwayinc.dev/jslib/colormangle/0.1.0/colormangle.js"></script>-->
     <link rel="stylesheet" type="text/css" href="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.0/wysiwyg4all.css" />
 </head>
 
@@ -12,160 +16,131 @@
 <h1>Wysiwyg4All</h1>
 <hr>
 <div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
-    H1
+<!-- command examples below -->
+<button onclick="wysiwyg.command('h1')">
+    h1
 </button>
-<!--<div style="width: 512px; margin:1rem auto;">
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h4')">
-        H4
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('bold')">
-        BOLD
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('color')">
-        COLOR
-    </button>
-    <button onclick="input_color_string()">
-        CUSTOM COLOR
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('strike')">
-        STRIKE
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('underline')">
-        UNDERLINE
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('divider')">
-        DIVIDER
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('quote')">
-        QUOTE
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('unorderedList')">
-        UNORDERED LIST
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('orderedList')">
-        ORDERED LIST
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('image')">
-        PHOTO
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('alignLeft')">
-        ALIGN LEFT
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('alignCenter')">
-        ALIGN CENTER
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('alignRight')">
-        ALIGN RIGHT
-    </button>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="export_data()">
-        EXPORT
-    </button>
-</div>-->
+<!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
+<input id='colorInput' type='color' onchange="(function(event){wysiwyg.command(event.target.value)})(event)"
+       onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
+<!-- .command('color') changes text to highlight color set on constructor -->
+<button onclick="wysiwyg.command('color')">
+    color
+</button>
+<!-- check out the callback to pre process image element before load -->
+<button onclick="wysiwyg.command('image')">
+    image
+</button>
+<!-- Highlight color is applied on quote -->
+<button onclick="wysiwyg.command('quote')">
+    quote
+</button>
+<!-- You can add custom element -->
+<button onclick="customElement()">
+    smile
+</button>
+<button onclick="exportData()">
+    export
+</button>
+</div>
 
 </body>
 <script>
 
     let wysiwyg = new Wysiwyg4All({
         elementId: 'myeditor',
-        // hashtag: true,
-        // placeholder: 'HELLO',
+        hashtag: true,
+        urllink: true,
+        placeholder: "Build your custom wysiwyg",
         // spellcheck: true,
-        // urllink: true,
-        // logMutation: false,
+        // highlightColor: 'teal',
         // lastLineBlank: true,
-        callback: async c => {
-            if (c.image) {
-                // let img = c.image;
-                // if (Array.isArray(img))
-                //     for (let h of img) {
-                //         h.onclick = (e) => {
-                //             console.log({e});
-                //         };
-                //         h.class = ['sample'];
-                //         h.style = {};
-                //         h.style.width = '50%';
-                //         h.style.margin = 'auto';
-                //         // let custom = document.createElement('div');
-                //         // custom.append(document.createTextNode('SAMPLE'));
-                //         // custom.style.backgroundColor = 'teal';
-                //         // custom.style.color = 'white';
-                //         // h.element = custom;
-                //     }
-            }
-            if (c.hashtag) {
-                // let ht = c.hashtag;
-                // if (Array.isArray(ht))
-                //     for (let h of ht) {
-                //         h.onclick = (e) => {
-                //             console.log({e});
-                //         };
-                //         h.class = ['sample'];
-                //         // let custom = document.createElement('div');
-                //         // custom.append(document.createTextNode('SAMPLE'));
-                //         // custom.style.backgroundColor = 'teal';
-                //         // custom.style.color = 'white';
-                //         // h.element = custom;
-                //         // h.custom = true;
-                //     }
-            }
-            if (c.urllink) {
-                // let ht = c.urllink;
-                // if (Array.isArray(ht))
-                //     for (let h of ht) {
-                //         h.onclick = (e) => {
-                //             console.log({e});
-                //         };
-                //         h.class = ['sample'];
-                //
-                //         if (c.urllink) {
-                //             // for (let u of c.urllink) {
-                //             //     console.log({u});
-                //             //     let div = document.createElement('div');
-                //             //     let frame = document.createElement('iframe');
-                //             //
-                //             //     frame.setAttribute('scrolling', 'no');
-                //             //     frame.setAttribute('frameborder', '0');
-                //             //     frame.setAttribute('allow', 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture');
-                //             //     frame.setAttribute('allowfullscreen', '');
-                //             //
-                //             //     div.classList.add(`youtube-embed-container`);
-                //             //     frame.src = u.url;
-                //             //     div.append(frame);
-                //             //     u.element = div;
-                //             //     u.custom = true;
-                //             // }
-                //         }
-                //
-                //         // let custom = document.createElement('div');
-                //         // custom.append(document.createTextNode('SAMPLE'));
-                //         // custom.style.backgroundColor = 'teal';
-                //         // custom.style.color = 'white';
-                //         // h.element = custom;
-                //         // h.custom = true;
-                //     }
-            }
+        // logMutation: true,
+        callback: c => {
             if (c.caratPosition) {
-                // let viewPortHeight = Math.min(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-                // let minusWhenOutOfView = viewPortHeight - c.caratPosition.top;
-                // if (minusWhenOutOfView < 0)
-                //     window.scrollBy(0, -minusWhenOutOfView);
+                // Tracks carat position
+                // Make carat to be always within the viewport
+                let viewPortHeight = Math.min(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                let minusWhenOutOfView = viewPortHeight - c.caratPosition.top;
+                if (minusWhenOutOfView < 0)
+                    window.scrollBy(0, -minusWhenOutOfView);
             }
-            // console.log(c);
+
+            if (c.mutation) {
+                // outputs dom mutation information
+                console.log({mutation: c.mutation});
+            }
+
+            if (c.commandTracker) {
+                let ct = c.commandTracker;
+
+                if (typeof ct.color === 'string')
+                    // change the color wheel input value based on the position of the caret
+                    document.getElementById('colorInput').value = ct.color;
+                else
+                    // If color output is true(boolean), the current color is the highlight color
+                    document.getElementById('colorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
+            }
+
+            if (c.image) {
+                // you can modify image element before it gets loaded
+                console.log({image: c.image});
+                for (let img of c.image) {
+
+                    // img.style = {
+                    //     width: '200px'
+                    // };
+
+                    img.onclick = () => {
+                        alert(`image clicked!`);
+                    };
+                }
+            }
+
+            if (c.hashtag) {
+                console.log({hashtag: c.hashtag});
+                for (let h of c.hashtag) {
+
+                    // h.style = {
+                    //     color: 'red'
+                    // };
+
+                    h.onclick = () => {
+                        alert(`${h.tag} clicked!`);
+                    };
+                }
+            }
+
+            if (c.urllink) {
+                console.log({urllink: c.urllink});
+                for (let u of c.urllink) {
+
+                    // h.style = {
+                    //     color: 'red'
+                    // };
+
+                    u.onclick = () => {
+                        alert(`${u.url} clicked!`);
+                    };
+                }
+            }
             return c;
         }
     });
-    let export_data = () => {
+
+    let customElement = () => {
+        // add emoji
+        wysiwyg.command({
+            element: '&#128512;' // can be html string (ex - <div>Hello</div>) or Node elements (ex - document.createElement('div'))
+        });
+    };
+
+    let exportData = () => {
         wysiwyg.export(pre => {
             console.log(pre);
         }).then(e => {
             console.log(e);
         });
     };
-    let input_color_string = () => {
-        let color = prompt("Input Color String");
-        wysiwyg.restoreLastSelection();
-        wysiwyg.command(color);
-    }
 </script>
 </html>
