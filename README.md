@@ -136,7 +136,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
             return c;
         }
     })
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/hashtag.gif" width: "300">
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/hashtag.gif" width="500">
 
 <br />
 
