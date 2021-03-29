@@ -17,30 +17,79 @@
 <hr>
 <div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
 <!-- command examples below -->
-<button onclick="wysiwyg.command('h1')">
-    h1
+<button onclick="wysiwyg.command('bold')">
+    Bold
 </button>
+<button onclick="wysiwyg.command('h1')">
+    H1
+</button>
+<button onclick="wysiwyg.command('h2')">
+    H2
+</button>
+<button onclick="wysiwyg.command('h3')">
+    H3
+</button>
+<button onclick="wysiwyg.command('h4')">
+    H4
+</button>
+<button onclick="wysiwyg.command('h5')">
+    H5
+</button>
+<button onclick="wysiwyg.command('h6')">
+    H6
+</button>
+<button onclick="wysiwyg.command('small')">
+    Small
+</button>
+<button onclick="wysiwyg.command('italic')">
+    Italic
+</button>
+<button onclick="wysiwyg.command('underline')">
+    Underline
+</button>
+<button onclick="wysiwyg.command('strike')">
+    Strike
+</button>
+
 <!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
 <input id='colorInput' type='color' onchange="(function(event){wysiwyg.command(event.target.value)})(event)"
        onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
 <!-- .command('color') changes text to highlight color set on constructor -->
 <button onclick="wysiwyg.command('color')">
-    color
+    Color
 </button>
-<!-- check out the callback to pre process image element before load -->
-<button onclick="wysiwyg.command('image')">
-    image
+<button onclick="wysiwyg.command('divider')">
+    Divider
 </button>
 <!-- Highlight color is applied on quote -->
 <button onclick="wysiwyg.command('quote')">
-    quote
+    Quote
+</button>
+<button onclick="wysiwyg.command('unorderedList')">
+    Unordered list
+</button>
+<button onclick="wysiwyg.command('orderedList')">
+    Ordered list
+</button>
+<button onclick="wysiwyg.command('alignCenter')">
+    Align center
+</button>
+<button onclick="wysiwyg.command('alignLeft')">
+    Align left
+</button>
+<button onclick="wysiwyg.command('alignRight')">
+    Align right
+</button>
+<!-- check out the callback to pre process image element before load -->
+<button onclick="wysiwyg.command('image')">
+    Image
 </button>
 <!-- You can add custom element -->
 <button onclick="customElement()">
-    smile
+    Smile
 </button>
 <button onclick="exportData()">
-    export
+    Export
 </button>
 </div>
 
@@ -73,7 +122,7 @@
 
             if (c.commandTracker) {
                 let ct = c.commandTracker;
-
+                console.log(ct)
                 if (typeof ct.color === 'string')
                     // change the color wheel input value based on the position of the caret
                     document.getElementById('colorInput').value = ct.color;
@@ -87,9 +136,10 @@
                 console.log({image: c.image});
                 for (let img of c.image) {
 
-                    // img.style = {
-                    //     width: '200px'
-                    // };
+                    img.style = {
+                        width: '20rem',
+                        border: 'solid 8px red'
+                    };
 
                     img.onclick = () => {
                         alert(`image clicked!`);
@@ -101,9 +151,9 @@
                 console.log({hashtag: c.hashtag});
                 for (let h of c.hashtag) {
 
-                    // h.style = {
-                    //     color: 'red'
-                    // };
+                    h.style = {
+                        color: 'red'
+                    };
 
                     h.onclick = () => {
                         alert(`${h.tag} clicked!`);
@@ -115,9 +165,9 @@
                 console.log({urllink: c.urllink});
                 for (let u of c.urllink) {
 
-                    // h.style = {
-                    //     color: 'red'
-                    // };
+                    u.style = {
+                        color: 'red'
+                    };
 
                     u.onclick = () => {
                         alert(`${u.url} clicked!`);
