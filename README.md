@@ -290,7 +290,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/Divider.PNG" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Divider.PNG" style="zoom:100%;" />
 
 <br />
 
