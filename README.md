@@ -330,7 +330,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/text alignment.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/text%20alignment.gif" style="zoom:100%;" />
 
 <br />
 
