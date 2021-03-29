@@ -111,7 +111,6 @@ Image style can be pre-processed in `.image`. Following code example shows setti
             return c;
         }
     })
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Image%20insertion.gif" style="zoom:50%;" />
 
 <br />
 
