@@ -350,7 +350,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 #### Custom element insertion
 
-`customElement()` adds pre-loaded HTML string or node elements inside a line. Smile emoji will be inserted whenever 'Smile' button is clicked in the following example as it was pre-loaded in the [default setting](#Custom-element-type) example.
+`customElement()` adds pre-loaded HTML string or node elements inside a line. Smile emoji will be inserted whenever 'Smile' button is clicked in the following example as it was pre-loaded in the [default setting](#Custom-element-type) custom element example.
 
 ```
 <button onclick="customElement()">
