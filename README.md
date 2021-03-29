@@ -112,7 +112,7 @@ Image style can be pre-processed in `.image`. Following code example shows setti
             return c;
         }
     })
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/Image insertion.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/Image insertion.gif" style="zoom:100%;" />
 
 <br />
 
@@ -138,7 +138,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
             return c;
         }
     })
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/hashtag.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/hashtag.gif" style="zoom:100%;" />
 
 <br />
 
@@ -164,7 +164,7 @@ let wysiwyg = new Wysiwyg4all({
 })
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/url link.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/url link.gif" style="zoom:100%;" />
 
 <br />
 
@@ -253,7 +253,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/txt style.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/txt style.gif" style="zoom:100%;" />
 
 <br />
 
@@ -276,7 +276,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
        onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/txtcolor.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/txtcolor.gif" style="zoom:100%;" />
 
 <br />
 
@@ -290,7 +290,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/Divider.PNG" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/Divider.PNG" style="zoom:100%;" />
 
 <br />
 
@@ -304,7 +304,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/Quote.PNG" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/Quote.PNG" style="zoom:100%;" />
 
 <br />
 
@@ -318,7 +318,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/unordered list.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/unordered list.gif" style="zoom:100%;" />
 
 <br />
 
@@ -332,7 +332,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/text alignment.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/text alignment.gif" style="zoom:100%;" />
 
 <br />
 
@@ -346,7 +346,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/Image insertion.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/Image insertion.gif" style="zoom:100%;" />
 
 <br />
 
@@ -360,7 +360,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/wysiwyg/emoji.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/tree/main/Manual%20figures/emoji.gif" style="zoom:100%;" />
 
 <br />
 
