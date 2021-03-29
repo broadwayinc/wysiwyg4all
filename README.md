@@ -136,7 +136,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
             return c;
         }
     })
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/hashtag.gif" width="500">
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/hashtag.gif" width="400">
 
 <br />
 
@@ -162,7 +162,7 @@ let wysiwyg = new Wysiwyg4all({
 })
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/url%20link.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/url%20link.gif" width="400">
 
 <br />
 
@@ -251,7 +251,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txt%20style.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txt%20style.gif" width="400">
 
 <br />
 
@@ -274,7 +274,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
        onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txtcolor.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txtcolor.gif" width="400">
 
 <br />
 
@@ -288,7 +288,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Divider.PNG" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Divider.PNG" width="400">
 
 <br />
 
@@ -302,7 +302,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Quote.PNG" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Quote.PNG" width="400">
 
 <br />
 
@@ -316,7 +316,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/unordered%20list.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/unordered%20list.gif" width="400">
 
 <br />
 
@@ -330,7 +330,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/text%20alignment.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/text%20alignment.gif" width="400">
 
 <br />
 
@@ -344,7 +344,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Image%20insertion.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Image%20insertion.gif" width="400">
 
 <br />
 
@@ -358,7 +358,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 </button>
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/emoji.gif" style="zoom:100%;" />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/emoji.gif" width="400">
 
 <br />
 
