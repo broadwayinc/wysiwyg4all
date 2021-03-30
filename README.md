@@ -233,6 +233,9 @@ Default log mutation properties can be modified in `.mutation` . Copy and paste 
 ```
 
 
+<br />
+
+
 ### Custom element type
 
 HTML string or node element can be assigned in `wysiwyg.command()` element value. In the following example code, smile emoji (😀) is loaded in the custom element that would be added inline, whenever `customElement()` function is called such as by using customElement [command button](#Custom-element-insertion). Following code should be included in **&lt;script>**.
