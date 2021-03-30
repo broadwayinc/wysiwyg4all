@@ -223,7 +223,7 @@ let customElement = () => {
 
 #### Export data
 
-`wysiwyg.export()` should be included in **&lt;script>**
+`wysiwyg.export()` should be included in **&lt;script>**. It exports brief summary of Document Object Model(DOM) including HTML element.
 
 ```
 let export_data = () => {
