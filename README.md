@@ -113,14 +113,14 @@ Image style can be pre-processed in `.image`. Following code example shows setti
                 // you can modify image element before it gets loaded
                 console.log({image: c.image});
                 for (let img of c.image) {
-                    // img.style = {
-                    //     width: '20rem',
-                    //     border: 'solid 2px red'
-                    // };
+                       img.style = {
+                           width: '20rem',
+                           border: 'solid 2px red'
+                       };
     
-                    // img.onclick = () => {
-                    //     alert(`image clicked!`);
-                    // };
+                       img.onclick = () => {
+                           alert(`image clicked!`);
+                       };
                 }
             }
             return c;
@@ -190,7 +190,7 @@ let wysiwyg = new Wysiwyg4all({
 
 ### Caret position
 
-Default caret position properties can be modified in `.caratPosition` . Specific details can be referred in API manual.
+Default caret position properties can be modified in `.caratPosition` . Copy and paste the following code example. Specific details can be referred in API manual.
 
 <br />
 
@@ -215,7 +215,7 @@ let wysiwyg = new Wysiwyg4all({
 
 ### Log mutation
 
-Default log mutation properties can be modified in `.mutation` . Specific details can be referred in API manual.
+Default log mutation properties can be modified in `.mutation` . Copy and paste the following code example. Specific details can be referred in API manual.
 
 <br />
 
