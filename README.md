@@ -102,6 +102,7 @@ Default command tracking properties can be modified in `.commandTracker`. Follow
 #### Image style
 
 Image style can be pre-processed in `.image`. Following code example shows setting default image width size of 8rem and border style red color, width of 2px and giving 'image clicked' message pop-up alert on the 'onclick' event. 
+
 <br />
 
 **_Example 4_**
@@ -131,6 +132,7 @@ Image style can be pre-processed in `.image`. Following code example shows setti
 #### Hashtag style
 
 Default hashtag properties can be modified in `.hashtag `. Following code example shows setting default color of hashtag as red and giving message pop-up alert, whenever clicking hashtag string. 
+
 <br />
 
 **_Example 5_**
@@ -160,6 +162,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
 #### URL style
 
 Default URL link properties can be modified in `.urllink`.  Following code example shows setting default color of URL link as red and displaying message pop-up alert, whenever clicking URL string. 
+
 <br />
 
 **_Example 6_**
@@ -188,6 +191,7 @@ let wysiwyg = new Wysiwyg4all({
 #### Caret position
 
 Default caret position properties can be modified in `.caratPosition` . Specific details can be referred in API manual.
+
 <br />
 
 **_Example 7_**
@@ -212,6 +216,7 @@ let wysiwyg = new Wysiwyg4all({
 #### Log mutation
 
 Default log mutation properties can be modified in `.mutation` . Specific details can be referred in API manual.
+
 <br />
 
 **_Example 8_**
@@ -232,6 +237,7 @@ Default log mutation properties can be modified in `.mutation` . Specific detail
 #### Custom element type
 
 HTML string or node element can be assigned in `wysiwyg.command()` element value. In the following example code, smile emoji (😀) is loaded in the custom element that would be added inline, whenever `customElement()` function is called such as by using customElement [command button](#Custom-element-insertion). Following code should be included in **&lt;script>**.
+
 <br />
 
 **_Example 9_**
@@ -249,6 +255,7 @@ let customElement = () => {
 #### Export data
 
 `wysiwyg.export()` should be included in **&lt;script>**. It exports brief summary of Document Object Model(DOM) including HTML element.
+
 <br />
 
 **_Example 10_**
@@ -271,6 +278,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 #### Text style
 
 `wysiwyg.command('bold' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'small' | 'italic' | 'underline' | 'strike')` changes the text style by bold, heading level (h1 ~ h6), small letter, italic, underline or strike.
+
 <br />
 
 **_Example 11_**
@@ -287,6 +295,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 
 #### **Text color**
 `wysiwyg.command('color')` changes the text color ('black') to **wysiwyg** default highlight color ('teal' in this example). 
+
 <br />
 
 **_Example 12_**
@@ -299,6 +308,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 <br />
 
 Other color choice can be provided to user by creating HTML color picker. It is important to restore the last selected text on 'onblur' action (whenever losing focus in the input field) by using `wysiwyg.restoreLastSelection()` to change the text color in color picker.
+
 <br />
 
 **_Example 13_**
@@ -313,6 +323,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 #### **Divider**
 `wysiwyg.command('divider')`adds horizontal line below the current text position.
+
 <br />
 
 **_Example 14_**
@@ -329,6 +340,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 #### **Quote**
 
 `wysiwyg.command('quote')`adds block quote on the selected line. Note that the default highlight color is applied on the block quote.
+
 <br />
 
 **_Example 15_**
@@ -345,6 +357,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 #### **List**
 
 `wysiwyg.command('unorderedList')` adds unordered list and`wysiwyg.command('orderedList')`adds ordered list on the selected line.  Following code shows creating command button to add unorderedList.
+
 <br />
 
 **_Example 16_**
@@ -361,6 +374,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 #### **Text alignment**
 
 `wysiwyg.command('alignLeft')` , `wysiwyg.command('alignCenter')`  or `wysiwyg.command('alignRight')`aligns selected text to the left, center or to the right. Following code shows creating command button for aligning text to the center of the text area. Clicking the command button again restore to the initial alignment.
+
 <br />
 
 **_Example 17_**
@@ -377,6 +391,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 #### Image insertion
 
 `wysiwyg.command('image')` adds image below selected line. By clicking the 'image' command button, directory panel pops up and opening the image will make insertion into the text input field.
+
 <br />
 
 **_Example 18_**
@@ -393,6 +408,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 #### Custom element insertion
 
 `customElement()` adds pre-loaded HTML string or node elements inside a line. Smile emoji will be inserted whenever 'Smile' button is clicked in the following example as it was pre-loaded in the [default setting](#Custom-element-type) custom element example.
+
 <br />
 
 **_Example 19_**
