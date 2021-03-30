@@ -232,7 +232,6 @@ Default log mutation properties can be modified in `.mutation` . Copy and paste 
     })
 ```
 
-<hr style="height:1px"><br />
 
 ### Custom element type
 
