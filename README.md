@@ -70,9 +70,9 @@ let wysiwyg = new Wysiwyg4all({
 ```
 <br />
 
-## Callback function
+  ## Callback function
 
-Callback function is used to set default properties for setting **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**. Keep in mind that callback parameter 'c' should be returned.
+Callback function is used to set default properties of **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**. Keep in mind that callback parameter 'c' should be returned.
 
 ### Command track
 
