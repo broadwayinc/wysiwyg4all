@@ -294,7 +294,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 #### **Quote**
 
-`wysiwyg.command('quote')`adds block quote on the selected line. Note that the highlight color is applied on the block quote.
+`wysiwyg.command('quote')`adds block quote on the selected line. Note that the default highlight color is applied on the block quote.
 
 ```
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('Quote')">
