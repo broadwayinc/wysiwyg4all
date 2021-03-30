@@ -76,8 +76,8 @@ Callback function is used to set default properties for setting **command tracke
 #### Command track
 
 Default command tracking properties can be modified in `.commandTracker`. Following code example shows...
-<br />
 
+<br />
 **_Example 3_**
 
     let wysiwyg = new Wysiwyg4all({
