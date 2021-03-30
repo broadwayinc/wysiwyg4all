@@ -220,6 +220,7 @@ Default log mutation properties can be modified in `.mutation` . Specific detail
 <br />
 
 **_Example 8_**
+```
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
             if (c.mutation) {
@@ -229,6 +230,7 @@ Default log mutation properties can be modified in `.mutation` . Specific detail
             return c;
         }
     })
+```
 
 <hr style="height:1px"><br />
 
