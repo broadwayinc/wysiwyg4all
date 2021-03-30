@@ -98,7 +98,7 @@ Following code example shows default setting of `.commandTracker`.
 
 ### Image style
 
-Image style can be pre-processed in `.image`. Following code example shows setting default image width size of 8rem and border style red color, width of 2px and giving 'image clicked' message pop-up alert on the 'onclick' event. 
+Image style can be pre-processed in `.image`. Following code example shows setting default width size of image by 8rem with border of red color, border width of 2px and trigerring 'image clicked' message pop-up alert on the 'onclick' event. 
 
 <br />
 
