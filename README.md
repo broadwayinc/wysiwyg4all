@@ -37,6 +37,7 @@ These following two-steps show basic demonstration of how **Wysiwyg4all** works 
 In **Wysiwyg4all** function, you shuold set default properties for element id, placeholder string, spell check, highlight color, last line blank, hash-tag and URL link, log mutation. Add Wysiwyg4all default setting script inside your **&lt;script**&gt;. The **&lt;script>** tag should come after closing the **&lt;/body**&gt; tag. Following script is an example for setting some of the default properties. **Wysiwyg4all** function will be created under the name of **wysiwyg** in the entire examples.
 
 <br />
+
 **_Example 2_**
 
 ```
@@ -71,8 +72,6 @@ let wysiwyg = new Wysiwyg4all({
 ### Callback function
 
 Callback function is used to set default properties for setting **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**. Keep in mind that callback parameter 'c' should be returned.
-
-<br />
 
 #### Command track
 
