@@ -23,7 +23,7 @@ These following two-steps show basic demonstration of how **Wysiwyg4all** works 
 
 <br />
 
-**_Example 1_**
+<u>**_Example 1_**</u>
 
 ```
 <div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
@@ -39,7 +39,7 @@ In **Wysiwyg4all** function, you shuold set default properties for element id, p
 
 <br />
 
-**_Example 2_**
+<u>**_Example 2_**</u>
 
 ```
 let wysiwyg = new Wysiwyg4all({
@@ -73,11 +73,11 @@ let wysiwyg = new Wysiwyg4all({
 ### Command track
 Callback function is used to set default properties of **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**. Keep in mind that callback parameter ('c' in the following example code) should be returned.
 <br/>
-Following code example shows default command tracking properties in `.commandTracker`.
+Following code example shows default setting of `.commandTracker`.
 
 <br />
 
-**_Example 3_**
+<u>**_Example 3_**</u>
 
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
@@ -102,7 +102,7 @@ Image style can be pre-processed in `.image`. Following code example shows setti
 
 <br />
 
-**_Example 4_**
+<u>**_Example 4_**</u>
 
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
@@ -132,7 +132,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
 
 <br />
 
-**_Example 5_**
+<u>**_Example 5_**</u>
 
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
@@ -162,7 +162,8 @@ Default URL link properties can be modified in `.urllink`.  Following code examp
 
 <br />
 
-**_Example 6_**
+<u>**_Example 6_**</u>
+
 ```
 let wysiwyg = new Wysiwyg4all({
     callback: async c => {
@@ -191,7 +192,8 @@ Default caret position properties can be modified in `.caratPosition` . Copy and
 
 <br />
 
-**_Example 7_**
+<u>**_Example 7_**</u>
+
 ```
 let wysiwyg = new Wysiwyg4all({
     callback: async c => {
@@ -216,7 +218,8 @@ Default log mutation properties can be modified in `.mutation` . Copy and paste 
 
 <br />
 
-**_Example 8_**
+<u>**_Example 8_**</u>
+
 ```
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
@@ -237,7 +240,8 @@ HTML string or node element can be assigned in `wysiwyg.command()` element value
 
 <br />
 
-**_Example 9_**
+<u>**_Example 9_**</u>
+
 ```
 let customElement = () => {
     // add smile emoji. This can be html string (ex - <div>Hello</div>) or node element (ex - document.createElement('div'))
@@ -255,7 +259,8 @@ let customElement = () => {
 
 <br />
 
-**_Example 10_**
+<u>**_Example 10_**</u>
+
 ```
 let export_data = () => {
     wysiwyg.export(pre => {
@@ -278,7 +283,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 
 <br />
 
-**_Example 11_**
+<u>**_Example 11_**</u>
 
 ```
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
@@ -295,7 +300,8 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 
 <br />
 
-**_Example 12_**
+<u>**_Example 12_**</u>
+
 ```
 <button onclick="wysiwyg.command('color')">
     Color
@@ -308,7 +314,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <br />
 
-**_Example 13_**
+<u>**_Example 13_**</u>
+
 ```
 <input id='colorInput' type='color' onchange="(function(event){wysiwyg.command(event.target.value)})(event)"
        onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
@@ -323,7 +330,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <br />
 
-**_Example 14_**
+<u>**_Example 14_**</u>
+
 ```
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('divider')">
     Divider
@@ -340,7 +348,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <br />
 
-**_Example 15_**
+<u>**_Example 15_**</u>
+
 ```
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('Quote')">
     Quote
@@ -357,7 +366,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <br />
 
-**_Example 16_**
+<u>**_Example 16_**</u>
+
 ```
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('unorderedList')">
     Unordered list
@@ -374,7 +384,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <br />
 
-**_Example 17_**
+<u>**_Example 17_**</u>
+
 ```
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('alignCenter')">
     Align center
@@ -391,7 +402,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <br />
 
-**_Example 18_**
+<u>**_Example 18_**</u>
+
 ```
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('image')">
     Image
@@ -408,7 +420,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <br />
 
-**_Example 19_**
+<u>**_Example 19_**</u>
+
 ```
 <button onclick="customElement()">
   Smile
