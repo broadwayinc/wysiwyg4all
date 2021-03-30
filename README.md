@@ -72,7 +72,8 @@ let wysiwyg = new Wysiwyg4all({
 
 ### Command track
 Callback function is used to set default properties of **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**. Keep in mind that callback parameter ('c' in the following example code) should be returned.
-Default command tracking properties can be modified in `.commandTracker`. Following code example shows...
+<br/>
+Following code example shows default command tracking properties in `.commandTracker`.
 
 <br />
 
