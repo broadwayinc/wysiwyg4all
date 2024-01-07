@@ -2,7 +2,7 @@
 
 [Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4all commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
 
-**Wysiwyg4all** ('what you see is what you get for all') is a simple framework for building a text editor for your website. It is highly expandable and customizable.
+**Wysiwyg4all** ('what you see is what you get for all') is a free minimal WYSIWYG editor for your website. It is highly expandable and customizable.
 
 <br />
 
