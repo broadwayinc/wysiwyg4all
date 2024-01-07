@@ -14,8 +14,8 @@ These following two-steps show basic demonstration of how **Wysiwyg4all** works 
 
 1. Inside HTML **&lt;head>** add below:
 ```
-<script src="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.0/wysiwyg4all.js"></script>
-<link rel="stylesheet" type="text/css" href="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.0/wysiwyg4all.css" />
+<script src="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.2/wysiwyg4all.js"></script>
+<link rel="stylesheet" type="text/css" href="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.2/wysiwyg4all.css" />
 ```
 <br />
 

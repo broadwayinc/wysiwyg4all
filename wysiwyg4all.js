@@ -1,5 +1,4 @@
-// To test locally on browser, remove import, export, fetch https://broadwayinc.dev/jslib/colormangle/0.1.0/colormangle.js script in header
-import {ColorMangle} from '../colormangle/colormangle.js';
+import ColorMangle from 'colormangle';
 
 export class Wysiwyg4All {
     /**
@@ -272,7 +271,7 @@ export class Wysiwyg4All {
 
         let setRange = !!target;
 
-        let {node = null, position = true} = target || {};
+        let { node = null, position = true } = target || {};
 
         let sel = window.getSelection();
         if (!sel)
@@ -348,7 +347,7 @@ export class Wysiwyg4All {
                         position = position ? 0 : node.textContent.length;
                     else position = position > node.textContent.length ? node.textContent.length : position;
 
-                    return {node, position};
+                    return { node, position };
                 }
             };
 
@@ -437,7 +436,7 @@ export class Wysiwyg4All {
     }
 
     _nodeCrawler(run, option) {
-        const {parentNode, node, startFromEldestChild, startNode} = option;
+        const { parentNode, node, startFromEldestChild, startNode } = option;
 
         if (startFromEldestChild && !parentNode)
             throw new Error('Need parentNode to crawl up single child');
@@ -469,7 +468,7 @@ export class Wysiwyg4All {
                 commonContainer !== parentAnchor &&
                 commonContainer.parentNode &&
                 commonContainer.parentNode !== parentAnchor
-                ) commonContainer = commonContainer.parentNode;
+            ) commonContainer = commonContainer.parentNode;
         }
 
         /** crawl order below (outputs node on the way)
@@ -486,7 +485,7 @@ export class Wysiwyg4All {
         if (commonContainer.nodeType === 3) {
             outputNodes.push(run(commonContainer));
 
-            return {nodes: outputNodes, commonContainer};
+            return { nodes: outputNodes, commonContainer };
         }
 
         let id, uniqueId;
@@ -554,7 +553,7 @@ export class Wysiwyg4All {
         if (id)
             commonContainer.removeAttribute('id');
 
-        return {node: outputNodes, commonContainer};
+        return { node: outputNodes, commonContainer };
     }
 
     _wrapNode(node, wrapper, appendWhole = false) {
@@ -584,7 +583,7 @@ export class Wysiwyg4All {
             this._nodeCrawler(n => {
                 withinRange(n);
                 return n;
-            }, {node});
+            }, { node });
         } else withinRange(node);
 
         if (wrapper) {
@@ -617,7 +616,7 @@ export class Wysiwyg4All {
         // restore range
         if ((stripped || node).textContent && (start || end)) {
             if (start && start === end && startOffset === endOffset)
-                range = this._adjustSelection({node: stripped || node, position: startOffset});
+                range = this._adjustSelection({ node: stripped || node, position: startOffset });
             else
                 range = this._adjustSelection({
                     node: [start, end],
@@ -626,7 +625,7 @@ export class Wysiwyg4All {
         }
 
         this.range = range;
-        return {node: stripped || node, range};
+        return { node: stripped || node, range };
     }
 
     _isSingleChildParent(n) {
@@ -683,7 +682,7 @@ export class Wysiwyg4All {
             node.parentNode.closest('#' + uniqueId) &&
             node.parentNode.id !== uniqueId &&
             (singleChildParent ? this._isSingleChildParent(node?.parentNode) : true)
-            ) {
+        ) {
 
             let cb = callback(node.parentNode);
 
@@ -703,7 +702,7 @@ export class Wysiwyg4All {
         if (!range)
             return true;
 
-        let {commonAncestorContainer, startContainer, endContainer} = range;
+        let { commonAncestorContainer, startContainer, endContainer } = range;
         let restrict = this.restrictedElement_queryArray;
         let startLine = this._climbUpToEldestParent(startContainer, element);
         let endLine = this._climbUpToEldestParent(endContainer, element);
@@ -913,7 +912,7 @@ export class Wysiwyg4All {
 
                     }
                     return node;
-                }, {node: this.range, parentNode: this.element});
+                }, { node: this.range, parentNode: this.element });
 
                 if (!crawlResult.node.length) {
                     let comm = this._trackStyle(this.range.startContainer);
@@ -930,7 +929,7 @@ export class Wysiwyg4All {
                 else if (caratEl.nodeType === 1)
                     caratPosition = caratEl.getBoundingClientRect();
 
-                this._callback({commandTracker, range: this.range, caratPosition}).catch(err => err);
+                this._callback({ commandTracker, range: this.range, caratPosition }).catch(err => err);
                 this._lastLineBlank();
             });
         }).bind(this);
@@ -1089,7 +1088,7 @@ export class Wysiwyg4All {
                                         containerOffset += n.textContent.length;
 
                                     return n;
-                                }, {node: line});
+                                }, { node: line });
                                 return containerOffset;
                             };
 
@@ -1098,7 +1097,7 @@ export class Wysiwyg4All {
 
                             diveAndRemoveTab(startLine);
                             if (hasIndent)
-                                this._adjustSelection({node: startLine, position: offset});
+                                this._adjustSelection({ node: startLine, position: offset });
                         }
                     } else {
                         // indent
@@ -1118,7 +1117,7 @@ export class Wysiwyg4All {
                         } else {
                             let tab = document.createTextNode('\t');
                             this.range.insertNode(tab);
-                            this._adjustSelection({node: tab, position: false});
+                            this._adjustSelection({ node: tab, position: false });
                         }
                     }
                     return;
@@ -1134,7 +1133,7 @@ export class Wysiwyg4All {
                             }
 
                             return n;
-                        }, {node: startContainer.nodeType === 3 ? startContainer.parentNode : startContainer});
+                        }, { node: startContainer.nodeType === 3 ? startContainer.parentNode : startContainer });
                     }
 
                     if (endLine.textContent[0] === '\t') {
@@ -1251,7 +1250,7 @@ export class Wysiwyg4All {
                 }
 
                 if (mutate.length)
-                    this._callback({mutation: mutate}).catch(_ => {
+                    this._callback({ mutation: mutate }).catch(_ => {
                     });
             }
 
@@ -1259,7 +1258,7 @@ export class Wysiwyg4All {
 
                 /** changes in attributes */
                 if (mutation.type === 'attributes') {
-                    const {target, attributeName} = mutation;
+                    const { target, attributeName } = mutation;
                     if (attributeName === 'class') {
                         if (target.parentNode && !target.classList.length && !(this._isTextBlockElement(target) || this._isBlockElement(target) || target.nodeName === 'P')) {
                             // this._unwrapElement(target);
@@ -1304,7 +1303,7 @@ export class Wysiwyg4All {
                                 }
 
                                 if (removed) {
-                                    this._callback({removed: {[what]: removed}}).catch(err => {
+                                    this._callback({ removed: { [what]: removed } }).catch(err => {
                                         throw err;
                                     });
                                 }
@@ -1498,7 +1497,7 @@ export class Wysiwyg4All {
                                         let tab = document.createTextNode(this.insertTabPending_tabString);
                                         node.line.insertBefore(tab, node.line.childNodes[0]);
                                         this.insertTabPending_tabString = '';
-                                        this._adjustSelection({node: tab, position: false});
+                                        this._adjustSelection({ node: tab, position: false });
                                     }
 
                                     // if empty text block is added add br
@@ -1510,7 +1509,7 @@ export class Wysiwyg4All {
                                                 return 'BREAK';
                                             }
                                             return n;
-                                        }, {node: node.line});
+                                        }, { node: node.line });
 
                                         if (addBr)
                                             node.line.append(document.createElement('br'));
@@ -1684,7 +1683,7 @@ export class Wysiwyg4All {
                         }
                     }
                     return n;
-                }, {node: targetContainer});
+                }, { node: targetContainer });
 
             }
             return !!nudged;
@@ -1780,7 +1779,7 @@ export class Wysiwyg4All {
                 if (!collapsed && !shift) {
                     preventDefault();
                     let adj = arrowDirection === 'UP' ? [startContainer, startOffset] : [endContainer, endOffset];
-                    this.range = this._adjustSelection({node: adj[0], position: adj[1]});
+                    this.range = this._adjustSelection({ node: adj[0], position: adj[1] });
                     break;
                 }
 
@@ -1949,7 +1948,7 @@ export class Wysiwyg4All {
                         return 'BREAK';
 
                     return n;
-                }, {node: common, startNode: this.range.startContainer});
+                }, { node: common, startNode: this.range.startContainer });
 
             if (restricted)
                 return;
@@ -2002,7 +2001,7 @@ export class Wysiwyg4All {
         append(endLine);
 
         if (insertAfter)
-            this.range = this._adjustSelection({node: focusElement || insertAfter});
+            this.range = this._adjustSelection({ node: focusElement || insertAfter });
 
     }
 
@@ -2024,13 +2023,13 @@ export class Wysiwyg4All {
     async _imageSelected(e) {
         let files = e.target.files;
 
-        const prepareForCallback = {image: []};
+        const prepareForCallback = { image: [] };
         let readFile = new FileReader();
 
         const load = (file) => {
             return new Promise(res => {
                 readFile.onload = f => {
-                    const {lastModified, name, size, type} = file;
+                    const { lastModified, name, size, type } = file;
                     const source = f.target.result;
 
                     let img = new Image;
@@ -2054,11 +2053,11 @@ export class Wysiwyg4All {
             });
         };
 
-        this.callback({loading: true});
+        this.callback({ loading: true });
         for (let idx = 0; files.length > idx; idx++) {
             prepareForCallback.image[idx] = await load(files[idx]);
         }
-        this.callback({loading: false});
+        this.callback({ loading: false });
 
         //  reset image input
         this.imgInput.value = '';
@@ -2179,7 +2178,7 @@ export class Wysiwyg4All {
                         this.element.appendChild(lastChild);
 
                         // Adjust selection
-                        this.range = this._adjustSelection({node: lastChild, position: true});
+                        this.range = this._adjustSelection({ node: lastChild, position: true });
                     }
 
                 } else
@@ -2221,7 +2220,7 @@ export class Wysiwyg4All {
             } else if (n.nodeType === 1) n.normalize();
 
             return n;
-        }, {node: this.element});
+        }, { node: this.element });
     }
 
     _replaceText(wholeDocument = false) {
@@ -2269,14 +2268,14 @@ export class Wysiwyg4All {
                     }
 
                     return n;
-                }, {node});
+                }, { node });
 
                 textNodes.forEach((node) => {
                     replaceTextNode(node, regex, function (matched) {
                         if (matched.length > 1) {
                             return {
                                 name: 'span',
-                                attrs: {'class': `${className} ${className}${matched}`},
+                                attrs: { 'class': `${className} ${className}${matched}` },
                                 content: matched
                             };
                         }
@@ -2331,7 +2330,7 @@ export class Wysiwyg4All {
                         el.parentNode.insertBefore(anchorText, el.nextSibling);
                     }
                 }
-                return {collected, element, anchorText};
+                return { collected, element, anchorText };
             })();
 
             let textEl = res.element;
@@ -2360,7 +2359,7 @@ export class Wysiwyg4All {
                 }
 
             if (toCallback.length) {
-                this._callback({[typeName]: toCallback}).then(e => {
+                this._callback({ [typeName]: toCallback }).then(e => {
                     for (let idx = 0; collectId.length > idx; idx++) {
                         //  elementId is read only
                         e[typeName][idx].elementId = collectId[idx];
@@ -2402,7 +2401,7 @@ export class Wysiwyg4All {
                     window.open(u, "_blank");
                 });
 
-                return {url: u};
+                return { url: u };
             });
         }
 
@@ -2410,7 +2409,7 @@ export class Wysiwyg4All {
             process('hashtag', tag => {
 
                 let t = tag.textContent;
-                return {tag: t[0] === '#' ? t.substring(1) : t};
+                return { tag: t[0] === '#' ? t.substring(1) : t };
 
             });
         }
@@ -2634,6 +2633,9 @@ export class Wysiwyg4All {
 
                 });
                 return;
+
+            default:
+                break;
         }
 
         let isColor;
@@ -2696,7 +2698,7 @@ export class Wysiwyg4All {
                     else
                         this.range.insertNode(wrapper);
 
-                    this.range = this._adjustSelection({node: text, position: false});
+                    this.range = this._adjustSelection({ node: text, position: false });
 
                 } else {
                     if (restrictedClass) {
@@ -2722,7 +2724,7 @@ export class Wysiwyg4All {
                             n.textContent = n.textContent.replaceAll('\t', '');
 
                         return n;
-                    }, {node: span, startFromEldestChild: true, parentNode: this.element});
+                    }, { node: span, startFromEldestChild: true, parentNode: this.element });
 
                     while (span.childNodes[0])
                         extract.append(span.childNodes[0]);
@@ -2888,7 +2890,7 @@ export class Wysiwyg4All {
 
                 this.custom_array.push(action);
 
-                this._callback({custom: action}).then(_ => {
+                this._callback({ custom: action }).then(_ => {
                     if (action.insert) {
                         this.range.insertNode(custom);
                         this.range = this._adjustSelection({
@@ -2969,7 +2971,7 @@ export class Wysiwyg4All {
                 }
                 tag = tag?.[0] === '#' ? tag.substring(1) : tag;
                 if (tag)
-                    hashtagCallback.push({tag, elementId, element: i});
+                    hashtagCallback.push({ tag, elementId, element: i });
             }
 
         // urllink
@@ -2988,7 +2990,7 @@ export class Wysiwyg4All {
                     }
                 }
                 if (url)
-                    urllinkCallback.push({url, elementId, element: i});
+                    urllinkCallback.push({ url, elementId, element: i });
             }
 
         const custom = div.querySelectorAll('._custom_');
@@ -2996,7 +2998,7 @@ export class Wysiwyg4All {
         if (custom.length)
             for (let i of custom) {
                 let elementId = i.id || this._generateId('custom');
-                customCallback.push({elementId, element: i});
+                customCallback.push({ elementId, element: i });
             }
 
         let fb = await this._callback({
@@ -3037,7 +3039,7 @@ export class Wysiwyg4All {
         this._normalizeDocument(true);
         const dom = this.element.cloneNode(true);
 
-        const {hashtag_array, image_array, urllink_array, custom_array} = this;
+        const { hashtag_array, image_array, urllink_array, custom_array } = this;
         let title = '';
         let text = '';
 

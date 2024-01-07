@@ -1,0 +1,23 @@
+{
+  "name": "wysiwyg4all",
+  "version": "1.0.0",
+  "description": "",
+  "main": "wysiwyg4all.js",
+  "scripts": {
+    "prod": "webpack -- --env mode=production"
+  },
+  "keywords": [],
+  "author": "Baksa Gimm",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.13.8",
+    "@babel/preset-env": "^7.13.9",
+    "babel-loader": "^8.2.2",
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "colormangle": "^0.1.98"
+  }
+}
