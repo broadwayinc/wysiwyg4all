@@ -1,6 +1,6 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Free minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
   "scripts": {
