@@ -1,5 +1,3 @@
-<img alt="APM" src="https://img.shields.io/apm/l/vim-mode"> ![Github All Releases](https://img.shields.io/github/downloads/broadwayinc/wysiwyg4all/total.svg)
-
 # Wysiwyg4all
 
 [Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4all commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
