@@ -1,6 +1,1127 @@
-import ColorMangle from 'colormangle';
+class ColorMangle {
+    /**
+     * @param {string} [color='#4848db'] - Argument string can be either color name string or any type of HTML color codes (hex, rgb, hsl).
+     */
+    constructor(color = '#4848db', fineTuned = true) {
+        this.fineTuned = fineTuned;
+        this.colorName = {
+            "aliceblue": "#f0f8ff",
+            "antiquewhite": "#faebd7",
+            "aqua": "#00ffff",
+            "aquamarine": "#7fffd4",
+            "azure": "#f0ffff",
+            "beige": "#f5f5dc",
+            "bisque": "#ffe4c4",
+            "black": "#000000",
+            "blanchedalmond": "#ffebcd",
+            "blue": "#0000ff",
+            "blueviolet": "#8a2be2",
+            "brown": "#a52a2a",
+            "burlywood": "#deb887",
+            "cadetblue": "#5f9ea0",
+            "chartreuse": "#7fff00",
+            "chocolate": "#d2691e",
+            "coral": "#ff7f50",
+            "cornflowerblue": "#6495ed",
+            "cornsilk": "#fff8dc",
+            "crimson": "#dc143c",
+            "cyan": "#00ffff",
+            "darkblue": "#00008b",
+            "darkcyan": "#008b8b",
+            "darkgoldenrod": "#b8860b",
+            "darkgray": "#a9a9a9",
+            "darkgreen": "#006400",
+            "darkgrey": "#a9a9a9",
+            "darkkhaki": "#bdb76b",
+            "darkmagenta": "#8b008b",
+            "darkolivegreen": "#556b2f",
+            "darkorange": "#ff8c00",
+            "darkorchid": "#9932cc",
+            "darkred": "#8b0000",
+            "darksalmon": "#e9967a",
+            "darkseagreen": "#8fbc8f",
+            "darkslateblue": "#483d8b",
+            "darkslategray": "#2f4f4f",
+            "darkslategrey": "#2f4f4f",
+            "darkturquoise": "#00ced1",
+            "darkviolet": "#9400d3",
+            "deeppink": "#ff1493",
+            "deepskyblue": "#00bfff",
+            "dimgray": "#696969",
+            "dimgrey": "#696969",
+            "dodgerblue": "#1e90ff",
+            "firebrick": "#b22222",
+            "floralwhite": "#fffaf0",
+            "forestgreen": "#228b22",
+            "fuchsia": "#ff00ff",
+            "gainsboro": "#dcdcdc",
+            "ghostwhite": "#f8f8ff",
+            "goldenrod": "#daa520",
+            "gold": "#ffd700",
+            "gray": "#808080",
+            "green": "#008000",
+            "greenyellow": "#adff2f",
+            "grey": "#808080",
+            "honeydew": "#f0fff0",
+            "hotpink": "#ff69b4",
+            "indianred": "#cd5c5c",
+            "indigo": "#4b0082",
+            "ivory": "#fffff0",
+            "khaki": "#f0e68c",
+            "lavenderblush": "#fff0f5",
+            "lavender": "#e6e6fa",
+            "lawngreen": "#7cfc00",
+            "lemonchiffon": "#fffacd",
+            "lightblue": "#add8e6",
+            "lightcoral": "#f08080",
+            "lightcyan": "#e0ffff",
+            "lightgoldenrodyellow": "#fafad2",
+            "lightgray": "#d3d3d3",
+            "lightgreen": "#90ee90",
+            "lightgrey": "#d3d3d3",
+            "lightpink": "#ffb6c1",
+            "lightsalmon": "#ffa07a",
+            "lightseagreen": "#20b2aa",
+            "lightskyblue": "#87cefa",
+            "lightslategray": "#778899",
+            "lightslategrey": "#778899",
+            "lightsteelblue": "#b0c4de",
+            "lightyellow": "#ffffe0",
+            "lime": "#00ff00",
+            "limegreen": "#32cd32",
+            "linen": "#faf0e6",
+            "magenta": "#ff00ff",
+            "maroon": "#800000",
+            "mediumaquamarine": "#66cdaa",
+            "mediumblue": "#0000cd",
+            "mediumorchid": "#ba55d3",
+            "mediumpurple": "#9370db",
+            "mediumseagreen": "#3cb371",
+            "mediumslateblue": "#7b68ee",
+            "mediumspringgreen": "#00fa9a",
+            "mediumturquoise": "#48d1cc",
+            "mediumvioletred": "#c71585",
+            "midnightblue": "#191970",
+            "mintcream": "#f5fffa",
+            "mistyrose": "#ffe4e1",
+            "moccasin": "#ffe4b5",
+            "navajowhite": "#ffdead",
+            "navy": "#000080",
+            "oldlace": "#fdf5e6",
+            "olive": "#808000",
+            "olivedrab": "#6b8e23",
+            "orange": "#ffa500",
+            "orangered": "#ff4500",
+            "orchid": "#da70d6",
+            "palegoldenrod": "#eee8aa",
+            "palegreen": "#98fb98",
+            "paleturquoise": "#afeeee",
+            "palevioletred": "#db7093",
+            "papayawhip": "#ffefd5",
+            "peachpuff": "#ffdab9",
+            "peru": "#cd853f",
+            "pink": "#ffc0cb",
+            "plum": "#dda0dd",
+            "powderblue": "#b0e0e6",
+            "purple": "#800080",
+            "rebeccapurple": "#663399",
+            "red": "#ff0000",
+            "rosybrown": "#bc8f8f",
+            "royalblue": "#4169e1",
+            "saddlebrown": "#8b4513",
+            "salmon": "#fa8072",
+            "sandybrown": "#f4a460",
+            "seagreen": "#2e8b57",
+            "seashell": "#fff5ee",
+            "sienna": "#a0522d",
+            "silver": "#c0c0c0",
+            "skyblue": "#87ceeb",
+            "slateblue": "#6a5acd",
+            "slategray": "#708090",
+            "slategrey": "#708090",
+            "snow": "#fffafa",
+            "springgreen": "#00ff7f",
+            "steelblue": "#4682b4",
+            "tan": "#d2b48c",
+            "teal": "#008080",
+            "thistle": "#d8bfd8",
+            "tomato": "#ff6347",
+            "turquoise": "#40e0d0",
+            "violet": "#ee82ee",
+            "wheat": "#f5deb3",
+            "white": "#ffffff",
+            "whitesmoke": "#f5f5f5",
+            "yellow": "#ffff00",
+            "yellowgreen": "#9acd32"
+        };
+        let format = this._colorType(color);
+        this.type = format.type;
+        this.color = format.color;
+    }
 
-export class Wysiwyg4All {
+    _colorType(color = this.color, throwErr = true) {
+        let chkType, type;
+
+        try {
+            if (!color)
+                throw 'invalid color';
+
+            if (typeof color === 'object' && color.string)
+                color = color.string;
+
+            if (typeof color === 'string')
+                color = color.toLowerCase();
+            else
+                throw 'invalid color';
+
+            if (color === this.color)
+                return { type: this.type, color: this.color };
+
+            if (this.colorName[color])
+                return { type: 'hex', color: this.colorName[color] };
+
+            chkType = color.match(/^(rgba?|rgb?|hsla?|#)/g);
+
+            if (Array.isArray(chkType)) {
+
+                if (chkType[0] === '#') {
+
+                    if (color.length === 4)
+                        // convert shorthand hex
+                        color = color[0] + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+
+                    if (/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color))
+                        // is valid hex
+                        type = 'hex';
+
+                    else
+                        throw 'invalid hex';
+
+                } else if (color[color.length - 1] === ')')
+                    // hex, rgb, rgba, hsl, hsla
+                    type = chkType[0];
+
+                return { type, color };
+
+            }
+
+        } catch (err) {
+            if (throwErr)
+                throw err + ':' + color;
+        }
+
+        return {};
+    }
+
+    _extractDigit(color_arg = this.color) {
+        let { type = this.type, color = this.color } = this._colorType(color_arg);
+
+        if (type === 'hex')
+            color = this.rgba(1, color).string;
+
+        const value = [];
+
+        for (const i of color.match(/\d+(\.\d+)?/g))
+            value.push(parseFloat(i));
+
+        if (value.length < 4) value.push(1);
+
+        return value;
+    }
+
+    /**
+     * @return {number} - Retrieves color alpha value (range 0 ~ 1)
+     */
+    getAlpha(color_arg = this.color) {
+
+        let extract = this._extractDigit(color_arg);
+        return extract ? extract[3] || 1 : 1;
+    }
+
+    /**
+     * @typedef {Object} colorScheme
+     * @property {string} --alert
+     * @property {string} --alert-text
+     * @property {string} --alert-text_placeholder
+     * @property {string} --alert-text_shade
+     * @property {string} --alert-text_shadow
+     * @property {string} --alert-text_soft
+     * @property {string} --alert-text_transparent
+     * @property {string} --alert_placeholder
+     * @property {string} --alert_shade
+     * @property {string} --alert_shadow
+     * @property {string} --alert_soft
+     * @property {string} --alert_transparent
+     * @property {string} --analogous
+     * @property {string} --analogous-text
+     * @property {string} --analogous-text_placeholder
+     * @property {string} --analogous-text_shade
+     * @property {string} --analogous-text_shadow
+     * @property {string} --analogous-text_soft
+     * @property {string} --analogous-text_transparent
+     * @property {string} --analogous_placeholder
+     * @property {string} --analogous_shade
+     * @property {string} --analogous_shadow
+     * @property {string} --analogous_soft
+     * @property {string} --analogous_transparent
+     * @property {string} --background
+     * @property {string} --background-focus
+     * @property {string} --background-focus-nude
+     * @property {string} --background-focus-nude_placeholder
+     * @property {string} --background-focus-nude_shade
+     * @property {string} --background-focus-nude_shadow
+     * @property {string} --background-focus-nude_soft
+     * @property {string} --background-focus-nude_transparent
+     * @property {string} --background-focus-text
+     * @property {string} --background-focus-text_placeholder
+     * @property {string} --background-focus-text_shade
+     * @property {string} --background-focus-text_shadow
+     * @property {string} --background-focus-text_soft
+     * @property {string} --background-focus-text_transparent
+     * @property {string} --background-focus_placeholder
+     * @property {string} --background-focus_shade
+     * @property {string} --background-focus_shadow
+     * @property {string} --background-focus_soft
+     * @property {string} --background-focus_transparent
+     * @property {string} --background-text
+     * @property {string} --background-text_placeholder
+     * @property {string} --background-text_shade
+     * @property {string} --background-text_shadow
+     * @property {string} --background-text_soft
+     * @property {string} --background-text_transparent
+     * @property {string} --background_placeholder
+     * @property {string} --background_shade
+     * @property {string} --background_shadow
+     * @property {string} --background_soft
+     * @property {string} --background_transparent
+     * @property {string} --button
+     * @property {string} --button-nude
+     * @property {string} --button-nude_placeholder
+     * @property {string} --button-nude_shade
+     * @property {string} --button-nude_shadow
+     * @property {string} --button-nude_soft
+     * @property {string} --button-nude_transparent
+     * @property {string} --button-text
+     * @property {string} --button-text_placeholder
+     * @property {string} --button-text_shade
+     * @property {string} --button-text_shadow
+     * @property {string} --button-text_soft
+     * @property {string} --button-text_transparent
+     * @property {string} --button_placeholder
+     * @property {string} --button_shade
+     * @property {string} --button_shadow
+     * @property {string} --button_soft
+     * @property {string} --button_transparent
+     * @property {string} --complementary
+     * @property {string} --complementary-text
+     * @property {string} --complementary-text_placeholder
+     * @property {string} --complementary-text_shade
+     * @property {string} --complementary-text_shadow
+     * @property {string} --complementary-text_soft
+     * @property {string} --complementary-text_transparent
+     * @property {string} --complementary_placeholder
+     * @property {string} --complementary_shade
+     * @property {string} --complementary_shadow
+     * @property {string} --complementary_soft
+     * @property {string} --complementary_transparent
+     * @property {string} --content
+     * @property {string} --content-focus
+     * @property {string} --content-focus-nude
+     * @property {string} --content-focus-nude_placeholder
+     * @property {string} --content-focus-nude_shade
+     * @property {string} --content-focus-nude_shadow
+     * @property {string} --content-focus-nude_soft
+     * @property {string} --content-focus-nude_transparent
+     * @property {string} --content-focus-text
+     * @property {string} --content-focus-text_placeholder
+     * @property {string} --content-focus-text_shade
+     * @property {string} --content-focus-text_shadow
+     * @property {string} --content-focus-text_soft
+     * @property {string} --content-focus-text_transparent
+     * @property {string} --content-focus_placeholder
+     * @property {string} --content-focus_shade
+     * @property {string} --content-focus_shadow
+     * @property {string} --content-focus_soft
+     * @property {string} --content-focus_transparent
+     * @property {string} --content-text
+     * @property {string} --content-text_placeholder
+     * @property {string} --content-text_shade
+     * @property {string} --content-text_shadow
+     * @property {string} --content-text_soft
+     * @property {string} --content-text_transparent
+     * @property {string} --content_placeholder
+     * @property {string} --content_shade
+     * @property {string} --content_shadow
+     * @property {string} --content_soft
+     * @property {string} --content_transparent
+     * @property {string} --focus
+     * @property {string} --focus-text
+     * @property {string} --focus-text_placeholder
+     * @property {string} --focus-text_shade
+     * @property {string} --focus-text_shadow
+     * @property {string} --focus-text_soft
+     * @property {string} --focus-text_transparent
+     * @property {string} --focus_placeholder
+     * @property {string} --focus_shade
+     * @property {string} --focus_shadow
+     * @property {string} --focus_soft
+     * @property {string} --focus_transparent
+     * @property {string} --placeholder
+     * @property {string} --saturate
+     * @property {string} --saturate-text
+     * @property {string} --saturate-text_placeholder
+     * @property {string} --saturate-text_shade
+     * @property {string} --saturate-text_shadow
+     * @property {string} --saturate-text_soft
+     * @property {string} --saturate-text_transparent
+     * @property {string} --saturate_placeholder
+     * @property {string} --saturate_shade
+     * @property {string} --saturate_shadow
+     * @property {string} --saturate_soft
+     * @property {string} --saturate_transparent
+     * @property {string} --shade
+     * @property {string} --shadow
+     * @property {string} --success
+     * @property {string} --success-text
+     * @property {string} --success-text_placeholder
+     * @property {string} --success-text_shade
+     * @property {string} --success-text_shadow
+     * @property {string} --success-text_soft
+     * @property {string} --success-text_transparent
+     * @property {string} --success_placeholder
+     * @property {string} --success_shade
+     * @property {string} --success_shadow
+     * @property {string} --success_soft
+     * @property {string} --success_transparent
+     * @property {string} --toolbar
+     * @property {string} --toolbar-focus
+     * @property {string} --toolbar-focus-nude
+     * @property {string} --toolbar-focus-nude_placeholder
+     * @property {string} --toolbar-focus-nude_shade
+     * @property {string} --toolbar-focus-nude_shadow
+     * @property {string} --toolbar-focus-nude_soft
+     * @property {string} --toolbar-focus-nude_transparent
+     * @property {string} --toolbar-focus-text
+     * @property {string} --toolbar-focus-text_placeholder
+     * @property {string} --toolbar-focus-text_shade
+     * @property {string} --toolbar-focus-text_shadow
+     * @property {string} --toolbar-focus-text_soft
+     * @property {string} --toolbar-focus-text_transparent
+     * @property {string} --toolbar-focus_placeholder
+     * @property {string} --toolbar-focus_shade
+     * @property {string} --toolbar-focus_shadow
+     * @property {string} --toolbar-focus_soft
+     * @property {string} --toolbar-focus_transparent
+     * @property {string} --toolbar-text
+     * @property {string} --toolbar-text_placeholder
+     * @property {string} --toolbar-text_shade
+     * @property {string} --toolbar-text_shadow
+     * @property {string} --toolbar-text_soft
+     * @property {string} --toolbar-text_transparent
+     * @property {string} --toolbar_placeholder
+     * @property {string} --toolbar_shade
+     * @property {string} --toolbar_shadow
+     * @property {string} --toolbar_soft
+     * @property {string} --toolbar_transparent
+     * @property {string} --transparent
+     */
+    /**
+     * Generates color scheme object.
+     * @param {string} [color=this.color] - Focus color for color scheme
+     * @param {boolean} [darkMode=false] - Dark mode when true
+     * @return {colorScheme} - { [&lt;CSS Variable names&gt;] : &lt;string | HTML color string&gt; }
+     */
+    colorScheme(color = this.color, darkMode = false) {
+
+        let opacity = {
+            text: { black: 0.88, white: 1 },
+            soft: { black: 0.66, white: 0.88 },
+            placeholder: { black: 0.44, white: 0.55 },
+            transparent: { black: 0.22, white: 0.33 },
+            shade: { black: 0.066, white: 0.11 },
+            shadow: { black: 0.033, white: 0.066 }
+        };
+
+        let template = {
+            '--background': darkMode ? '#121212' : '#f7f7f7',
+            '--content': darkMode ? '#2b2b2b' : '#ffffff',
+            '--toolbar': darkMode ? '#2b2b2b' : '#ffffff'
+        };
+
+        let focusOriginal;
+        let focusSat;
+        let content_isHighLuminance = this.isHighLuminance(template['--content']);
+        let focus = (() => {
+            if (color && typeof color === 'object') {
+                if (color['--button']) {
+                    focusOriginal = color['--button'];
+                    return focusOriginal;
+                }
+                for (let key of color)
+                    if (key.includes('focus')) {
+                        focusOriginal = color[key];
+                        return focusOriginal;
+                    }
+            }
+
+            focusOriginal = color;
+            focusSat = this.matchLuminance(color, template['--content'], content_isHighLuminance ? 1.5 : 4.5);
+            return darkMode ? focusSat : color;
+        })();
+
+        let compDir = 1;
+        let analogous = (() => {
+            let deg = 30;
+            let analogous = this.analogous(focusOriginal, deg);
+            let focusHSL = this.hsla(1, focusOriginal).h;
+            let an1HSL = this.hsla(1, analogous[0]).h;
+            let an2HSL = this.hsla(1, analogous[1]).h;
+
+            if (focusHSL + deg > 360)
+                an1HSL = an1HSL + 360;
+            if (focusHSL - deg < 0)
+                an2HSL = 360 - an2HSL;
+
+            if (Math.abs(focusHSL - an1HSL) > Math.abs(focusHSL - an2HSL)) {
+                compDir = -1;
+                return analogous[1];
+            }
+
+            return analogous[0];
+        })();
+
+        let complementary = this.matchLuminance(this.complementary(focus, 60 * compDir), template['--background'], 3.1);
+        let fixedValue = {
+            '--shadow': 'rgba(0, 0, 0, 0.033)',
+            '--shade': 'rgba(0, 0, 0, 0.066)',
+            '--transparent': 'rgba(0, 0, 0, 0.22)',
+            '--placeholder': 'rgba(0, 0, 0, 0.33)'
+        };
+
+        let darkModeAnalogous = darkMode ? this.matchLuminance(analogous, template['--background'], 4.5) : analogous;
+        let analogousNude = this.matchLuminance(analogous, template['--background'], 4.5);
+
+        for (let k in template) {
+            template[k + '-text'] = this.textColor(opacity.text, template[k]);
+            template[k + '-focus'] = k.includes('--background') ? darkModeAnalogous : focus;
+            template[k + '-focus-nude'] = k.includes('--background') ? analogousNude : this.matchLuminance(darkMode ? focus : focusSat, template[k], 1.66);
+            template[k + '-focus-text'] = this.textColor(1, k.includes('--background') ? darkModeAnalogous : focus);
+        }
+
+        template['--focus'] = focusOriginal;
+        template['--focus-text'] = this.textColor(1, focusOriginal);
+        template['--saturate'] = focusSat;
+        template['--saturate-text'] = this.textColor(1, focusSat);
+
+        Object.assign(template, {
+            '--complementary': complementary,
+            '--complementary-text': this.textColor(1, complementary),
+            '--analogous': analogous,
+            '--analogous-text': this.textColor(1, analogous),
+            '--alert': 'tomato',
+            '--alert-text': 'white',
+            '--success': 'seagreen',
+            '--success-text': 'white',
+            '--button': focus,
+            '--button-nude': darkMode ? this.matchLuminance(focusSat, template["--content"], 7) : this.contrastRatio(template["--content"], focusSat) < 4.5 ? "inherit" : focusSat,
+            '--button-text': this.textColor(1, focus)
+        });
+
+        for (let k in template) {
+            if (!template[k] || template[k] === "")
+                continue;
+
+            let highLum = this.isHighLuminance(template[k]);
+            for (let op of ['soft', 'placeholder', 'transparent', 'shadow', 'shade']) {
+
+                template[k + '_' + op] = this.rgba(opacity[op][highLum ? 'white' : 'black'], template[k]).string;
+            }
+        }
+
+        // template['--button-border'] = (() => {
+        //     let focus_isHighLuminance = this.isHighLuminance(focus);
+        //     let border = this.matchLuminance(this.adjustLuminance(-1, template['--button']), template['--button'], 1.15, -1, focus_isHighLuminance ? 'luminance' : 'brightness');
+        //     return focus_isHighLuminance ? this.rgba(0.5, border).string : border;
+        // })();
+
+        if (color && typeof color === 'object') {
+            for (let key of color)
+                if (key[0] !== '-')
+                    throw 'invalid color scheme';
+            Object.assign(template, color);
+        }
+
+        let unordered = Object.assign(template, fixedValue);
+        return Object.keys(unordered).sort().reduce(
+            (obj, key) => {
+                obj[key] = unordered[key];
+                return obj;
+            },
+            {}
+        );
+    }
+
+    /**
+     * Match luminance of target_color with base color
+     * @param {string} target_color - Target color
+     * @param {string} [color_arg=this.color] - Base color
+     * @param {number} [target_ratio] - Set contrast ratio difference
+     * @param {number} [direction] - Adjust direction. Adjust to darker luminance when -1. Brighter when 1, otherwise auto.
+     * @param {string} [method] - Luminance adjustment mode: 'brightness | luminance | saturation'
+     * @return {string} - HTML color string
+     */
+    matchLuminance(target_color, color_arg = this.color, target_ratio, direction, method) {
+        let { color } = this._colorType(color_arg);
+        let target = this._colorType(target_color).color;
+
+        if (target_ratio) {
+            let adj = target;
+            let m = this.contrastRatio(adj, color);
+            if (m < target_ratio) {
+                let dir = direction || this.isHighLuminance(color) ? -1 : 1;
+                let count = 100;
+                while (m < target_ratio && count--) {
+                    let adj_set;
+
+                    switch (method) {
+                        case 'brightness':
+                            adj_set = this.adjustBrightness(1 * dir, adj);
+                            break;
+                        case 'luminance':
+                            adj_set = this.adjustLuminance(1 * dir, adj);
+                            break;
+                        default:
+                            adj_set = this.adjustBrightness(1 * dir, { legacy: true, color: adj });
+                    }
+
+                    if (adj === adj_set)
+                        break;
+                    adj = adj_set;
+
+                    m = this.contrastRatio(adj, color);
+                }
+            }
+            return this.hex(adj);
+        } else {
+            let main_lum = this._luminance(color);
+            let lum = this._luminance(target);
+
+            if (Math.abs(lum - main_lum) < 0.01)
+                return target;
+
+            let adj = this.hex(target);
+
+            let dir = (lum, main_lum) => {
+                return lum < main_lum ? 1 : -1;
+            };
+
+            let currDir = dir(lum, main_lum);
+            while (Math.abs(lum - main_lum) > 0.01 && currDir === dir(lum, main_lum)) {
+                let adj_set;
+                switch (method) {
+                    case 'saturation':
+                        adj_set = this.adjustBrightness(currDir, { color: adj, legacy: true });
+                        break;
+                    case 'luminance':
+                        adj_set = this.adjustLuminance(currDir, adj);
+                        break;
+                    default:
+                        adj_set = this.adjustBrightness(currDir, adj);
+                }
+                let lum_pre = this._luminance(adj_set);
+                if (lum_pre === lum || currDir !== dir(lum_pre, main_lum))
+                    break;
+                lum = lum_pre;
+                adj = adj_set;
+            }
+            return this.hex(adj);
+        }
+    }
+
+    /**
+     * Generate analogous color
+     * @param {string} [color_arg=this.color] - Target color
+     * @param {number} [deg=30] - Amount of hue separation
+     * @return {Array} - 2 analogous color is returned. [&lt;hsla color&gt;, ... ]
+     */
+    analogous(color_arg = this.color, deg = 30) {
+        let { color } = this._colorType(color_arg);
+
+        let spin = (h, v) => {
+            let val = h + v;
+            return val < 0 ? 360 + val : val > 360 ? val - 360 : val;
+        };
+
+        let hsl = this.hsla(this.getAlpha(color), color);
+        let plus = 'hsla(' + spin(hsl.h, deg) + ', ' + hsl.s + '%, ' + hsl.l + '%, ' + hsl.a + ')';
+        let minus = 'hsla(' + spin(hsl.h, -deg) + ', ' + hsl.s + '%, ' + hsl.l + '%, ' + hsl.a + ')';
+
+        return [this.matchLuminance(plus, color), this.matchLuminance(minus, color)];
+    }
+
+    /**
+     * Generate complementary color
+     * @param {string} [color_arg=this.color] - Target color
+     * @param {number} [add=0] - Add or subtract hue from complementary color
+     * @return {string} - HEX color string
+     */
+    complementary(color_arg = this.color, add = 0) {
+        let { color } = this._colorType(color_arg);
+
+        let hsl = this.hsla(this.getAlpha(color), color);
+
+        if (hsl.h < 180)
+            hsl.h += 180;
+        else
+            hsl.h -= 180;
+
+        hsl.h += add;
+        hsl.h = hsl.h > 360 ? hsl.h - 360 : hsl.h < 0 ? 360 - hsl.h : hsl.h;
+
+        return this.hex(this._toString(hsl));
+    }
+
+    /**
+     * @param {string} [color_arg=this.color] - Target color
+     * @param {boolean} [fineTuned=false] - Custom Color space is applied when true
+     * @return {boolean} - True if color has high luminance
+     */
+    isHighLuminance(color_arg = this.color, fineTuned = this.fineTuned) {
+        const { r, g, b } = this.rgba(1, this._colorType(color_arg).color);
+
+        let yiq =
+            fineTuned ?
+                ((r * (299 - 64)) + (g * (587 * 1.25)) + (b * 114)) / 1000 : // Fine tuned
+                ((r * 299) + (g * 587) + (b * 114)) / 1000; // Standard color space formula
+
+        // Web standard of color space threshold is 128
+        return (yiq >= (fineTuned ? 188 : 128));
+    }
+
+    _luminance(color_arg = this.color) {
+        let rgb = this.rgba(1, color_arg);
+        let a = [rgb.r, rgb.g, rgb.b].map(function (v) {
+            v /= 255;
+            return v <= 0.03928
+                ? v / 12.92
+                : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+
+        return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    }
+
+    _toString(col) {
+        let numberOrNot = (n, def = 100) => {
+            return typeof n === 'number' ? n : def;
+        };
+        if (typeof col === 'string')
+            return col;
+
+        if (col.hasOwnProperty('h'))
+            return 'hsla(' + (col.h || 0) + ', ' + numberOrNot(col.s) + '%, ' + numberOrNot(col.l) + '%, ' + numberOrNot(col.a, 1) + ')';
+
+        if (col.hasOwnProperty('r'))
+            return 'rgba(' + numberOrNot(col.r) + ', ' + numberOrNot(col.g) + ', ' + numberOrNot(col.b) + ', ' + numberOrNot(col.a, 1) + ')';
+        throw col;
+    }
+
+    /**
+     * Returns contrast ratio between the given color.
+     * Useful to determine if the given color is suitable for text with the constructed color as a background.
+     * @param {string} color_arg1 - Color string you want to compare luminance ratio.
+     * @param {string} [color_arg2=this.color] - Color string you want to compare with color_arg1
+     * @return {number} - Contrast ratio
+     */
+    contrastRatio(color_arg1, color_arg2 = this.color) {
+        let lum1 = this._luminance(color_arg2) + 0.05;
+        let lum2 = this._luminance(color_arg1) + 0.05;
+
+        return lum1 > lum2 ? lum1 / lum2 : lum2 / lum1;
+    }
+
+    /**
+     * Returns suitable text color (Black / White).
+     * @param {(number | Object)} opacity - Can set returning color values opacity.
+     * @param {number} opacity.black - Set returning color values opacity when the result color is black.
+     * @param {number} opacity.white - Set returning color values opacity when the result color is white.
+     * @param {(string|Object)} [option=this.color] - Background color of text
+     * @param {(string|Object)} [option.color=this.color] - Background color of text
+     * @param {(string|Object)} [option.fineTuned=true] - Follows standard color space calculation when false
+     * @return {string | null} - HTML color string
+     */
+    textColor(opacity = 1, option = this.color) {
+
+        if (typeof option === 'string')
+            option = { color: option };
+
+        let { color = this.color, fineTuned = true } = option;
+
+        color = this._colorType(color).color;
+
+        // returns null if color opacity is below 0.5
+        if (this.getAlpha(color) < 0.5)
+            return "";
+
+        let blackOpacity, whiteOpacity;
+
+        if (typeof opacity === 'number' && opacity < 1) {
+            blackOpacity = opacity;
+            whiteOpacity = opacity;
+        } else if (opacity && typeof opacity === 'object') {
+            for (let k of ['black', 'white']) {
+                let opa = opacity[k];
+                if (typeof opa === 'number' && opa < 1) {
+                    if (k === 'black')
+                        blackOpacity = opa;
+                    else if (k === 'white')
+                        whiteOpacity = opa;
+                }
+            }
+        }
+
+        const opa = (v) => {
+            if (typeof v === 'number') {
+                if (v < 1 && v > 0) return v;
+                else if (v > 1) return 1;
+                else return 0;
+            } else return 1;
+        };
+
+        if (this.isHighLuminance(color, fineTuned))
+            return blackOpacity ? `rgba(0, 0, 0, ${opa(blackOpacity)})` : 'black';
+
+        return whiteOpacity ? `rgba(255, 255, 255, ${opa(whiteOpacity)})` : 'white';
+    }
+
+    /**
+     * Returns hsla color
+     * @param {number} [opacity] - Set opacity for returning color value.
+     * @param {string} [color_arg=this.color] - Color to convert to hsla string
+     * @return {Object} - { h: &lt;number&gt;, s: &lt;number&gt;, l: &lt;number&gt;, r: &lt;number&gt;, g: &lt;number&gt;, b: &lt;number&gt;, a: &lt;number&gt;, string: &lt;string | rgba color string&gt; }
+     */
+    hsla(opacity, color_arg = this.color) {
+        const { type = this.type, color = this.color } = this._colorType(color_arg);
+
+        const hsl = (r, g, b) => {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            let c_min = Math.min(r, g, b),
+                c_max = Math.max(r, g, b),
+                delta = c_max - c_min,
+                h = 0,
+                s = 0,
+                l = 0;
+
+            if (delta === 0)
+                h = 0;
+            else if (c_max === r)
+                h = ((g - b) / delta) % 6;
+            else if (c_max === g)
+                h = (b - r) / delta + 2;
+            else
+                h = (r - g) / delta + 4;
+
+            h = Math.round(h * 60);
+
+            if (h < 0) h += 360;
+
+            l = (c_max + c_min) / 2;
+            s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+            s = +(s * 100).toFixed(1);
+            l = +(l * 100).toFixed(1);
+            return { h, s, l };
+        };
+
+        if (type === 'hex') {
+            opacity = typeof opacity === 'number' ? opacity : 1;
+            const rgba = this.rgba(opacity, color);
+            const { r, g, b, a } = rgba;
+            const { h, s, l } = hsl(r, g, b);
+
+            return {
+                r, g, b, a,
+                h: h,
+                s: s,
+                l: l,
+                string: this._toString({ h, s, l, a: opacity })
+            };
+
+        } else {
+
+            const digit = this._extractDigit(color);
+            opacity = typeof opacity === 'number' ? opacity : digit[3] || 1;
+
+            if (type.includes('hsl')) {
+                const { r, g, b, a } = this.rgba(opacity, color);
+
+                return {
+                    r, g, b, a,
+                    h: digit[0],
+                    s: digit[1],
+                    l: digit[2],
+                    string: this._toString({
+                        h: digit[0],
+                        s: digit[1],
+                        l: digit[2],
+                        a
+                    })
+                };
+
+            } else if (type.includes('rgb')) {
+                const value = {
+                    r: digit[0],
+                    g: digit[1],
+                    b: digit[2],
+                    a: opacity
+                };
+                const { h, s, l } = hsl(value.r, value.g, value.b);
+
+                return Object.assign(value, {
+                    r: value.r,
+                    g: value.g,
+                    b: value.b,
+                    h: h,
+                    s: s,
+                    l: l,
+                    a: value.a,
+                    string: this._toString({ h, s, l, a: value.a })
+                });
+
+            }
+        }
+    }
+
+    /**
+     * Returns hex color string
+     * @param {string} [color_arg=this.color] - Color to convert to hex string
+     * @return {string} - HEX color string
+     */
+    hex(color_arg = this.color) {
+        const { type = this.type, color = this.color } = this._colorType(color_arg);
+
+        if (type.includes('rgb') || type.includes('hsl')) {
+            const rgba = this.rgba(1, color);
+            return '#' + ((1 << 24) + (rgba.r << 16) + (rgba.g << 8) + rgba.b).toString(16).slice(1);
+        }
+
+        return color;
+    }
+
+    /**
+     * Returns rgba color
+     * @param {number} [opacity] - Set opacity of returning color
+     * @param {string} [color_arg=this.color] - Color to convert to rgba string
+     * @return {Object} - { r: &lt;number&gt;, g: &lt;number&gt;, b: &lt;number&gt;, a: &lt;number&gt;, string: &lt;string | HTML color string&gt; }
+     */
+    rgba(opacity, color_arg = this.color) {
+        const { type = this.type, color = this.color } = this._colorType(color_arg);
+
+        if (type === 'hex') {
+            const hex = color;
+            let rgbObject = { r: null, g: null, b: null };
+            let hexValues = hex.match(/[a-fA-F0-9]{2}/g);
+
+            if (hex.length === 4) {
+                hexValues = hex.match(/[a-fA-F0-9]{1}/g);
+                hexValues = hexValues.map(hex => "" + hex + hex);
+            }
+            let count = 0;
+            for (const key in rgbObject) {
+                rgbObject[key] = parseInt(hexValues[count], 16);
+                count++;
+            }
+
+            const opacity_value = typeof opacity === 'number' ? opacity : 1;
+            let { r, g, b } = rgbObject;
+
+            return {
+                ...rgbObject,
+                a: opacity_value,
+                string: this._toString({
+                    r: +r, g: +g, b: +b, a: opacity_value
+                })
+            };
+
+        } else {
+            const digit = this._extractDigit(color);
+            const a = typeof opacity === 'number' ? opacity : digit[3] || 1;
+
+            if (type.includes('rgb')) {
+
+                let value = {
+                    r: digit[0],
+                    g: digit[1],
+                    b: digit[2],
+                    a
+                };
+
+                return Object.assign({
+                    string: this._toString(value)
+                }, value);
+
+            } else if (type.includes('hsl')) {
+
+                let h = digit[0];
+                let s = digit[1];
+                let l = digit[2];
+
+                s /= 100;
+                l /= 100;
+
+                let c = (1 - Math.abs(2 * l - 1)) * s,
+                    x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+                    m = l - c / 2,
+                    r = 0,
+                    g = 0,
+                    b = 0;
+                if (0 <= h && h < 60) {
+                    r = c;
+                    g = x;
+                    b = 0;
+                } else if (60 <= h && h < 120) {
+                    r = x;
+                    g = c;
+                    b = 0;
+                } else if (120 <= h && h < 180) {
+                    r = 0;
+                    g = c;
+                    b = x;
+                } else if (180 <= h && h < 240) {
+                    r = 0;
+                    g = x;
+                    b = c;
+                } else if (240 <= h && h < 300) {
+                    r = x;
+                    g = 0;
+                    b = c;
+                } else if (300 <= h && h < 360) {
+                    r = c;
+                    g = 0;
+                    b = x;
+                }
+                r = Math.round((r + m) * 255);
+                g = Math.round((g + m) * 255);
+                b = Math.round((b + m) * 255);
+
+                return {
+                    r, g, b, a,
+                    string: this._toString({ r, g, b, a })
+                };
+
+            }
+        }
+    }
+
+    /**
+     * @param {number} value - Adjust value by percent. range: -100 ~ 100
+     * @param {(string|Object)} [option=this.color] - Color to adjust || additional option.
+     * @param {(string|Object)} [option.color_arg=this.color] - Color to adjust.
+     * @param {(string|Object)} [option.legacy=false] - Legacy adjust mode. Adjust brightness by saturation and luminance.
+     * @return {string} - Brightness adjusted HTML color string
+     */
+    adjustBrightness(value = 0, option = this.color) {
+        let color_arg, legacy = false;
+        if (typeof option === 'string')
+            color_arg = option || this.color;
+        else {
+            color_arg = option.color || this.color;
+            legacy = option.legacy || false;
+        }
+
+        if (legacy) {
+            let { color } = this._colorType(color_arg);
+            let col = this.hsla(this.getAlpha(color), color);
+
+            let limit = (v, limit = 100) => {
+                return v > limit ? limit : v < 0 ? 0 : v;
+            };
+
+            col.s += ((value > 0 ? (100 - col.s) : col.s) / 100) * value;
+            col.s = limit(col.s);
+            col.l += ((value > 0 ? (100 - col.l) : col.l) / 100) * value;
+            col.l = limit(col.l);
+
+            return this._toString(col);
+        }
+
+        let { type = this.type, color = this.color } = this._colorType(color_arg);
+
+        if (value === 0)
+            return color;
+
+        const opacity = type === 'hex' ? 1 : this._extractDigit(color)[3] || 1;
+        const rgb = this.rgba(opacity, color);
+
+        let rgbRange = {
+            r: 0 - rgb['r'],
+            g: 0 - rgb['g'],
+            b: 0 - rgb['b']
+        };
+
+        if (value > 0) {
+            Object.keys(rgbRange).map(function (key) {
+                rgbRange[key] = 255 - rgb[key];
+            });
+        }
+
+        ['r', 'g', 'b'].map(function (key) {
+            rgb[key] += parseInt(rgbRange[key] / 100 * Math.abs(value));
+        });
+
+        const result = 'rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')';
+
+        if (type === 'hex')
+            return this.hex(result);
+
+        else if (type.includes('rgb'))
+            return this.rgba(rgb.a, result).string;
+
+        else if (type.includes('hsl'))
+            return this.hsla(rgb.a, result).string;
+    }
+
+    /**
+     * @param {number} value - Adjust value by percent. range: -100 ~ 100
+     * @param {string} [color_arg=this.color] - Color to adjust.
+     * @return {string} - Luminance adjusted hsla color string
+     */
+    adjustLuminance(value = 0, color_arg = this.color) {
+        let { color } = this._colorType(color_arg);
+        let col = this.hsla(this.getAlpha(color), color);
+
+        let limit = (v, limit = 100) => {
+            return v > limit ? limit : v < 0 ? 0 : v;
+        };
+
+        col.l += ((value > 0 ? (100 - col.l) : col.l) / 100) * value;
+        col.l = limit(col.l);
+
+        return this._toString(col);
+    }
+
+    /**
+     * @param {number} value - Adjust value by percent. range: -100 ~ 100
+     * @param {string} [color_arg=this.color] - Color to adjust.
+     * @return {string} - Saturation adjusted hsla color string
+     */
+    adjustSaturation(value = 0, color_arg = this.color) {
+        let { color } = this._colorType(color_arg);
+        let col = this.hsla(this.getAlpha(color), color);
+
+        let limit = (v, limit = 100) => {
+            return v > limit ? limit : v < 0 ? 0 : v;
+        };
+
+        col.s += ((value > 0 ? (100 - col.s) : col.s) / 100) * value;
+        col.s = limit(col.s);
+
+        return this._toString(col);
+    }
+}
+
+class Wysiwyg4All {
     /**
      * Wysiwyg4All is a simple framework for building a text editor for your website.
      * Focused on expandability and customizations.
@@ -20,9 +1141,6 @@ export class Wysiwyg4All {
      * @param {boolean} [option.logMutation=false] - When set to true, wysiwyg will output dom mutation data via callback function.
      */
     constructor(option) {
-        if (typeof ColorMangle === 'undefined')
-            throw "Can't find colormangle.js library";
-
         this.hashtag_regex = /#[\u0041-\u005A\u0061-\u007A\u00AA\u00B5\u00BA\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0\u08A2-\u08AC\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097F\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C33\u0C35-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191C\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005\u3006\u3031-\u3035\u303B\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA697\uA6A0-\uA6E5\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA793\uA7A0-\uA7AA\uA7F8-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA80-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC\w-]+(?:\+[\w-]+)*/g;
         this.hashtag_stopper_regex = /[^\u0041-\u005A\u0061-\u007A\u00AA\u00B5\u00BA\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0\u08A2-\u08AC\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097F\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C33\u0C35-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191C\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005\u3006\u3031-\u3035\u303B\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA697\uA6A0-\uA6E5\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA793\uA7A0-\uA7AA\uA7F8-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA80-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC\w-]/g;
         this.urllink_regex = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
@@ -3185,3 +4303,21 @@ export class Wysiwyg4All {
         this._observeMutation(bool);
     }
 }
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.jsonCrawler = factory();
+    }
+}(this, function () {
+    // Your function here
+    return Wysiwyg4All;
+}));

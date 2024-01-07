@@ -1,14 +1,13 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <script src="https://broadwayinc.dev/jslib/wysiwyg4all/0.1.0/wysiwyg4all.js"></script>
-    <link rel="stylesheet" type="text/css" href="wysiwyg4all.css" />
-</head>
 
-<body>
+<script src="wysiwyg4all.js"></script>
+<link rel="stylesheet" href="wysiwyg4all.css">
+
+
 <h1>Wysiwyg4All</h1>
 <hr>
-<div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
+<div id="myeditor" style="padding:1rem; border: solid 1px teal"></div>
 <!-- command examples below -->
 <button onclick="wysiwyg.command('bold')">
     Bold
@@ -46,7 +45,7 @@
 
 <!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
 <input id='colorInput' type='color' onchange="(function(event){wysiwyg.command(event.target.value)})(event)"
-       onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
+    onblur="(function(){wysiwyg.restoreLastSelection()})()" />
 <!-- .command('color') changes text to highlight color set on constructor -->
 <button onclick="wysiwyg.command('color')">
     Color
@@ -86,9 +85,7 @@
 </button>
 </div>
 
-</body>
 <script>
-
     let wysiwyg = new Wysiwyg4All({
         elementId: 'myeditor',
         hashtag: true,
@@ -110,12 +107,11 @@
 
             if (c.mutation) {
                 // outputs dom mutation information
-                console.log({mutation: c.mutation});
+                // console.log({mutation: c.mutation});
             }
 
             if (c.commandTracker) {
                 let ct = c.commandTracker;
-                console.log(ct)
                 if (typeof ct.color === 'string')
                     // change the color wheel input value based on the position of the caret
                     document.getElementById('colorInput').value = ct.color;
@@ -126,14 +122,7 @@
 
             if (c.image) {
                 // you can modify image element before it gets loaded
-                console.log({image: c.image});
                 for (let img of c.image) {
-
-                    img.style = {
-                        width: '20rem',
-                        border: 'solid 8px red'
-                    };
-
                     img.onclick = () => {
                         alert(`image clicked!`);
                     };
@@ -141,7 +130,6 @@
             }
 
             if (c.hashtag) {
-                console.log({hashtag: c.hashtag});
                 for (let h of c.hashtag) {
 
                     h.style = {
@@ -155,7 +143,6 @@
             }
 
             if (c.urllink) {
-                console.log({urllink: c.urllink});
                 for (let u of c.urllink) {
 
                     u.style = {
@@ -186,4 +173,3 @@
         });
     };
 </script>
-</html>
