@@ -1,17 +1,37 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Free minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
+  "browser": "dist/wysiwyg4all.js",
+  "exports": {
+    ".": {
+      "require": "./dist/wysiwyg4all.cjs",
+      "import": "./wysiwyg4all.js"
+    },
+    "./css": "./wywiwyg4all.css"
+  },
+  "files": [
+    "dist",
+    "wysiwyg4all.js",
+    "wysiwyg4all.css"
+  ],
   "scripts": {
-    "test": "node node_modules/basic-node-server/index.js 3300"
+    "dev": "npx bns 3333",
+    "build": "npx webpack --config webpack.config.js"
   },
   "keywords": [
     "wysiwyg"
   ],
   "author": "Baksa Gimm",
   "license": "MIT",
+  "devDependencies": {
+    "webpack": "^5.74.0",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^4.10.0"
+  },
   "dependencies": {
-    "basic-node-server": "^1.0.4"
+    "basic-node-server": "^1.0.11",
+    "colormangle": "^0.1.100"
   }
 }
