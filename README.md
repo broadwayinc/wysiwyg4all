@@ -11,7 +11,8 @@
 These following two-steps show basic demonstration of how **Wysiwyg4all** works out.
 
 1. Inside HTML **&lt;head>** add below:
-```
+```html
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" />
 ```
@@ -23,7 +24,7 @@ These following two-steps show basic demonstration of how **Wysiwyg4all** works 
 
 <u>**_Example 1_**</u>
 
-```
+```html
 <div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
     H1
@@ -39,7 +40,7 @@ In **Wysiwyg4all** function, you shuold set default properties for element id, p
 
 <u>**_Example 2_**</u>
 
-```
+```js
 let wysiwyg = new Wysiwyg4all({
     //set ID of target <DIV>.
     elementId : 'myeditor',
@@ -76,22 +77,23 @@ Following code example shows default setting of `.commandTracker`, which shows c
 <br />
 
 <u>**_Example 3_**</u>
-
-    let wysiwyg = new Wysiwyg4all({
-        callback: async c => {
-            if (c.commandTracker) {
-                let ct = c.commandTracker;
-                console.log(ct)
-                if (typeof ct.color === 'string')
-                // change the color wheel input value based on the position of the caret
-                document.getElementById('colorInput').value = ct.color;
-                else
-                // If color output is true(boolean), the current color is the highlight color
-                document.getElementById('colorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
-            }
-            return c;
+```js
+let wysiwyg = new Wysiwyg4all({
+    callback: async c => {
+        if (c.commandTracker) {
+            let ct = c.commandTracker;
+            console.log(ct)
+            if (typeof ct.color === 'string')
+            // change the color wheel input value based on the position of the caret
+            document.getElementById('colorInput').value = ct.color;
+            else
+            // If color output is true(boolean), the current color is the highlight color
+            document.getElementById('colorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
         }
-    })
+        return c;
+    }
+})
+```
 <br />
 
 ### Image style
@@ -101,7 +103,7 @@ Image style can be pre-processed in `.image`. Following code example shows setti
 <br />
 
 <u>**_Example 4_**</u>
-
+```js
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
             if (c.image) {
@@ -121,7 +123,7 @@ Image style can be pre-processed in `.image`. Following code example shows setti
             return c;
         }
     })
-
+```
 <br />
 
 ### Hashtag style
@@ -131,7 +133,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
 <br />
 
 <u>**_Example 5_**</u>
-
+```js
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
             if (c.hashtag) {
@@ -150,6 +152,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
             return c;
         }
     })
+```
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/hashtag.gif" width="500">
 
 <br />
@@ -162,7 +165,7 @@ Default URL link properties can be modified in `.urllink`.  Following code examp
 
 <u>**_Example 6_**</u>
 
-```
+```js
 let wysiwyg = new Wysiwyg4all({
     callback: async c => {
         if (c.urllink) {
@@ -192,7 +195,7 @@ Default caret position properties can be modified in `.caratPosition` . Copy and
 
 <u>**_Example 7_**</u>
 
-```
+```js
 let wysiwyg = new Wysiwyg4all({
     callback: async c => {
         if (c.caratPosition) {
@@ -218,7 +221,7 @@ Default log mutation properties can be modified in `.mutation` . Copy and paste 
 
 <u>**_Example 8_**</u>
 
-```
+```js
     let wysiwyg = new Wysiwyg4all({
         callback: async c => {
             if (c.mutation) {
@@ -242,7 +245,7 @@ HTML string or node element can be assigned in `wysiwyg.command()` element value
 
 <u>**_Example 9_**</u>
 
-```
+```js
 let customElement = () => {
     // add smile emoji. This can be html string (ex - <div>Hello</div>) or node element (ex - document.createElement('div'))
     wysiwyg.command({
@@ -261,7 +264,7 @@ let customElement = () => {
 
 <u>**_Example 10_**</u>
 
-```
+```js
 let export_data = () => {
     wysiwyg.export(pre => {
         console.log(pre);
@@ -285,7 +288,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 
 <u>**_Example 11_**</u>
 
-```
+```html
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
     H1
 </button>
@@ -302,7 +305,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 
 <u>**_Example 12_**</u>
 
-```
+```html
 <button onclick="wysiwyg.command('color')">
     Color
 </button>
@@ -316,7 +319,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <u>**_Example 13_**</u>
 
-```
+```html
 <input id='colorInput' type='color' onchange="(function(event){wysiwyg.command(event.target.value)})(event)"
        onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
 ```
@@ -332,7 +335,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <u>**_Example 14_**</u>
 
-```
+```html
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('divider')">
     Divider
 </button>
@@ -350,7 +353,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <u>**_Example 15_**</u>
 
-```
+```html
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('Quote')">
     Quote
 </button>
@@ -368,7 +371,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <u>**_Example 16_**</u>
 
-```
+```html
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('unorderedList')">
     Unordered list
 </button>
@@ -386,7 +389,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <u>**_Example 17_**</u>
 
-```
+```html
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('alignCenter')">
     Align center
 </button>
@@ -404,7 +407,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <u>**_Example 18_**</u>
 
-```
+```html
 <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('image')">
     Image
 </button>
@@ -422,7 +425,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 
 <u>**_Example 19_**</u>
 
-```
+```html
 <button onclick="customElement()">
   Smile
 </button>
