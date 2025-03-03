@@ -17,7 +17,7 @@
     "wysiwyg4all.css"
   ],
   "scripts": {
-    "dev": "npx bns 3333",
+    "dev": "npx bns 3300",
     "build": "npx webpack --config webpack.config.js"
   },
   "keywords": [
