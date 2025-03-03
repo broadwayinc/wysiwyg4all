@@ -8,7 +8,7 @@
 
 ## Getting started
 
-These following steps show basic demonstration of how **Wysiwyg4all** works out.
+These following steps show basic demonstration of how to install **Wysiwyg4all**.
 
 1. Inside HTML **&lt;head>** add below:
     ```html
@@ -33,17 +33,17 @@ These following steps show basic demonstration of how **Wysiwyg4all** works out.
 
 2. Inside  **&lt;body>**, create **&lt;div>** with an id ('myeditor' ,for example) and give custom css style. Buttons can be created to actuate wysiwyg functionality. We added a button which will change text size to **'h1'** at the **'onclick'** event using `wysiwyg.command('h1')` function. Diverse command options can be selected, which are listed in below [List of Wysiwyg4all commands](#List-of-Wysiwyg4all-commands). Of course, the button design can be customized by your own taste. 
 
-<br />
+    <br />
 
-<u>**_Example 1_**</u>
+    <u>**_Example 1_**</u>
 
-```html
-<div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
-    H1
-</button>
-```
-<br />
+    ```html
+    <div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
+    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
+        H1
+    </button>
+    ```
+    <br />
 
 ## Default settings
 
