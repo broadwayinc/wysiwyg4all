@@ -1,6 +1,6 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Free minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
   "browser": "dist/wysiwyg4all.js",
@@ -9,7 +9,7 @@
       "require": "./dist/wysiwyg4all.cjs",
       "import": "./wysiwyg4all.js"
     },
-    "./css": "./wywiwyg4all.css"
+    "./css": "./wysiwyg4all.css"
   },
   "files": [
     "dist",
