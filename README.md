@@ -8,15 +8,28 @@
 
 ## Getting started
 
-These following two-steps show basic demonstration of how **Wysiwyg4all** works out.
+These following steps show basic demonstration of how **Wysiwyg4all** works out.
 
 1. Inside HTML **&lt;head>** add below:
-```html
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" />
-```
-<br />
+    ```html
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" />
+    ```
+
+    If you are working on webpack based projects:
+
+    ```bash
+    npm i wysiwyg4all
+    ```
+
+    Then, import the library from your project main file:
+
+    ```js
+    import { Wysiwyg4All } from 'wysiwyg4all';
+    import 'wysiwyg4all/css';
+    ```
+
 
 2. Inside  **&lt;body>**, create **&lt;div>** with an id ('myeditor' ,for example) and give custom css style. Buttons can be created to actuate wysiwyg functionality. We added a button which will change text size to **'h1'** at the **'onclick'** event using `wysiwyg.command('h1')` function. Diverse command options can be selected, which are listed in below [List of Wysiwyg4all commands](#List-of-Wysiwyg4all-commands). Of course, the button design can be customized by your own taste. 
 
