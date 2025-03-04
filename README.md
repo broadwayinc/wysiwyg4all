@@ -4,6 +4,8 @@
 
 **Wysiwyg4all** is a free minimal WYSIWYG editor for your website. It is highly expandable and customizable.
 
+You can easily build your own full fledged WYSIWYG application with this library.
+
 <br />
 
 ## Getting started
@@ -56,28 +58,28 @@ In **Wysiwyg4all** function, you shuold set default properties for element id, p
 ```js
 let wysiwyg = new Wysiwyg4all({
     //set ID of target <DIV>.
-    elementId : 'myeditor',
+    elementId: 'myeditor',
 
     // Add placeholder string.
-    placeholder : 'Build your custom wysiwyg',
+    placeholder: 'Build your custom wysiwyg',
 
     // Set spellcheck to true/false.
-    spellcheck : false, 
+    spellcheck: false, 
 
     // Set color scheme of wysiwyg (HTML color name | hex | rgb | hsl).
-    highlightColor : 'teal',
+    highlightColor: 'teal',
 
     // When set to true, blank line will always be added on the last line of text area.
-    lastLineBlank = false,
+    lastLineBlank: false,
 
     // When set to true, wysiwyg will auto detect hashtag strings.
-    hashtag = true,
+    hashtag: true,
 
     // When set to true, wysiwyg will auto detect url strings
-    urllink = true,
+    urllink: true,
 
     // When set to true, wysiwyg will output DOM mutation data via callback function.
-    logMutation = false
+    logMutation: false
 })
 ```
 <br />
