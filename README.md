@@ -92,9 +92,10 @@ Following code example shows default setting of `.commandTracker`, which shows c
 <br />
 
 <u>**_Example 3_**</u>
+
 ```js
 let wysiwyg = new Wysiwyg4all({
-    callback: async c => {
+    callback: c => {
         if (c.commandTracker) {
             let ct = c.commandTracker;
             console.log(ct)
@@ -118,9 +119,10 @@ Image style can be pre-processed in `.image`. Following code example shows setti
 <br />
 
 <u>**_Example 4_**</u>
+
 ```js
     let wysiwyg = new Wysiwyg4all({
-        callback: async c => {
+        callback: c => {
             if (c.image) {
                 // you can modify image element before it gets loaded
                 console.log({image: c.image});
@@ -148,9 +150,10 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
 <br />
 
 <u>**_Example 5_**</u>
+
 ```js
     let wysiwyg = new Wysiwyg4all({
-        callback: async c => {
+        callback: c => {
             if (c.hashtag) {
                 console.log({hashtag: c.hashtag});
                 for (let h of c.hashtag) {
@@ -182,7 +185,7 @@ Default URL link properties can be modified in `.urllink`.  Following code examp
 
 ```js
 let wysiwyg = new Wysiwyg4all({
-    callback: async c => {
+    callback: c => {
         if (c.urllink) {
             console.log({urllink: c.urllink});
             for (let u of c.urllink) {
@@ -212,7 +215,7 @@ Default caret position properties can be modified in `.caratPosition` . Copy and
 
 ```js
 let wysiwyg = new Wysiwyg4all({
-    callback: async c => {
+    callback: c => {
         if (c.caratPosition) {
             // Tracks carat position
             // Make carat to be always within the viewport
@@ -238,7 +241,7 @@ Default log mutation properties can be modified in `.mutation` . Copy and paste 
 
 ```js
     let wysiwyg = new Wysiwyg4all({
-        callback: async c => {
+        callback: c => {
             if (c.mutation) {
                 // outputs dom mutation information
                 console.log({mutation: c.mutation});
