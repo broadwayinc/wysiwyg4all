@@ -98,11 +98,14 @@ class Wysiwyg4All {
         this.blockElement_queryArray = ['HR', 'BLOCKQUOTE', 'UL', 'OL', '._media_', '._custom_'];
         this.specialTextElement_queryArray = ['._hashtag_', '._urllink_'];
         this.restrictedElement_queryArray = ['._media_', '._custom_'];
-        this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI'];
-        this.textBlockElement_queryArray = ['P', 'LI'];
-        this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`];
+        // this.restrictedElement_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
+        // this.restrictedElement_queryArray = ['._media_'];
+        this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI', 'TD'];
+        this.textBlockElement_queryArray = ['P', 'LI', "TD"];
+        this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`, 'TD'];
         this.unSelectable_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
-        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_'];
+        // this.unSelectable_queryArray = ['._media_', '._hashtag_', '._urllink_', 'HR'];
+        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_', 'TD'];
         this.alignClass = ['_alignCenter_', '_alignRight_'];
 
         this.hashtag_flag = false;
@@ -711,8 +714,14 @@ class Wysiwyg4All {
             commonAncestorContainer = commonAncestorContainer.nodeType === 3 ? commonAncestorContainer.parentNode : commonAncestorContainer;
             for (let r of restrict) {
                 let cl = commonAncestorContainer.closest(this._classNameToQuery(r));
-                if (cl)
-                    return r;
+                if (cl) {
+                    if(cl.getAttribute('contenteditable') !== 'true') {
+                        return r;
+                    }
+                }
+                // let cl = commonAncestorContainer.closest(this._classNameToQuery(r));
+                // if (cl)
+                //     return r;
             }
         } else {
             while (startLine && startLine !== endLine) {
@@ -720,8 +729,13 @@ class Wysiwyg4All {
                 if (startLine) {
                     if (startLine.nodeType === 1)
                         for (let r of restrict) {
-                            if (startLine.classList.contains(r))
-                                return r;
+                            if (startLine.classList.contains(r)) {
+                                if(startLine.getAttribute('contenteditable') !== 'true') {
+                                    return r;
+                                }
+                            }
+                            // if (startLine.classList.contains(r))
+                            //     return r;
                         }
                 } else
                     break;
@@ -1455,10 +1469,16 @@ class Wysiwyg4All {
                                     node.isUrlLinkElement
                                 ) {
                                     // make sure un-editable element is secure
-                                    (node.isCustomElement ||
+                                    let el = (
+                                        node.isCustomElement ||
                                         node.isMediaElement ||
                                         node.isHashtagElement ||
-                                        node.isUrlLinkElement).setAttribute('contenteditable', 'false');
+                                        node.isUrlLinkElement);
+
+                                    // check if el has a value of contenteditable
+                                    if (el.getAttribute('contenteditable') !== 'true')
+                                        el.setAttribute('contenteditable', 'false');
+
                                     continue;
                                 }
 
@@ -2434,13 +2454,18 @@ class Wysiwyg4All {
         this.urllink_flag = false;
     }
 
-    _checkElement(node, chkArr, closest) {
+    _checkElement(node, chkArr, closest, exp) {
         if (node && node.nodeType === 1)
             for (let c of chkArr) {
                 if (closest) {
                     let clo = node.closest(c);
-                    if (node.closest(c))
+                    if (clo) {
+                        if (exp && exp[c]) {
+                            return clo.getAttribute(exp[c].attr) !== exp[c].value ? clo : false;
+                        }
+
                         return clo;
+                    }
                 } else if (
                     c[0] === '#' ? node.id === c.substring(1) :
                         c[0] === '.' ? node.classList.contains(c.substring(1)) :
@@ -2453,7 +2478,10 @@ class Wysiwyg4All {
 
     _isUnSelectableElement(node) {
         node = node?.nodeType === 3 ? node.parentNode : node;
-        return this._checkElement(node, this.unSelectable_queryArray, true);
+        let exceptions = {
+            '._custom_': {attr: 'contenteditable', value: 'true'},
+        }
+        return this._checkElement(node, this.unSelectable_queryArray, true, exceptions);
     }
 
     _isStyleAllowedElement(node) {
@@ -2875,7 +2903,8 @@ class Wysiwyg4All {
                    elementId: <string: generated parent element id>,
                    element: <HTMLElement>,
                    style: {<css style object for parent element>},
-                   insert: true | false
+                   insert: true | false,
+                   contenteditable: false,
                 }
              */
 
@@ -2883,7 +2912,7 @@ class Wysiwyg4All {
                 //  setup wrapper
                 let custom = document.createElement('div');
                 custom.classList.add('_custom_');
-                custom.setAttribute('contenteditable', false);
+                custom.setAttribute('contenteditable', (!!action?.contenteditable).toString());
 
                 if (action.style)
                     for (let s in action.style)

@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="en">
-<script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" />
-<!-- <script src="dist/wysiwyg4all.js"></script>
-<link rel="stylesheet" href="wysiwyg4all.css"> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" /> -->
+<script src="dist/wysiwyg4all.js"></script>
+<script src="plugins.js"></script>
+
+<link rel="stylesheet" href="wysiwyg4all.css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <h1>Wysiwyg4All</h1>
 <hr>
@@ -80,6 +82,10 @@
 <button onclick="customElement()">
     Smile
 </button>
+<!-- You can add custom element -->
+<button onclick="tablePlugin(4,4)">
+    Table
+</button>
 <button onclick="exportData()">
     Export
 </button>
@@ -96,8 +102,6 @@
         // lastLineBlank: true,
         logMutation: true,
         callback: c => {
-            console.log(c);
-            
             if (c.caratPosition) {
                 // Tracks carat position
                 // Make carat to be always within the viewport
@@ -105,11 +109,17 @@
                 let minusWhenOutOfView = viewPortHeight - c.caratPosition.top;
                 if (minusWhenOutOfView < 0)
                     window.scrollBy(0, -minusWhenOutOfView);
+
+                console.log({ caratPosition: c.caratPosition });
             }
 
             if (c.mutation) {
                 // outputs dom mutation information
-                console.log({mutation: c.mutation});
+                console.log({ mutation: c.mutation });
+            }
+
+            if (c.range) {
+                console.log({ range: c.range });
             }
 
             if (c.commandTracker) {
@@ -166,6 +176,13 @@
             element: '&#128512;' // can be html string (ex - <div>Hello</div>) or Node elements (ex - document.createElement('div'))
         });
     };
+
+    let tablePlugin = (col, row) => {
+        wysiwyg.command({
+            element: createTable(col, row),
+            contenteditable: true
+        });
+    }
 
     let exportData = () => {
         wysiwyg.export(pre => {

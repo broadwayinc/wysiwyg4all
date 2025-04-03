@@ -1,6 +1,6 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Free minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
   "browser": "dist/wysiwyg4all.js",
@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "dev": "npx bns 3300",
-    "build": "npx webpack --config webpack.config.js"
+    "build": "lessc wysiwyg4all.less wysiwyg4all.css; npx webpack --config webpack.config.js"
   },
   "keywords": [
     "wysiwyg"
@@ -31,7 +31,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "basic-node-server": "^1.0.11",
+    "basic-node-server": "^1.0.13",
     "colormangle": "^0.1.100"
   }
 }
