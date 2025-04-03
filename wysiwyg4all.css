@@ -94,7 +94,8 @@
 ._wysiwyg4all small,
 ._wysiwyg4all i,
 ._wysiwyg4all li,
-._wysiwyg4all td {
+._wysiwyg4all td,
+._wysiwyg4all th {
   line-height: 1.6;
   font-weight: normal;
   white-space: pre-wrap;
@@ -109,7 +110,8 @@
 ._wysiwyg4all small *,
 ._wysiwyg4all i *,
 ._wysiwyg4all li *,
-._wysiwyg4all td * {
+._wysiwyg4all td *,
+._wysiwyg4all th * {
   display: inline;
 }
 ._wysiwyg4all p span,
@@ -122,7 +124,8 @@
 ._wysiwyg4all small span,
 ._wysiwyg4all i span,
 ._wysiwyg4all li span,
-._wysiwyg4all td span {
+._wysiwyg4all td span,
+._wysiwyg4all th span {
   text-decoration: inherit;
   vertical-align: baseline;
 }
@@ -136,7 +139,8 @@
 ._wysiwyg4all small span:empty,
 ._wysiwyg4all i span:empty,
 ._wysiwyg4all li span:empty,
-._wysiwyg4all td span:empty {
+._wysiwyg4all td span:empty,
+._wysiwyg4all th span:empty {
   display: inline-block;
 }
 ._wysiwyg4all p span:empty::after,
@@ -149,7 +153,8 @@
 ._wysiwyg4all small span:empty::after,
 ._wysiwyg4all i span:empty::after,
 ._wysiwyg4all li span:empty::after,
-._wysiwyg4all td span:empty::after {
+._wysiwyg4all td span:empty::after,
+._wysiwyg4all th span:empty::after {
   content: '\200B';
 }
 ._wysiwyg4all p ._hashtag_,
@@ -162,7 +167,8 @@
 ._wysiwyg4all small ._hashtag_,
 ._wysiwyg4all i ._hashtag_,
 ._wysiwyg4all li ._hashtag_,
-._wysiwyg4all td ._hashtag_ {
+._wysiwyg4all td ._hashtag_,
+._wysiwyg4all th ._hashtag_ {
   color: var(--content-text);
   font-weight: bold;
 }
@@ -176,7 +182,8 @@
 ._wysiwyg4all small ._urllink_,
 ._wysiwyg4all i ._urllink_,
 ._wysiwyg4all li ._urllink_,
-._wysiwyg4all td ._urllink_ {
+._wysiwyg4all td ._urllink_,
+._wysiwyg4all th ._urllink_ {
   color: var(--content-text);
   text-decoration: underline;
   cursor: pointer;
@@ -192,7 +199,8 @@
 ._wysiwyg4all small ._urllink_:hover,
 ._wysiwyg4all i ._urllink_:hover,
 ._wysiwyg4all li ._urllink_:hover,
-._wysiwyg4all td ._urllink_:hover {
+._wysiwyg4all td ._urllink_:hover,
+._wysiwyg4all th ._urllink_:hover {
   color: var(--content-focus);
 }
 ._wysiwyg4all p ._color,
@@ -205,7 +213,8 @@
 ._wysiwyg4all small ._color,
 ._wysiwyg4all i ._color,
 ._wysiwyg4all li ._color,
-._wysiwyg4all td ._color {
+._wysiwyg4all td ._color,
+._wysiwyg4all th ._color {
   min-width: 1px;
   text-decoration: inherit;
   color: var(--content-focus);
@@ -220,7 +229,8 @@
 ._wysiwyg4all small ._color_stop,
 ._wysiwyg4all i ._color_stop,
 ._wysiwyg4all li ._color_stop,
-._wysiwyg4all td ._color_stop {
+._wysiwyg4all td ._color_stop,
+._wysiwyg4all th ._color_stop {
   min-width: 1px;
   color: var(--content-text);
 }
@@ -234,7 +244,8 @@
 ._wysiwyg4all small ._b,
 ._wysiwyg4all i ._b,
 ._wysiwyg4all li ._b,
-._wysiwyg4all td ._b {
+._wysiwyg4all td ._b,
+._wysiwyg4all th ._b {
   min-width: 1px;
   font-weight: bold;
 }
@@ -248,7 +259,8 @@
 ._wysiwyg4all small ._b_stop,
 ._wysiwyg4all i ._b_stop,
 ._wysiwyg4all li ._b_stop,
-._wysiwyg4all td ._b_stop {
+._wysiwyg4all td ._b_stop,
+._wysiwyg4all th ._b_stop {
   min-width: 1px;
   font-weight: normal;
 }
@@ -262,7 +274,8 @@
 ._wysiwyg4all small ._u,
 ._wysiwyg4all i ._u,
 ._wysiwyg4all li ._u,
-._wysiwyg4all td ._u {
+._wysiwyg4all td ._u,
+._wysiwyg4all th ._u {
   min-width: 1px;
   text-decoration: underline;
 }
@@ -277,6 +290,7 @@
 ._wysiwyg4all i ._u ._del,
 ._wysiwyg4all li ._u ._del,
 ._wysiwyg4all td ._u ._del,
+._wysiwyg4all th ._u ._del,
 ._wysiwyg4all p ._u ._del_stop,
 ._wysiwyg4all h1 ._u ._del_stop,
 ._wysiwyg4all h2 ._u ._del_stop,
@@ -288,6 +302,7 @@
 ._wysiwyg4all i ._u ._del_stop,
 ._wysiwyg4all li ._u ._del_stop,
 ._wysiwyg4all td ._u ._del_stop,
+._wysiwyg4all th ._u ._del_stop,
 ._wysiwyg4all p ._u ._u_stop,
 ._wysiwyg4all h1 ._u ._u_stop,
 ._wysiwyg4all h2 ._u ._u_stop,
@@ -298,7 +313,8 @@
 ._wysiwyg4all small ._u ._u_stop,
 ._wysiwyg4all i ._u ._u_stop,
 ._wysiwyg4all li ._u ._u_stop,
-._wysiwyg4all td ._u ._u_stop {
+._wysiwyg4all td ._u ._u_stop,
+._wysiwyg4all th ._u ._u_stop {
   display: inline-block;
 }
 ._wysiwyg4all p ._u ._del *,
@@ -312,6 +328,7 @@
 ._wysiwyg4all i ._u ._del *,
 ._wysiwyg4all li ._u ._del *,
 ._wysiwyg4all td ._u ._del *,
+._wysiwyg4all th ._u ._del *,
 ._wysiwyg4all p ._u ._del_stop *,
 ._wysiwyg4all h1 ._u ._del_stop *,
 ._wysiwyg4all h2 ._u ._del_stop *,
@@ -323,6 +340,7 @@
 ._wysiwyg4all i ._u ._del_stop *,
 ._wysiwyg4all li ._u ._del_stop *,
 ._wysiwyg4all td ._u ._del_stop *,
+._wysiwyg4all th ._u ._del_stop *,
 ._wysiwyg4all p ._u ._u_stop *,
 ._wysiwyg4all h1 ._u ._u_stop *,
 ._wysiwyg4all h2 ._u ._u_stop *,
@@ -333,7 +351,8 @@
 ._wysiwyg4all small ._u ._u_stop *,
 ._wysiwyg4all i ._u ._u_stop *,
 ._wysiwyg4all li ._u ._u_stop *,
-._wysiwyg4all td ._u ._u_stop * {
+._wysiwyg4all td ._u ._u_stop *,
+._wysiwyg4all th ._u ._u_stop * {
   display: inline-block;
 }
 ._wysiwyg4all p ._u_stop,
@@ -346,7 +365,8 @@
 ._wysiwyg4all small ._u_stop,
 ._wysiwyg4all i ._u_stop,
 ._wysiwyg4all li ._u_stop,
-._wysiwyg4all td ._u_stop {
+._wysiwyg4all td ._u_stop,
+._wysiwyg4all th ._u_stop {
   min-width: 1px;
   text-decoration: none;
 }
@@ -360,7 +380,8 @@
 ._wysiwyg4all small ._del,
 ._wysiwyg4all i ._del,
 ._wysiwyg4all li ._del,
-._wysiwyg4all td ._del {
+._wysiwyg4all td ._del,
+._wysiwyg4all th ._del {
   min-width: 1px;
   text-decoration: line-through;
 }
@@ -375,6 +396,7 @@
 ._wysiwyg4all i ._del ._u,
 ._wysiwyg4all li ._del ._u,
 ._wysiwyg4all td ._del ._u,
+._wysiwyg4all th ._del ._u,
 ._wysiwyg4all p ._del ._u_stop,
 ._wysiwyg4all h1 ._del ._u_stop,
 ._wysiwyg4all h2 ._del ._u_stop,
@@ -386,6 +408,7 @@
 ._wysiwyg4all i ._del ._u_stop,
 ._wysiwyg4all li ._del ._u_stop,
 ._wysiwyg4all td ._del ._u_stop,
+._wysiwyg4all th ._del ._u_stop,
 ._wysiwyg4all p ._del ._del_stop,
 ._wysiwyg4all h1 ._del ._del_stop,
 ._wysiwyg4all h2 ._del ._del_stop,
@@ -396,7 +419,8 @@
 ._wysiwyg4all small ._del ._del_stop,
 ._wysiwyg4all i ._del ._del_stop,
 ._wysiwyg4all li ._del ._del_stop,
-._wysiwyg4all td ._del ._del_stop {
+._wysiwyg4all td ._del ._del_stop,
+._wysiwyg4all th ._del ._del_stop {
   display: inline-block;
 }
 ._wysiwyg4all p ._del ._u *,
@@ -410,6 +434,7 @@
 ._wysiwyg4all i ._del ._u *,
 ._wysiwyg4all li ._del ._u *,
 ._wysiwyg4all td ._del ._u *,
+._wysiwyg4all th ._del ._u *,
 ._wysiwyg4all p ._del ._u_stop *,
 ._wysiwyg4all h1 ._del ._u_stop *,
 ._wysiwyg4all h2 ._del ._u_stop *,
@@ -421,6 +446,7 @@
 ._wysiwyg4all i ._del ._u_stop *,
 ._wysiwyg4all li ._del ._u_stop *,
 ._wysiwyg4all td ._del ._u_stop *,
+._wysiwyg4all th ._del ._u_stop *,
 ._wysiwyg4all p ._del ._del_stop *,
 ._wysiwyg4all h1 ._del ._del_stop *,
 ._wysiwyg4all h2 ._del ._del_stop *,
@@ -431,7 +457,8 @@
 ._wysiwyg4all small ._del ._del_stop *,
 ._wysiwyg4all i ._del ._del_stop *,
 ._wysiwyg4all li ._del ._del_stop *,
-._wysiwyg4all td ._del ._del_stop * {
+._wysiwyg4all td ._del ._del_stop *,
+._wysiwyg4all th ._del ._del_stop * {
   display: inline-block;
 }
 ._wysiwyg4all p ._del_stop,
@@ -444,7 +471,8 @@
 ._wysiwyg4all small ._del_stop,
 ._wysiwyg4all i ._del_stop,
 ._wysiwyg4all li ._del_stop,
-._wysiwyg4all td ._del_stop {
+._wysiwyg4all td ._del_stop,
+._wysiwyg4all th ._del_stop {
   min-width: 1px;
   text-decoration: none;
 }
@@ -458,7 +486,8 @@
 ._wysiwyg4all small ._i,
 ._wysiwyg4all i ._i,
 ._wysiwyg4all li ._i,
-._wysiwyg4all td ._i {
+._wysiwyg4all td ._i,
+._wysiwyg4all th ._i {
   min-width: 1px;
   font-style: italic;
 }
@@ -472,7 +501,8 @@
 ._wysiwyg4all small ._i *,
 ._wysiwyg4all i ._i *,
 ._wysiwyg4all li ._i *,
-._wysiwyg4all td ._i * {
+._wysiwyg4all td ._i *,
+._wysiwyg4all th ._i * {
   font-style: inherit;
 }
 ._wysiwyg4all p ._i_stop,
@@ -485,7 +515,8 @@
 ._wysiwyg4all small ._i_stop,
 ._wysiwyg4all i ._i_stop,
 ._wysiwyg4all li ._i_stop,
-._wysiwyg4all td ._i_stop {
+._wysiwyg4all td ._i_stop,
+._wysiwyg4all th ._i_stop {
   min-width: 1px;
   font-style: normal;
 }
@@ -499,7 +530,8 @@
 ._wysiwyg4all small ._small,
 ._wysiwyg4all i ._small,
 ._wysiwyg4all li ._small,
-._wysiwyg4all td ._small {
+._wysiwyg4all td ._small,
+._wysiwyg4all th ._small {
   min-width: 1px;
   font-weight: normal;
   text-decoration: none;
@@ -515,7 +547,8 @@
 ._wysiwyg4all small ._small_stop,
 ._wysiwyg4all i ._small_stop,
 ._wysiwyg4all li ._small_stop,
-._wysiwyg4all td ._small_stop {
+._wysiwyg4all td ._small_stop,
+._wysiwyg4all th ._small_stop {
   min-width: 1px;
   font-weight: inherit;
   text-decoration: none;
@@ -533,7 +566,8 @@
   ._wysiwyg4all small ._small_stop,
   ._wysiwyg4all i ._small_stop,
   ._wysiwyg4all li ._small_stop,
-  ._wysiwyg4all td ._small_stop {
+  ._wysiwyg4all td ._small_stop,
+  ._wysiwyg4all th ._small_stop {
     font-size: var(--wysiwyg-font-tablet);
     --wysiwyg-font: var(--wysiwyg-font-tablet);
   }
@@ -549,7 +583,8 @@
   ._wysiwyg4all small ._small_stop,
   ._wysiwyg4all i ._small_stop,
   ._wysiwyg4all li ._small_stop,
-  ._wysiwyg4all td ._small_stop {
+  ._wysiwyg4all td ._small_stop,
+  ._wysiwyg4all th ._small_stop {
     font-size: var(--wysiwyg-font-phone);
     --wysiwyg-font: var(--wysiwyg-font-phone);
   }
@@ -564,7 +599,8 @@
 ._wysiwyg4all small ._h1,
 ._wysiwyg4all i ._h1,
 ._wysiwyg4all li ._h1,
-._wysiwyg4all td ._h1 {
+._wysiwyg4all td ._h1,
+._wysiwyg4all th ._h1 {
   font-weight: inherit;
   min-width: 1px;
   text-decoration: inherit;
@@ -580,7 +616,8 @@
 ._wysiwyg4all small ._h1_stop,
 ._wysiwyg4all i ._h1_stop,
 ._wysiwyg4all li ._h1_stop,
-._wysiwyg4all td ._h1_stop {
+._wysiwyg4all td ._h1_stop,
+._wysiwyg4all th ._h1_stop {
   min-width: 1px;
   text-decoration: inherit;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
@@ -597,7 +634,8 @@
   ._wysiwyg4all small ._h1_stop,
   ._wysiwyg4all i ._h1_stop,
   ._wysiwyg4all li ._h1_stop,
-  ._wysiwyg4all td ._h1_stop {
+  ._wysiwyg4all td ._h1_stop,
+  ._wysiwyg4all th ._h1_stop {
     font-size: var(--wysiwyg-font-tablet);
     --wysiwyg-font: var(--wysiwyg-font-tablet);
   }
@@ -613,7 +651,8 @@
   ._wysiwyg4all small ._h1_stop,
   ._wysiwyg4all i ._h1_stop,
   ._wysiwyg4all li ._h1_stop,
-  ._wysiwyg4all td ._h1_stop {
+  ._wysiwyg4all td ._h1_stop,
+  ._wysiwyg4all th ._h1_stop {
     font-size: var(--wysiwyg-font-phone);
     --wysiwyg-font: var(--wysiwyg-font-phone);
   }
@@ -628,7 +667,8 @@
 ._wysiwyg4all small ._h2,
 ._wysiwyg4all i ._h2,
 ._wysiwyg4all li ._h2,
-._wysiwyg4all td ._h2 {
+._wysiwyg4all td ._h2,
+._wysiwyg4all th ._h2 {
   font-weight: inherit;
   min-width: 1px;
   text-decoration: inherit;
@@ -644,7 +684,8 @@
 ._wysiwyg4all small ._h2_stop,
 ._wysiwyg4all i ._h2_stop,
 ._wysiwyg4all li ._h2_stop,
-._wysiwyg4all td ._h2_stop {
+._wysiwyg4all td ._h2_stop,
+._wysiwyg4all th ._h2_stop {
   min-width: 1px;
   text-decoration: inherit;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
@@ -661,7 +702,8 @@
   ._wysiwyg4all small ._h2_stop,
   ._wysiwyg4all i ._h2_stop,
   ._wysiwyg4all li ._h2_stop,
-  ._wysiwyg4all td ._h2_stop {
+  ._wysiwyg4all td ._h2_stop,
+  ._wysiwyg4all th ._h2_stop {
     font-size: var(--wysiwyg-font-tablet);
     --wysiwyg-font: var(--wysiwyg-font-tablet);
   }
@@ -677,7 +719,8 @@
   ._wysiwyg4all small ._h2_stop,
   ._wysiwyg4all i ._h2_stop,
   ._wysiwyg4all li ._h2_stop,
-  ._wysiwyg4all td ._h2_stop {
+  ._wysiwyg4all td ._h2_stop,
+  ._wysiwyg4all th ._h2_stop {
     font-size: var(--wysiwyg-font-phone);
     --wysiwyg-font: var(--wysiwyg-font-phone);
   }
@@ -692,7 +735,8 @@
 ._wysiwyg4all small ._h3,
 ._wysiwyg4all i ._h3,
 ._wysiwyg4all li ._h3,
-._wysiwyg4all td ._h3 {
+._wysiwyg4all td ._h3,
+._wysiwyg4all th ._h3 {
   font-weight: inherit;
   min-width: 1px;
   text-decoration: inherit;
@@ -708,7 +752,8 @@
 ._wysiwyg4all small ._h3_stop,
 ._wysiwyg4all i ._h3_stop,
 ._wysiwyg4all li ._h3_stop,
-._wysiwyg4all td ._h3_stop {
+._wysiwyg4all td ._h3_stop,
+._wysiwyg4all th ._h3_stop {
   min-width: 1px;
   text-decoration: inherit;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
@@ -725,7 +770,8 @@
   ._wysiwyg4all small ._h3_stop,
   ._wysiwyg4all i ._h3_stop,
   ._wysiwyg4all li ._h3_stop,
-  ._wysiwyg4all td ._h3_stop {
+  ._wysiwyg4all td ._h3_stop,
+  ._wysiwyg4all th ._h3_stop {
     font-size: var(--wysiwyg-font-tablet);
     --wysiwyg-font: var(--wysiwyg-font-tablet);
   }
@@ -741,7 +787,8 @@
   ._wysiwyg4all small ._h3_stop,
   ._wysiwyg4all i ._h3_stop,
   ._wysiwyg4all li ._h3_stop,
-  ._wysiwyg4all td ._h3_stop {
+  ._wysiwyg4all td ._h3_stop,
+  ._wysiwyg4all th ._h3_stop {
     font-size: var(--wysiwyg-font-phone);
     --wysiwyg-font: var(--wysiwyg-font-phone);
   }
@@ -756,7 +803,8 @@
 ._wysiwyg4all small ._h4,
 ._wysiwyg4all i ._h4,
 ._wysiwyg4all li ._h4,
-._wysiwyg4all td ._h4 {
+._wysiwyg4all td ._h4,
+._wysiwyg4all th ._h4 {
   font-weight: inherit;
   min-width: 1px;
   text-decoration: inherit;
@@ -772,7 +820,8 @@
 ._wysiwyg4all small ._h4_stop,
 ._wysiwyg4all i ._h4_stop,
 ._wysiwyg4all li ._h4_stop,
-._wysiwyg4all td ._h4_stop {
+._wysiwyg4all td ._h4_stop,
+._wysiwyg4all th ._h4_stop {
   min-width: 1px;
   text-decoration: inherit;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
@@ -789,7 +838,8 @@
   ._wysiwyg4all small ._h4_stop,
   ._wysiwyg4all i ._h4_stop,
   ._wysiwyg4all li ._h4_stop,
-  ._wysiwyg4all td ._h4_stop {
+  ._wysiwyg4all td ._h4_stop,
+  ._wysiwyg4all th ._h4_stop {
     font-size: var(--wysiwyg-font-tablet);
     --wysiwyg-font: var(--wysiwyg-font-tablet);
   }
@@ -805,7 +855,8 @@
   ._wysiwyg4all small ._h4_stop,
   ._wysiwyg4all i ._h4_stop,
   ._wysiwyg4all li ._h4_stop,
-  ._wysiwyg4all td ._h4_stop {
+  ._wysiwyg4all td ._h4_stop,
+  ._wysiwyg4all th ._h4_stop {
     font-size: var(--wysiwyg-font-phone);
     --wysiwyg-font: var(--wysiwyg-font-phone);
   }
@@ -820,7 +871,8 @@
 ._wysiwyg4all small ._h5,
 ._wysiwyg4all i ._h5,
 ._wysiwyg4all li ._h5,
-._wysiwyg4all td ._h5 {
+._wysiwyg4all td ._h5,
+._wysiwyg4all th ._h5 {
   font-weight: inherit;
   min-width: 1px;
   text-decoration: inherit;
@@ -836,7 +888,8 @@
 ._wysiwyg4all small ._h5_stop,
 ._wysiwyg4all i ._h5_stop,
 ._wysiwyg4all li ._h5_stop,
-._wysiwyg4all td ._h5_stop {
+._wysiwyg4all td ._h5_stop,
+._wysiwyg4all th ._h5_stop {
   min-width: 1px;
   text-decoration: inherit;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
@@ -853,7 +906,8 @@
   ._wysiwyg4all small ._h5_stop,
   ._wysiwyg4all i ._h5_stop,
   ._wysiwyg4all li ._h5_stop,
-  ._wysiwyg4all td ._h5_stop {
+  ._wysiwyg4all td ._h5_stop,
+  ._wysiwyg4all th ._h5_stop {
     font-size: var(--wysiwyg-font-tablet);
     --wysiwyg-font: var(--wysiwyg-font-tablet);
   }
@@ -869,7 +923,8 @@
   ._wysiwyg4all small ._h5_stop,
   ._wysiwyg4all i ._h5_stop,
   ._wysiwyg4all li ._h5_stop,
-  ._wysiwyg4all td ._h5_stop {
+  ._wysiwyg4all td ._h5_stop,
+  ._wysiwyg4all th ._h5_stop {
     font-size: var(--wysiwyg-font-phone);
     --wysiwyg-font: var(--wysiwyg-font-phone);
   }
@@ -884,7 +939,8 @@
 ._wysiwyg4all small ._h6,
 ._wysiwyg4all i ._h6,
 ._wysiwyg4all li ._h6,
-._wysiwyg4all td ._h6 {
+._wysiwyg4all td ._h6,
+._wysiwyg4all th ._h6 {
   font-weight: inherit;
   min-width: 1px;
   text-decoration: inherit;
@@ -900,7 +956,8 @@
 ._wysiwyg4all small ._h6_stop,
 ._wysiwyg4all i ._h6_stop,
 ._wysiwyg4all li ._h6_stop,
-._wysiwyg4all td ._h6_stop {
+._wysiwyg4all td ._h6_stop,
+._wysiwyg4all th ._h6_stop {
   min-width: 1px;
   text-decoration: inherit;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
@@ -917,7 +974,8 @@
   ._wysiwyg4all small ._h6_stop,
   ._wysiwyg4all i ._h6_stop,
   ._wysiwyg4all li ._h6_stop,
-  ._wysiwyg4all td ._h6_stop {
+  ._wysiwyg4all td ._h6_stop,
+  ._wysiwyg4all th ._h6_stop {
     font-size: var(--wysiwyg-font-tablet);
     --wysiwyg-font: var(--wysiwyg-font-tablet);
   }
@@ -933,7 +991,8 @@
   ._wysiwyg4all small ._h6_stop,
   ._wysiwyg4all i ._h6_stop,
   ._wysiwyg4all li ._h6_stop,
-  ._wysiwyg4all td ._h6_stop {
+  ._wysiwyg4all td ._h6_stop,
+  ._wysiwyg4all th ._h6_stop {
     font-size: var(--wysiwyg-font-phone);
     --wysiwyg-font: var(--wysiwyg-font-phone);
   }
