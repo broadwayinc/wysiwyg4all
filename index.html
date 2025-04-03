@@ -98,9 +98,8 @@
         urllink: true,
         placeholder: "Build your custom wysiwyg",
         // spellcheck: true,
-        // highlightColor: 'teal',
         // lastLineBlank: true,
-        logMutation: true,
+        // logMutation: true,
         callback: c => {
             if (c.caratPosition) {
                 // Tracks carat position
@@ -113,10 +112,10 @@
                 console.log({ caratPosition: c.caratPosition });
             }
 
-            if (c.mutation) {
-                // outputs dom mutation information
-                console.log({ mutation: c.mutation });
-            }
+            // if (c.mutation) {
+            //     // outputs dom mutation information
+            //     console.log({ mutation: c.mutation });
+            // }
 
             if (c.range) {
                 console.log({ range: c.range });
@@ -124,6 +123,7 @@
 
             if (c.commandTracker) {
                 let ct = c.commandTracker;
+                
                 if (typeof ct.color === 'string')
                     // change the color wheel input value based on the position of the caret
                     document.getElementById('colorInput').value = ct.color;
