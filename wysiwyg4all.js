@@ -291,7 +291,7 @@ class Wysiwyg4All {
 
             for (let n of node) {
                 if (!(n instanceof Node) && n !== null) {
-                    if(n === false) return;
+                    if (n === false) return;
                     throw 'INVALID_NODE';
                 }
             }
@@ -712,7 +712,7 @@ class Wysiwyg4All {
             for (let r of restrict) {
                 let cl = commonAncestorContainer.closest(this._classNameToQuery(r));
                 if (cl) {
-                    if(cl.getAttribute('contenteditable') !== 'true') {
+                    if (cl.getAttribute('contenteditable') !== 'true') {
                         return r;
                     }
                 }
@@ -727,7 +727,7 @@ class Wysiwyg4All {
                     if (startLine.nodeType === 1)
                         for (let r of restrict) {
                             if (startLine.classList.contains(r)) {
-                                if(startLine.getAttribute('contenteditable') !== 'true') {
+                                if (startLine.getAttribute('contenteditable') !== 'true') {
                                     return r;
                                 }
                             }
@@ -1277,8 +1277,7 @@ class Wysiwyg4All {
                 }
 
                 if (mutate.length)
-                    this._callback({ mutation: mutate }).catch(_ => {
-                    });
+                    this._callback({ mutation: mutate }).catch(err => err);
             }
 
             for (const mutation of mutation_array) {
@@ -1330,9 +1329,7 @@ class Wysiwyg4All {
                                 }
 
                                 if (removed) {
-                                    this._callback({ removed: { [what]: removed } }).catch(err => {
-                                        throw err;
-                                    });
+                                    this._callback({ removed: { [what]: removed } });
                                 }
                             };
 
@@ -2038,19 +2035,12 @@ class Wysiwyg4All {
 
     }
 
-    _callback(data) {
-        return new Promise(res => {
-            if (typeof this.callback === 'function') {
-                let cb = this.callback(data) || data;
-                if (cb instanceof Promise)
-                    cb.then(r => {
-                        res(r);
-                    });
-
-                res(cb || data);
-            }
-            res(data);
-        });
+    async _callback(data) {
+        if (typeof this.callback === 'function') {
+            let cb = this.callback(data) || data;
+            return cb || data;
+        }
+        return data
     }
 
     async _imageSelected(e) {
@@ -2476,7 +2466,7 @@ class Wysiwyg4All {
     _isUnSelectableElement(node) {
         node = node?.nodeType === 3 ? node.parentNode : node;
         let exceptions = {
-            '._custom_': {attr: 'contenteditable', value: 'true'},
+            '._custom_': { attr: 'contenteditable', value: 'true' },
         }
         return this._checkElement(node, this.unSelectable_queryArray, true, exceptions);
     }
@@ -2671,7 +2661,6 @@ class Wysiwyg4All {
                         commandTracker,
                         range: this.range
                     }).catch(err => err);
-
                 });
                 return;
 
