@@ -98,14 +98,11 @@ class Wysiwyg4All {
         this.blockElement_queryArray = ['HR', 'BLOCKQUOTE', 'UL', 'OL', '._media_', '._custom_'];
         this.specialTextElement_queryArray = ['._hashtag_', '._urllink_'];
         this.restrictedElement_queryArray = ['._media_', '._custom_'];
-        // this.restrictedElement_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
-        // this.restrictedElement_queryArray = ['._media_'];
-        this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI', 'TD'];
+        this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI', 'TD', 'TH'];
         this.textBlockElement_queryArray = ['P', 'LI', "TD"];
-        this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`, 'TD'];
+        this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`, 'TD', 'TH'];
         this.unSelectable_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
-        // this.unSelectable_queryArray = ['._media_', '._hashtag_', '._urllink_', 'HR'];
-        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_', 'TD'];
+        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_', 'TD', 'TH'];
         this.alignClass = ['_alignCenter_', '_alignRight_'];
 
         this.hashtag_flag = false;
