@@ -1,8 +1,8 @@
-# Wysiwyg4all
+# Wysiwyg4All
 
-[Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4all commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
+[Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4All commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
 
-**Wysiwyg4all** is a free minimal WYSIWYG editor for your website. It is highly expandable and customizable.
+**Wysiwyg4All** is a free minimal WYSIWYG editor for your website. It is highly expandable and customizable.
 
 You can easily build your own full fledged WYSIWYG application with this library.
 
@@ -10,7 +10,7 @@ You can easily build your own full fledged WYSIWYG application with this library
 
 ## Getting started
 
-These following steps show basic demonstration of how to install **Wysiwyg4all**.
+These following steps show basic demonstration of how to install **Wysiwyg4All**.
 
 1. Inside HTML **&lt;head>** add below:
     ```html
@@ -33,7 +33,7 @@ These following steps show basic demonstration of how to install **Wysiwyg4all**
     ```
 
 
-2. Inside  **&lt;body>**, create **&lt;div>** with an id ('myeditor' ,for example) and give custom css style. Buttons can be created to actuate wysiwyg functionality. We added a button which will change text size to **'h1'** at the **'onclick'** event using `wysiwyg.command('h1')` function. Diverse command options can be selected, which are listed in below [List of Wysiwyg4all commands](#List-of-Wysiwyg4all-commands). Of course, the button design can be customized by your own taste. 
+2. Inside  **&lt;body>**, create **&lt;div>** with an id ('myeditor' ,for example) and give custom css style. Buttons can be created to actuate wysiwyg functionality. We added a button which will change text size to **'h1'** at the **'onclick'** event using `wysiwyg.command('h1')` function. Diverse command options can be selected, which are listed in below [List of Wysiwyg4All commands](#List-of-Wysiwyg4All-commands). Of course, the button design can be customized by your own taste. 
 
     <br />
 
@@ -49,14 +49,14 @@ These following steps show basic demonstration of how to install **Wysiwyg4all**
 
 ## Default settings
 
-In **Wysiwyg4all** function, you shuold set default properties for element id, placeholder string, spell check, highlight color, last line blank, hash-tag and URL link, log mutation. Add Wysiwyg4all default setting script inside your **&lt;script**&gt;. The **&lt;script>** tag should come after closing the **&lt;/body**&gt; tag. Following script is an example for setting some of the default properties. **Wysiwyg4all** function will be created under the name of **wysiwyg** in the entire examples.
+In **Wysiwyg4All** function, you shuold set default properties for element id, placeholder string, spell check, highlight color, last line blank, hash-tag and URL link, log mutation. Add Wysiwyg4All default setting script inside your **&lt;script**&gt;. The **&lt;script>** tag should come after closing the **&lt;/body**&gt; tag. Following script is an example for setting some of the default properties. **Wysiwyg4All** function will be created under the name of **wysiwyg** in the entire examples.
 
 <br />
 
 <u>**_Example 2_**</u>
 
 ```js
-let wysiwyg = new Wysiwyg4all({
+let wysiwyg = new Wysiwyg4All({
     //set ID of target <DIV>.
     elementId: 'myeditor',
 
@@ -94,7 +94,7 @@ Following code example shows default setting of `.commandTracker`, which shows c
 <u>**_Example 3_**</u>
 
 ```js
-let wysiwyg = new Wysiwyg4all({
+let wysiwyg = new Wysiwyg4All({
     callback: c => {
         if (c.commandTracker) {
             let ct = c.commandTracker;
@@ -121,7 +121,7 @@ Image style can be pre-processed in `.image`. Following code example shows setti
 <u>**_Example 4_**</u>
 
 ```js
-    let wysiwyg = new Wysiwyg4all({
+    let wysiwyg = new Wysiwyg4All({
         callback: c => {
             if (c.image) {
                 // you can modify image element before it gets loaded
@@ -152,7 +152,7 @@ Default hashtag properties can be modified in `.hashtag `. Following code exampl
 <u>**_Example 5_**</u>
 
 ```js
-    let wysiwyg = new Wysiwyg4all({
+    let wysiwyg = new Wysiwyg4All({
         callback: c => {
             if (c.hashtag) {
                 console.log({hashtag: c.hashtag});
@@ -184,7 +184,7 @@ Default URL link properties can be modified in `.urllink`.  Following code examp
 <u>**_Example 6_**</u>
 
 ```js
-let wysiwyg = new Wysiwyg4all({
+let wysiwyg = new Wysiwyg4All({
     callback: c => {
         if (c.urllink) {
             console.log({urllink: c.urllink});
@@ -214,7 +214,7 @@ Default caret position properties can be modified in `.caratPosition` . Copy and
 <u>**_Example 7_**</u>
 
 ```js
-let wysiwyg = new Wysiwyg4all({
+let wysiwyg = new Wysiwyg4All({
     callback: c => {
         if (c.caratPosition) {
             // Tracks carat position
@@ -240,7 +240,7 @@ Default log mutation properties can be modified in `.mutation` . Copy and paste 
 <u>**_Example 8_**</u>
 
 ```js
-    let wysiwyg = new Wysiwyg4all({
+    let wysiwyg = new Wysiwyg4All({
         callback: c => {
             if (c.mutation) {
                 // outputs dom mutation information
@@ -294,7 +294,7 @@ let export_data = () => {
 
 <br />
 
-# List of Wysiwyg4all commands
+# List of Wysiwyg4All commands
 
 The Wysiwyg can edit text styles and text input field in diverse manners by using `wysiwyg.command()` function. Buttons can be created inside your **&lt;body>** as shown in the [Getting started](#getting-started) example, and to activate commands on 'onclick' event. The list of the command inputs is shown in the following. 
 
