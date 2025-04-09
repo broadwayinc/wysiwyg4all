@@ -76,6 +76,15 @@
         cursor: pointer;
     }
 
+    // font size variables
+    --wysiwyg-h1: calc(var(--wysiwyg-font) * 4.2);
+    --wysiwyg-h2: calc(var(--wysiwyg-font) * 3.56);
+    --wysiwyg-h3: calc(var(--wysiwyg-font) * 2.92);
+    --wysiwyg-h4: calc(var(--wysiwyg-font) * 2.28);
+    --wysiwyg-h5: calc(var(--wysiwyg-font) * 1.64);
+    --wysiwyg-h6: calc(var(--wysiwyg-font) * 1.15);
+    --wysiwyg-small: calc(var(--wysiwyg-font) * 0.8);
+    
     //  line
     p, h1, h2, h3, h4, h5, h6, small, i, li, td, th {
         line-height: 1.6;
@@ -199,7 +208,7 @@
             font-weight: normal;
             // text-decoration: inherit;
             text-decoration: none;
-            font-size: calc(var(--wysiwyg-font) * 0.8);
+            font-size: var(--wysiwyg-small);
         }
 
         ._small_stop {
@@ -207,85 +216,85 @@
             font-weight: inherit;
             // text-decoration: inherit;
             text-decoration: none;
-            #_wysiwyg_fontSize_normal;
+            // #_wysiwyg_fontSize_normal;
         }
 
         ._h1 {
             font-weight: inherit;
             min-width: 1px;
             text-decoration: inherit;
-            font-size: calc(var(--wysiwyg-font) * 4.2);
+            font-size: var(--wysiwyg-h1)
         }
 
         ._h1_stop {
             min-width: 1px;
             text-decoration: inherit;
-            #_wysiwyg_fontSize_normal;
+            // #_wysiwyg_fontSize_normal;
         }
 
         ._h2 {
             font-weight: inherit;
             min-width: 1px;
             text-decoration: inherit;
-            font-size: calc(var(--wysiwyg-font) * 3.56);
+            font-size: var(--wysiwyg-h2);
         }
 
         ._h2_stop {
             min-width: 1px;
             text-decoration: inherit;
-            #_wysiwyg_fontSize_normal;
+            // #_wysiwyg_fontSize_normal;
         }
 
         ._h3 {
             font-weight: inherit;
             min-width: 1px;
             text-decoration: inherit;
-            font-size: calc(var(--wysiwyg-font) * 2.92);
+            font-size: var(--wysiwyg-h3);
         }
 
         ._h3_stop {
             min-width: 1px;
             text-decoration: inherit;
-            #_wysiwyg_fontSize_normal;
+            // #_wysiwyg_fontSize_normal;
         }
 
         ._h4 {
             font-weight: inherit;
             min-width: 1px;
             text-decoration: inherit;
-            font-size: calc(var(--wysiwyg-font) * 2.28);
+            font-size: var(--wysiwyg-h4);
         }
 
         ._h4_stop {
             min-width: 1px;
             text-decoration: inherit;
-            #_wysiwyg_fontSize_normal;
+            // #_wysiwyg_fontSize_normal;
         }
 
         ._h5 {
             font-weight: inherit;
             min-width: 1px;
             text-decoration: inherit;
-            font-size: calc(var(--wysiwyg-font) * 1.64);
+            font-size: var(--wysiwyg-h5);
         }
 
         ._h5_stop {
             min-width: 1px;
             text-decoration: inherit;
-            #_wysiwyg_fontSize_normal;
+            // #_wysiwyg_fontSize_normal;
         }
 
         ._h6 {
             font-weight: inherit;
             min-width: 1px;
             text-decoration: inherit;
-            font-size: calc(var(--wysiwyg-font) * 1.15);
+            font-size: var(--wysiwyg-h6)
         }
 
         ._h6_stop {
             min-width: 1px;
             text-decoration: inherit;
-            #_wysiwyg_fontSize_normal;
+            // #_wysiwyg_fontSize_normal;
         }
     }
 
@@ -303,31 +312,31 @@
     }
 
     h1 {
-        font-size: calc(var(--wysiwyg-font) * 4.2);
+        font-size: var(--wysiwyg-h1);
     }
 
     h2 {
-        font-size: calc(var(--wysiwyg-font) * 3.56);
+        font-size: var(--wysiwyg-h2);
     }
 
     h3 {
-        font-size: calc(var(--wysiwyg-font) * 2.92);
+        font-size: var(--wysiwyg-h3);
     }
 
     h4 {
-        font-size: calc(var(--wysiwyg-font) * 2.28);
+        font-size: var(--wysiwyg-h4);
     }
 
     h5 {
-        font-size: calc(var(--wysiwyg-font) * 1.64);
+        font-size: var(--wysiwyg-h5);
     }
 
     h6 {
-        font-size: calc(var(--wysiwyg-font) * 1.15);
+        font-size: var(--wysiwyg-h6);
     }
 
     small {
-        font-size: calc(var(--wysiwyg-font) * 0.8);
+        font-size: var(--wysiwyg-small);
     }
 
     hr {
