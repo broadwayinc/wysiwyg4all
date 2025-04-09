@@ -323,8 +323,6 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txt%20style.gif" width="500">
 
-<br />
-
 ### ⚠️ Warning
 
 When executing wysiwyg commands, the text selection in wysiwyg should be present.
