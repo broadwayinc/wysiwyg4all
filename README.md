@@ -336,6 +336,8 @@ To prevent this, it might be a good idea to prevent default on command buttons:
 </button>
 ```
 
+<br />
+
 ### **Text color**
 `wysiwyg.command('color')` changes the text color ('black') to **wysiwyg** default highlight color ('teal' in this example). 
 
