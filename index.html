@@ -46,8 +46,8 @@
 </button>
 
 <!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
-<input id='colorInput' type='color' onchange="(function(event){wysiwyg.command(event.target.value)})(event)"
-    onblur="(function(){wysiwyg.restoreLastSelection()})()" />
+<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)"
+    onblur="wysiwyg.restoreLastSelection()" />
 <!-- .command('color') changes text to highlight color set on constructor -->
 <button onclick="wysiwyg.command('color')">
     Color
@@ -179,7 +179,7 @@
 
     let tablePlugin = (col, row) => {
         wysiwyg.command({
-            element: createTable(col, row),
+            element: createTable(col, row), // create custom table element, from plugins.js
             contenteditable: true
         });
     }

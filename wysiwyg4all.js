@@ -2038,6 +2038,9 @@ class Wysiwyg4All {
     async _callback(data) {
         if (typeof this.callback === 'function') {
             let cb = this.callback(data) || data;
+            if (cb instanceof Promise) {
+                cb = await cb;
+            }
             return cb || data;
         }
         return data

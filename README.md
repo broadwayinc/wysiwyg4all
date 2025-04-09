@@ -1,6 +1,6 @@
 # Wysiwyg4All
 
-[Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4All commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
+[Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4All commands](#list-of-wysiwyg4all-commands) | [CSS variables](#css-variables) | [License](#license) </br> 
 
 **Wysiwyg4All** is a free minimal WYSIWYG editor for your website. It is highly expandable and customizable.
 
@@ -41,7 +41,7 @@ These following steps show basic demonstration of how to install **Wysiwyg4All**
 
     ```html
     <div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
-    <button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
+    <button onclick="wysiwyg.command('h1')">
         H1
     </button>
     ```
@@ -79,13 +79,21 @@ let wysiwyg = new Wysiwyg4All({
     urllink: true,
 
     // When set to true, wysiwyg will output DOM mutation data via callback function.
-    logMutation: false
+    logMutation: false,
+
+    // font size for each display
+    fontSize = {
+        desktop: 18,
+        tablet: 16, // (max-width: 899px)
+        phone: 14 // (max-width: 599px)
+    },
 })
 ```
 <br />
 
-### Command track
-Callback function is used to modify default properties of **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**. Keep in mind that callback parameter ('c' in the following example code) should be returned.
+### Command tracker
+
+Callback function is used to log properties of **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**.
 <br/>
 Following code example shows default setting of `.commandTracker`, which shows current status of the text style in the console log.
 
@@ -267,7 +275,8 @@ HTML string or node element can be assigned in `wysiwyg.command()` element value
 let customElement = () => {
     // add smile emoji. This can be html string (ex - <div>Hello</div>) or node element (ex - document.createElement('div'))
     wysiwyg.command({
-        element: '&#128512;' 
+        element: '&#128512;',
+        contenteditable: false // when true, added custom element is editable
     });
 };
 ```
@@ -307,7 +316,7 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 <u>**_Example 11_**</u>
 
 ```html
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('h1')">
+<button onclick="wysiwyg.command('h1')">
     H1
 </button>
 ```
@@ -315,6 +324,19 @@ The Wysiwyg can edit text styles and text input field in diverse manners by usin
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txt%20style.gif" width="500">
 
 <br />
+
+### ⚠️ Warning
+
+When executing wysiwyg commands, the text selection in wysiwyg should be present.
+
+For some browsers, wysiwyg text selection can be disabled the moment the user clicks on the command button.
+To prevent this, it might be a good idea to prevent default on command buttons:
+
+```html
+<button onmousedown="event.preventDefault()" onclick="wysiwyg.command('h1')">
+    H1
+</button>
+```
 
 ### **Text color**
 `wysiwyg.command('color')` changes the text color ('black') to **wysiwyg** default highlight color ('teal' in this example). 
@@ -338,8 +360,8 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <u>**_Example 13_**</u>
 
 ```html
-<input id='colorInput' type='color' onchange="(function(event){wysiwyg.command(event.target.value)})(event)"
-       onblur="(function(){wysiwyg.restoreLastSelection()})()"/>
+<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)"
+       onblur="wysiwyg.restoreLastSelection()"/>
 ```
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txtcolor.gif" width="500">
@@ -354,7 +376,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <u>**_Example 14_**</u>
 
 ```html
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('divider')">
+<button onclick="wysiwyg.command('divider')">
     Divider
 </button>
 ```
@@ -372,7 +394,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <u>**_Example 15_**</u>
 
 ```html
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('Quote')">
+<button onclick="wysiwyg.command('Quote')">
     Quote
 </button>
 ```
@@ -390,7 +412,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <u>**_Example 16_**</u>
 
 ```html
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('unorderedList')">
+<button onclick="wysiwyg.command('unorderedList')">
     Unordered list
 </button>
 ```
@@ -408,7 +430,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <u>**_Example 17_**</u>
 
 ```html
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('alignCenter')">
+<button onclick="wysiwyg.command('alignCenter')">
     Align center
 </button>
 ```
@@ -426,7 +448,7 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <u>**_Example 18_**</u>
 
 ```html
-<button onmousedown="(function(event){event.preventDefault()})(event)" onclick="wysiwyg.command('image')">
+<button onclick="wysiwyg.command('image')">
     Image
 </button>
 ```
@@ -452,6 +474,20 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/emoji.gif" width="500">
 
 <br />
+
+# CSS Variables
+
+Each headers font size can be defined as css variable as below:
+
+```css
+--wysiwyg-h1: calc(var(--wysiwyg-font) * 4.2);
+--wysiwyg-h2: calc(var(--wysiwyg-font) * 3.56);
+--wysiwyg-h3: calc(var(--wysiwyg-font) * 2.92);
+--wysiwyg-h4: calc(var(--wysiwyg-font) * 2.28);
+--wysiwyg-h5: calc(var(--wysiwyg-font) * 1.64);
+--wysiwyg-h6: calc(var(--wysiwyg-font) * 1.15);
+--wysiwyg-small: calc(var(--wysiwyg-font) * 0.8);
+```
 
 ## License
 
