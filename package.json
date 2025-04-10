@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "dev": "npx bns 3300",
-    "build": "lessc wysiwyg4all.less wysiwyg4all.css; npx webpack --config webpack.config.js"
+    "build": "npx lessc wysiwyg4all.less wysiwyg4all.css; npx webpack --config webpack.config.js"
   },
   "keywords": [
     "wysiwyg"
@@ -28,7 +28,8 @@
   "devDependencies": {
     "webpack": "^5.74.0",
     "webpack-bundle-analyzer": "^4.10.2",
-    "webpack-cli": "^4.10.0"
+    "webpack-cli": "^4.10.0",
+    "less": "^4.3.0"
   },
   "dependencies": {
     "basic-node-server": "^1.0.13",

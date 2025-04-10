@@ -23,20 +23,6 @@
   line-height: 1.6em;
   letter-spacing: 0.025em;
   cursor: text;
-  --wysiwyg-font: var(--wysiwyg-font-desktop);
-  font-size: var(--wysiwyg-font-desktop);
-}
-@media only screen and (max-width: 899px) {
-  ._wysiwyg4all[contenteditable='true'][placeholder]:empty:before {
-    font-size: var(--wysiwyg-font-tablet);
-    --wysiwyg-font: var(--wysiwyg-font-tablet);
-  }
-}
-@media only screen and (max-width: 599px) {
-  ._wysiwyg4all[contenteditable='true'][placeholder]:empty:before {
-    font-size: var(--wysiwyg-font-phone);
-    --wysiwyg-font: var(--wysiwyg-font-phone);
-  }
 }
 ._wysiwyg4all {
   background-color: var(--content);
