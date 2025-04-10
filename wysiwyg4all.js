@@ -2963,6 +2963,10 @@ class Wysiwyg4All {
      * @param {boolean} [editable=false] - Set editable mode.
      */
     async loadHTML(html = this.html, editable = false) {
+        if(typeof html !== 'string') {
+            throw new Error('html should be a string');
+        }
+
         this.setEditable(false);
         this.html = html || '';
         const div = document.createElement('div');
