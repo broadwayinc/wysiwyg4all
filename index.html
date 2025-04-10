@@ -186,10 +186,13 @@
     }
 
     let exportData = () => {
-        wysiwyg.export(pre => {
-            console.log(pre);
-        }).then(e => {
-            console.log(e);
+        alert('Check console for exported data!');
+        wysiwyg.export(preExport => {
+            // preExport is the preprocessed data before export
+            console.log({preExport});
+        }).then(exported => {
+            // e is the exported data
+            console.log({exported});
         });
     };
 </script>
