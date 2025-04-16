@@ -36,13 +36,6 @@
   user-select: text;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
   font-size: var(--wysiwyg-font-desktop);
-  --wysiwyg-h1: calc(var(--wysiwyg-font) * 4.2);
-  --wysiwyg-h2: calc(var(--wysiwyg-font) * 3.56);
-  --wysiwyg-h3: calc(var(--wysiwyg-font) * 2.92);
-  --wysiwyg-h4: calc(var(--wysiwyg-font) * 2.28);
-  --wysiwyg-h5: calc(var(--wysiwyg-font) * 1.64);
-  --wysiwyg-h6: calc(var(--wysiwyg-font) * 1.15);
-  --wysiwyg-small: calc(var(--wysiwyg-font) * 0.8);
 }
 @media only screen and (max-width: 899px) {
   ._wysiwyg4all {
