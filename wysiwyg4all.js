@@ -33,9 +33,17 @@ class Wysiwyg4All {
             html = '',
             callback,
             fontSize = {
-                desktop: 18,
-                tablet: 16,
-                phone: 14
+                desktop: '18px',
+                tablet: '16px',
+                phone: '14px',
+
+                h1: 4.2,
+                h2: 3.56,
+                h3: 2.92,
+                h4: 2.28,
+                h5: 1.64,
+                h6: 1.15,
+                small: 0.8,
             },
             lastLineBlank = false,
             hashtag = false,
@@ -50,9 +58,9 @@ class Wysiwyg4All {
 
         if (typeof fontSize === 'number')
             this.fontSizeCssVariable = {
-                '--wysiwyg-font-desktop': `${fontSize}px`,
-                '--wysiwyg-font-tablet': `${fontSize}px`,
-                '--wysiwyg-font-phone': `${fontSize}px`,
+                '--wysiwyg-font-desktop': `${fontSize}`,
+                '--wysiwyg-font-tablet': `${fontSize}`,
+                '--wysiwyg-font-phone': `${fontSize}`,
             };
         else if (typeof fontSize === 'object' && Object.keys(fontSize).length) {
             let hold;
@@ -61,17 +69,10 @@ class Wysiwyg4All {
             for (let k of keyArr) {
                 if (fontSize[k]) {
                     hold = fontSize[k];
-                    break;
+                    if (typeof hold === 'number')
+                        hold = `${hold}px`;
                 }
-            }
-
-            if (!hold)
-                throw 'invalid fontSize';
-
-            for (let k of keyArr) {
-                if (fontSize[k])
-                    hold = fontSize[k];
-                this.fontSizeCssVariable[`--wysiwyg-font-${k}`] = `${hold}px`;
+                this.fontSizeCssVariable[`--wysiwyg-font-${k}`] = `${hold}`;
             }
         }
 
@@ -166,14 +167,46 @@ class Wysiwyg4All {
 
         const fontSizeRatio = {
             //  should always be the same em value as css
-            h1: 4.2,
-            h2: 3.56,
-            h3: 2.92,
-            h4: 2.28,
-            h5: 1.64,
-            h6: 1.15,
-            small: 0.8,
+            // h1: 4.2,
+            // h2: 3.56,
+            // h3: 2.92,
+            // h4: 2.28,
+            // h5: 1.64,
+            // h6: 1.15,
+            // small: 0.8,
+            h1: fontSize.h1 || 4.2,
+            h2: fontSize.h2 || 3.56,
+            h3: fontSize.h3 || 2.92,
+            h4: fontSize.h4 || 2.28,
+            h5: fontSize.h5 || 1.64,
+            h6: fontSize.h6 || 1.15,
+            small: fontSize.small || 0.8
         };
+
+        // // font size variables
+        // --wysiwyg-h1: calc(var(--wysiwyg-font) * 4.2);
+        // --wysiwyg-h2: calc(var(--wysiwyg-font) * 3.56);
+        // --wysiwyg-h3: calc(var(--wysiwyg-font) * 2.92);
+        // --wysiwyg-h4: calc(var(--wysiwyg-font) * 2.28);
+        // --wysiwyg-h5: calc(var(--wysiwyg-font) * 1.64);
+        // --wysiwyg-h6: calc(var(--wysiwyg-font) * 1.15);
+        // --wysiwyg-small: calc(var(--wysiwyg-font) * 0.8);
+        for (const [tag, ratio] of Object.entries(fontSizeRatio)) {
+            if (typeof ratio === 'number') {
+                this.element.style.setProperty(`--wysiwyg-${tag}`, `calc(var(--wysiwyg-font) * ${ratio})`);
+            }
+            else if (typeof ratio === 'string') {
+                if (ratio.includes('px')) {
+                    this.element.style.setProperty(`--wysiwyg-${tag}`, ratio);
+                }
+                else if (ratio.includes('em') || ratio.includes('rem')) {
+                    let emSize = parseFloat(ratio);
+                    if (emSize > 0) {
+                        this.element.style.setProperty(`--wysiwyg-${tag}`, `calc(var(--wysiwyg-font) * ${emSize})`);
+                    }
+                }
+            }
+        }
 
         this.styleTagOfCommand = {};
         this.counterTagOf = {};
@@ -193,11 +226,27 @@ class Wysiwyg4All {
                 for (let tag in fontSizeRatio) {
                     let f_size = fontSizeRatio[tag];
 
-                    //  precision
-                    let compare_size = documentFontSize * f_size;
-                    let f_size_high = compare_size + 0.01;
-                    let f_size_low = compare_size - 0.01;
-                    if (f_size_high > nodeFontSize && f_size_low < nodeFontSize) return tag;
+                    if (typeof f_size === 'number') {
+                        //  precision
+                        let compare_size = documentFontSize * f_size;
+                        let f_size_high = compare_size + 0.01;
+                        let f_size_low = compare_size - 0.01;
+                        if (f_size_high > nodeFontSize && f_size_low < nodeFontSize) return tag;
+                    }
+                    else if (typeof f_size === 'string') {
+                        if (f_size.includes('px')) {
+                            if (v === f_size) return tag;
+                        }
+                        else if (f_size.includes('em') || f_size.includes('rem')) {
+                            let emSize = parseFloat(f_size);
+                            if (emSize > 0) {
+                                let compare_size = documentFontSize * emSize;
+                                let f_size_high = compare_size + 0.01;
+                                let f_size_low = compare_size - 0.01;
+                                if (f_size_high > nodeFontSize && f_size_low < nodeFontSize) return tag;
+                            }
+                        }
+                    }
                 }
                 return false;
             },
@@ -2963,7 +3012,7 @@ class Wysiwyg4All {
      * @param {boolean} [editable=false] - Set editable mode.
      */
     async loadHTML(html = this.html, editable = false) {
-        if(typeof html !== 'string') {
+        if (typeof html !== 'string') {
             throw new Error('html should be a string');
         }
 

@@ -1,6 +1,6 @@
 # Wysiwyg4All
 
-[Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4All commands](#list-of-wysiwyg4all-commands) | [CSS variables](#css-variables) | [License](#license) </br> 
+[Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4All commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
 
 **Wysiwyg4All** is a free minimal WYSIWYG editor for your website. It is highly expandable and customizable.
 
@@ -82,10 +82,19 @@ let wysiwyg = new Wysiwyg4All({
     logMutation: false,
 
     // font size for each display
-    fontSize = {
-        desktop: 18,
+    fontSize: {
+        desktop: 18, // Can be css value: '18px', '2em'... etc. When number is given, it normalizes to 'px'
         tablet: 16, // (max-width: 899px)
-        phone: 14 // (max-width: 599px)
+        phone: 14, // (max-width: 599px)
+        
+        // header sizes below -
+        h1: 4.2, // Can be css value: '18px', '2em'... etc. When number is given, it normalizes to 'em'
+        h2: 3.56,
+        h3: 2.92,
+        h4: 2.28,
+        h5: 1.64,
+        h6: 1.15,
+        small: 0.8,
     },
 })
 ```
@@ -474,20 +483,6 @@ Other color choice can be provided to user by creating HTML color picker. It is 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/emoji.gif" width="500">
 
 <br />
-
-# CSS Variables
-
-Each headers font size can be defined as css variable as below:
-
-```css
---wysiwyg-h1: calc(var(--wysiwyg-font) * 4.2);
---wysiwyg-h2: calc(var(--wysiwyg-font) * 3.56);
---wysiwyg-h3: calc(var(--wysiwyg-font) * 2.92);
---wysiwyg-h4: calc(var(--wysiwyg-font) * 2.28);
---wysiwyg-h5: calc(var(--wysiwyg-font) * 1.64);
---wysiwyg-h6: calc(var(--wysiwyg-font) * 1.15);
---wysiwyg-small: calc(var(--wysiwyg-font) * 0.8);
-```
 
 ## License
 
