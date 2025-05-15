@@ -84,8 +84,8 @@ let wysiwyg = new Wysiwyg4All({
     // font size for each display
     fontSize: {
         desktop: 18, // Can be css value: '18px', '2em'... etc. When number is given, it normalizes to 'px'
-        tablet: 16, // (max-width: 899px)
-        phone: 14, // (max-width: 599px)
+        tablet: 16, // (max-width: 899px) Optional, if not given, inherits from desktop size.
+        phone: 14, // (max-width: 599px) Optional, if not given, inherits from tablet size.
         
         // header sizes below -
         h1: 4.2, // Can be css value: '18px', '2em'... etc. When number is given, it normalizes to 'em'
