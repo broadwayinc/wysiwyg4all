@@ -1407,8 +1407,7 @@ class Wysiwyg4All {
 
                             toBreak = false;
 
-                            //this._isCeilingElement(mutationTarget) &&
-                            if ((() => {
+                            if (this._isCeilingElement(mutationTarget) && (() => {
                                 let idx = mutationTarget.childNodes.length;
                                 if (idx)
                                     while (idx--) {
