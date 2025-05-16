@@ -48,12 +48,14 @@ class Wysiwyg4All {
             lastLineBlank = false,
             hashtag = false,
             urllink = false,
-            logMutation = false
+            logMutation = false,
+            logExecution = false
         } = option;
 
         this.hashtag = hashtag;
         this.urllink = urllink;
         this.logMutation = logMutation;
+        this.logExecution = logExecution;
         this.fontSizeCssVariable = {};
 
         if (typeof fontSize === 'number')
@@ -99,11 +101,11 @@ class Wysiwyg4All {
         this.blockElement_queryArray = ['HR', 'BLOCKQUOTE', 'UL', 'OL', '._media_', '._custom_'];
         this.specialTextElement_queryArray = ['._hashtag_', '._urllink_'];
         this.restrictedElement_queryArray = ['._media_', '._custom_'];
-        this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI', 'TD', 'TH'];
-        this.textBlockElement_queryArray = ['P', 'LI', "TD"];
+        this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI', "TD", "TH"];
+        this.textBlockElement_queryArray = ['P', 'LI', "TD", "TH"];
         this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`, 'TD', 'TH'];
         this.unSelectable_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
-        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_', 'TD', 'TH'];
+        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_', 'TD', 'TH']; // ALLOWED ELEMENTS FOR STYLE ATTRIBUTE <... style="...">
         this.alignClass = ['_alignCenter_', '_alignRight_'];
 
         this.hashtag_flag = false;
@@ -304,6 +306,8 @@ class Wysiwyg4All {
     }
 
     _adjustSelection(target, ceilingElement_query = this.ceilingElement_queryArray) {
+        if(this.logExecution) console.log('_adjustSelection()', {target, ceilingElement_query});
+
         let toArray = (v, allowObject = false) => {
             if (Array.isArray(v)) return v;
             else if (
@@ -447,6 +451,7 @@ class Wysiwyg4All {
     }
 
     _generateId(option) {
+        if (this.logExecution) console.log('_generateId()', {option});
         let limit = 12;
         let prefix = '';
 
@@ -485,6 +490,7 @@ class Wysiwyg4All {
     }
 
     _nodeCrawler(run, option) {
+        if (this.logExecution) console.log('_nodeCrawler()', {run, option});
         const { parentNode, node, startFromEldestChild, startNode } = option;
 
         if (startFromEldestChild && !parentNode)
@@ -606,6 +612,7 @@ class Wysiwyg4All {
     }
 
     _wrapNode(node, wrapper, appendWhole = false) {
+        if (this.logExecution) console.log('_wrapNode()', {node, wrapper, appendWhole});
         if (!(node instanceof Node)) return;
 
         if (!node.parentNode)
@@ -678,7 +685,7 @@ class Wysiwyg4All {
     }
 
     _isSingleChildParent(n) {
-
+        if (this.logExecution) console.log('_isSingleChildParent()', {n});
         if (!n || n.nodeType === 3)
             return false;
 
@@ -710,6 +717,7 @@ class Wysiwyg4All {
     }
 
     _climbUpToEldestParent(node, wrapper, singleChildParent = false, callback) {
+        if (this.logExecution) console.log('_climbUpToEldestParent()', {node, wrapper, singleChildParent, callback});
         callback = callback || ((n) => {
             return n;
         });
@@ -748,6 +756,7 @@ class Wysiwyg4All {
     }
 
     _isSelectionWithinRestrictedRange(range = this.range, element = this.element) {
+        if (this.logExecution) console.log('_isSelectionWithinRestrictedRange()', {range, element});
         if (!range)
             return true;
 
@@ -792,12 +801,14 @@ class Wysiwyg4All {
     }
 
     _classNameToQuery(q) {
+        if (this.logExecution) console.log('_classNameToQuery()', {q});
         if (q.includes('_stop') && q[0] !== '.')
             return '.' + q;
         return q[0] === '_' ? '.' + q : q;
     }
 
     _createEmptyParagraph(append) {
+        if (this.logExecution) console.log('_createEmptyParagraph()', {append});
         let p = document.createElement('p');
 
         if (append && typeof append === 'string')
@@ -812,6 +823,7 @@ class Wysiwyg4All {
     }
 
     _trackStyle(n, cls) {
+        if (this.logExecution) console.log('_trackStyle()', {n, cls});
         let commandTracker = {};
         let style = window.getComputedStyle(n);
 
@@ -858,6 +870,7 @@ class Wysiwyg4All {
     }
 
     _lastLineBlank() {
+        if (this.logExecution) console.log('_lastLineBlank()');
         if (this.lastLineBlank) {
             let lastLine = this.element.lastChild;
             if (lastLine.nodeName !== 'P' ||
@@ -868,6 +881,7 @@ class Wysiwyg4All {
     }
 
     _setEventListener(listen) {
+        if (this.logExecution) console.log('_setEventListener()', {listen});
         /**
          * keydown -> observer(dom change) -> selection change -> click | keyup
          */
@@ -1676,6 +1690,7 @@ class Wysiwyg4All {
     }
 
     _setArrow(e) {
+        if (this.logExecution) console.log('_setArrow', {e});
         if (!this.range || !e?.key)
             return;
 
@@ -1957,6 +1972,7 @@ class Wysiwyg4All {
     }
 
     _append(i, insertAfter, wrap = false, focusElement) {
+        if (this.logExecution) console.log('_append', {i, insertAfter, wrap, focusElement});
         let common = this._climbUpToEldestParent(this.range.commonAncestorContainer, this.element);
         let startLine = this._climbUpToEldestParent(this.range.startContainer, this.element);
         let endLine = this._climbUpToEldestParent(this.range.endContainer, this.element);
@@ -2095,6 +2111,7 @@ class Wysiwyg4All {
     }
 
     async _imageSelected(e) {
+        if (this.logExecution) console.log('_imageSelected', {e});
         let files = e.target.files;
 
         const prepareForCallback = { image: [] };
@@ -2158,6 +2175,7 @@ class Wysiwyg4All {
     }
 
     _loadImage(imageObject, wrapper) {
+        if (this.logExecution) console.log('_loadImage', {imageObject, wrapper});
         /**
          elementId: "img_uniqueId"
          element: HTML
@@ -2238,6 +2256,7 @@ class Wysiwyg4All {
     }
 
     _modifySelection(run) {
+        if (this.logExecution) console.log('_modifySelection', {run});
         let sel = window.getSelection();
         if (sel) {
             let anchorElement = sel.anchorNode?.nodeType === 3 ? sel.anchorNode.parentNode : sel.anchorNode;
@@ -2268,6 +2287,7 @@ class Wysiwyg4All {
     }
 
     _normalizeDocument(normalize) {
+        if (this.logExecution) console.log('_normalizeDocument', {normalize});
         if (!normalize) return;
 
         this._nodeCrawler(n => {
@@ -2298,7 +2318,7 @@ class Wysiwyg4All {
     }
 
     _replaceText(wholeDocument = false) {
-
+        if (this.logExecution) console.log('_replaceText', {wholeDocument});
         const process = (typeName, setData) => {
             if (!this[typeName])
                 return;
@@ -2493,12 +2513,28 @@ class Wysiwyg4All {
     }
 
     _checkElement(node, chkArr, closest, exp) {
+        /**
+         * parentNode when node is a text node
+         * chkArr is an array of class names or tag names
+         * closest is a boolean to check if the element is closest to the node
+         */
+        if (this.logExecution) console.log('_checkElement', {node, chkArr, closest, exp});
         if (node && node.nodeType === 1)
             for (let c of chkArr) {
                 if (closest) {
                     let clo = node.closest(c);
                     if (clo) {
                         if (exp && exp[c]) {
+                            if(c === '._custom_') {
+                                let flyup = node;
+                                let gotTheMatch = false;
+                                while (flyup && this.element === flyup || !gotTheMatch) {
+                                    gotTheMatch = flyup.getAttribute(exp[c].attr) === exp[c].value
+                                    if(!gotTheMatch)
+                                        flyup = flyup.parentNode;
+                                }
+                                return gotTheMatch ? false : flyup;
+                            }
                             return clo.getAttribute(exp[c].attr) !== exp[c].value ? clo : false;
                         }
 
@@ -2515,6 +2551,7 @@ class Wysiwyg4All {
     }
 
     _isUnSelectableElement(node) {
+        if (this.logExecution) console.log('_isUnSelectableElement', {node});
         node = node?.nodeType === 3 ? node.parentNode : node;
         let exceptions = {
             '._custom_': { attr: 'contenteditable', value: 'true' },
@@ -2523,32 +2560,39 @@ class Wysiwyg4All {
     }
 
     _isStyleAllowedElement(node) {
+        if (this.logExecution) console.log('_isStyleAllowedElement', {node});
         return this._checkElement(node, this.styleAllowedElement_queryArray);
     }
 
     _isCeilingElement(node) {
+        if (this.logExecution) console.log('_isCeilingElement', {node});
         return this._checkElement(node, this.ceilingElement_queryArray);
     }
 
     _isBlockElement(node) {
+        if (this.logExecution) console.log('_isBlockElement', {node});
         return this._checkElement(node, this.blockElement_queryArray);
     }
 
     _isTextAreaElement(node) {
+        if (this.logExecution) console.log('_isTextAreaElement', {node});
         return this._checkElement(node, this.textAreaElement_queryArray);
     }
 
     _isTextBlockElement(node) {
+        if (this.logExecution) console.log('_isTextBlockElement', {node});
         node = node?.nodeType === 3 ? node.parentNode : node;
         return this._checkElement(node, this.textBlockElement_queryArray);
     }
 
     _isSpecialTextElement(node) {
+        if (this.logExecution) console.log('_isSpecialTextElement', {node});
         node = node?.nodeType === 3 ? node.parentNode : node;
         return this._checkElement(node, this.specialTextElement_queryArray);
     }
 
     _isTextElement(node) {
+        if (this.logExecution) console.log('_isTextElement', {node});
         node = node?.nodeType === 3 ? node.parentNode : node;
         return (this._isTextBlockElement(node) || node.nodeName === 'SPAN') && !this._isSpecialTextElement(node);
     }
@@ -2582,7 +2626,6 @@ class Wysiwyg4All {
      * @param {boolean} action.insert - Set custom element insert mode. If true, inserts element at carat position, otherwise appends on next line
      */
     command(action) {
-
         if (!action)
             return;
 
@@ -2990,6 +3033,7 @@ class Wysiwyg4All {
      * Restores the last selection range
      */
     restoreLastSelection() {
+        if (this.logExecution) console.log('restoreLastSelection', {range_backup: this.range_backup});
         if (this.range_backup) {
             this.range = this._adjustSelection(
                 {
@@ -3242,6 +3286,7 @@ class Wysiwyg4All {
      * @param {string} p - Set placeholder string.
      */
     setPlaceholder(p) {
+        if (this.logExecution) console.log('setPlaceholder', {p});
         if (this.element) {
             if (p && typeof p === 'string') this.element.setAttribute("placeholder", p);
             else this.element.removeAttribute("placeholder");
@@ -3253,6 +3298,7 @@ class Wysiwyg4All {
      * @param {boolean} bool - Set spellcheck mode.
      */
     setSpellcheck(bool) {
+        if (this.logExecution) console.log('setSpellcheck', {bool});
         if (this.element)
             this.element.setAttribute("spellcheck", bool ? 'on' : 'off');
     }
@@ -3262,6 +3308,7 @@ class Wysiwyg4All {
      * @param {boolean} bool - Set wysiwyg to editable when true.
      */
     setEditable(bool) {
+        if (this.logExecution) console.log('setEditable', {bool});
         bool = this.element ? bool : false;
 
         if (this.element)

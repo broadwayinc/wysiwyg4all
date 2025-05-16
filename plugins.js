@@ -1,5 +1,6 @@
 let createTable = (cols, rows) => {
     let table = document.createElement('table');
+    table.setAttribute('contenteditable', 'true');
     table.style.borderCollapse = 'collapse';
     table.style.margin = '1rem 0';
     table.style.width = '100%';

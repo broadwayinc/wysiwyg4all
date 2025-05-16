@@ -100,7 +100,8 @@
         highlightColor: 'limegreen',
         // spellcheck: true,
         // lastLineBlank: true,
-        // logMutation: true,
+        logMutation: true,
+        logExecution: true,
         callback: c => {
             if (c.caratPosition) {
                 // Tracks carat position
@@ -181,7 +182,7 @@
     let tablePlugin = (col, row) => {
         wysiwyg.command({
             element: createTable(col, row), // create custom table element, from plugins.js
-            contenteditable: true
+            contenteditable: false
         });
     }
 
