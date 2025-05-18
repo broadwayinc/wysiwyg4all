@@ -776,10 +776,24 @@ class Wysiwyg4All {
         return [startLine, endLine, inBetween];
     }
 
+    _isThereContentEditableOverMyHead(node, element = this.element) {
+        if (node && node !== this.element) {
+            let flyup = node;
+            while (flyup && this.element !== flyup) {
+                if (flyup.getAttribute("contenteditable") === "true")
+                    return true;
+                
+                flyup = flyup.parentNode;
+            }
+        }
+        return false;
+    }
+
     _isSelectionWithinRestrictedRange(range = this.range, element = this.element) {
-        if (this.logExecution) console.log('_isSelectionWithinRestrictedRange()', {range, element});
-        if (!range)
+        if (!range) {
+            if (this.logExecution) console.log('_isSelectionWithinRestrictedRange():true', {range, element});
             return true;
+        }
 
         let { commonAncestorContainer, startContainer, endContainer } = range;
         let restrict = this.restrictedElement_queryArray;
@@ -787,38 +801,52 @@ class Wysiwyg4All {
         // let endLine = this._climbUpToEldestParent(endContainer, element);
 
         // if (this.logExecution) console.log('startLine | endLine', {startLine, endLine});
-        let [startLine, endLine] = this._getStartEndLine(range, element);
+        let [startLine, endLine, inBetween] = this._getStartEndLine(range, element, true);
 
         if (startLine === endLine) {
             commonAncestorContainer = commonAncestorContainer.nodeType === 3 ? commonAncestorContainer.parentNode : commonAncestorContainer;
             for (let r of restrict) {
                 let cl = commonAncestorContainer.closest(this._classNameToQuery(r));
                 if (cl) {
-                    if (cl.getAttribute('contenteditable') !== 'true') {
-                        return r;
+                    // if (cl.getAttribute('contenteditable') !== 'true') {
+                    //     return r;
+                    // }
+                    let isThere = this._isThereContentEditableOverMyHead(commonAncestorContainer, element);
+                    if (!isThere) {
+                        return true;
                     }
                 }
                 // let cl = commonAncestorContainer.closest(this._classNameToQuery(r));
                 // if (cl)
                 //     return r;
             }
-        } else {
-            while (startLine && startLine !== endLine) {
-                startLine = startLine.nextSibling;
-                if (startLine) {
-                    if (startLine.nodeType === 1)
-                        for (let r of restrict) {
-                            if (startLine.classList.contains(r)) {
-                                if (startLine.getAttribute('contenteditable') !== 'true') {
-                                    return r;
-                                }
-                            }
-                            // if (startLine.classList.contains(r))
-                            //     return r;
+        } else if(inBetween.length) {
+            for (let i = 0; i < inBetween.length; i++) {
+                for (let r of restrict) {
+                    if (inBetween[i].closest(this._classNameToQuery(r))) {
+                        let isThere = this._isThereContentEditableOverMyHead(inBetween[i]);
+                        if(!isThere) {
+                            return true;
                         }
-                } else
-                    break;
+                    }
+                }
             }
+            // while (startLine && startLine !== endLine) {
+            //     startLine = startLine.nextSibling;
+            //     if (startLine) {
+            //         if (startLine.nodeType === 1)
+            //             for (let r of restrict) {
+            //                 if (startLine.classList.contains(r)) {
+            //                     if (startLine.getAttribute('contenteditable') !== 'true') {
+            //                         return r;
+            //                     }
+            //                 }
+            //                 // if (startLine.classList.contains(r))
+            //                 //     return r;
+            //             }
+            //     } else
+            //         break;
+            // }
         }
 
         return false;
@@ -2566,14 +2594,18 @@ class Wysiwyg4All {
                             if(c === '._custom_') {
                                 let flyup = node;
                                 let gotTheMatch = false;
-                                while (flyup && this.element === flyup || !gotTheMatch) {
-                                    gotTheMatch = flyup.getAttribute(exp[c].attr) === exp[c].value
-                                    if(!gotTheMatch)
+                                if (node !== this.element) {
+                                    while (flyup && this.element !== flyup || !gotTheMatch) {
+                                        gotTheMatch = flyup.getAttribute(exp[c].attr) === exp[c].value;
+                                        if (gotTheMatch)
+                                            return false;
+                                        
                                         flyup = flyup.parentNode;
+                                    }   
                                 }
-                                return gotTheMatch ? false : flyup;
                             }
-                            return clo.getAttribute(exp[c].attr) !== exp[c].value ? clo : false;
+                            else
+                                return clo.getAttribute(exp[c].attr) === exp[c].value ? false: clo;
                         }
 
                         return clo;
