@@ -2,9 +2,9 @@
 
 [Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4All commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
 
-**Wysiwyg4All** is a free minimal WYSIWYG editor for your website. It is highly expandable and customizable.
+**Wysiwyg4All** is a free opensource minimal WYSIWYG editor for your website. It is highly expandable and customizable.
 
-You can easily build your own full fledged WYSIWYG application with this library.
+You can easily build your own full fledged WYSIWYG application with your own css design with this library.
 
 <br />
 
