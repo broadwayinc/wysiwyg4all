@@ -1,6 +1,6 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "description": "Free opensource minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
   "browser": "dist/wysiwyg4all.js",
@@ -16,6 +16,10 @@
     "wysiwyg4all.js",
     "wysiwyg4all.css"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/broadwayinc/wysiwyg4all"
+  },
   "scripts": {
     "dev": "npx bns 3300",
     "build": "npx lessc wysiwyg4all.less wysiwyg4all.css; npx webpack --config webpack.config.js"
