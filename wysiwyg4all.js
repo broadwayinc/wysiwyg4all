@@ -102,7 +102,7 @@ class Wysiwyg4All {
         this.specialTextElement_queryArray = ['._hashtag_', '._urllink_'];
         this.restrictedElement_queryArray = ['._media_', '._custom_'];
         this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI', "TD", "TH"];
-        this.textBlockElement_queryArray = ['P', 'LI', "TD", "TH"];
+        this.textBlockElement_queryArray = ['P', 'LI', "TD", "TH"]; //, '._color', '._small', '._h1`', '._h2', '._h3', '._h4', '._h5', '._h6', '._b', '._i', '._u', '._del'
         this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`, 'TD', 'TH'];
         this.unSelectable_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
         this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_', 'TD', 'TH']; // ALLOWED ELEMENTS FOR STYLE ATTRIBUTE <... style="...">
@@ -468,25 +468,25 @@ class Wysiwyg4All {
             .toString()
             .substring(7, 13); // SECOND, MILLISECOND
 
-        const shuffleArray = (array) => {
-            let currentIndex = array.length;
-            let temporaryValue, randomIndex;
-            while (0 !== currentIndex) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex -= 1;
-                temporaryValue = array[currentIndex];
-                array[currentIndex] = array[randomIndex];
-                array[randomIndex] = temporaryValue;
-            }
-            return array;
-        };
+        // const shuffleArray = (array) => {
+        //     let currentIndex = array.length;
+        //     let temporaryValue, randomIndex;
+        //     while (0 !== currentIndex) {
+        //         randomIndex = Math.floor(Math.random() * currentIndex);
+        //         currentIndex -= 1;
+        //         temporaryValue = array[currentIndex];
+        //         array[currentIndex] = array[randomIndex];
+        //         array[randomIndex] = temporaryValue;
+        //     }
+        //     return array;
+        // };
 
-        const letter_array = shuffleArray((text + numb).split(''));
+        // const letter_array = shuffleArray((text + numb).split(''));
 
-        let output = '';
-        for (let i = 0; i < limit; i++) output += letter_array[i];
+        // let output = '';
+        // for (let i = 0; i < limit; i++) output += letter_array[i];
 
-        return prefix + output;
+        return prefix + numb + text;
     }
 
     _nodeCrawler(run, option) {
@@ -684,38 +684,6 @@ class Wysiwyg4All {
         return { node: stripped || node, range };
     }
 
-    _isSingleChildParent(n) {
-        if (this.logExecution) console.log('_isSingleChildParent()', {n});
-        if (!n || n.nodeType === 3)
-            return false;
-
-        let childrenCount = n?.children?.length;
-        return (
-            childrenCount === 0 ||
-            (() => {
-                let sweep = n.childNodes.length;
-                let divCount = 0;
-                let iHaveText = false;
-
-                while (sweep--) {
-                    let s = n.childNodes[sweep];
-
-                    if (s.nodeType === 3 && s.textContent.length > 0 && s.textContent !== '\u200B')
-                        iHaveText = true;
-
-                    else if (s.nodeType === 1 && s.nodeName !== 'BR')
-                        divCount++;
-
-                    if (divCount > 1 || divCount && iHaveText)
-                        return false;
-                }
-
-                return true;
-            })()
-        );
-
-    }
-
     _climbUpToEldestParent(node, wrapper, singleChildParent = false, callback) {
         if (this.logExecution) console.log('_climbUpToEldestParent()', {node, wrapper, singleChildParent, callback});
         callback = callback || ((n) => {
@@ -732,13 +700,42 @@ class Wysiwyg4All {
             return id;
         })();
         // on single parent mode climb up if parent has only 1 child or 2 child with zero space text
+        function _isSingleChildParent(n) {
+            if (!n || n.nodeType === 3)
+                return false;
 
+            let childrenCount = n?.children?.length;
+            return (
+                childrenCount === 0 ||
+                (() => {
+                    let sweep = n.childNodes.length;
+                    let divCount = 0;
+                    let iHaveText = false;
+
+                    while (sweep--) {
+                        let s = n.childNodes[sweep];
+
+                        if (s.nodeType === 3 && s.textContent.length > 0 && s.textContent !== '\u200B')
+                            iHaveText = true;
+
+                        else if (s.nodeType === 1 && s.nodeName !== 'BR')
+                            divCount++;
+
+                        // if (divCount > 1 || divCount && iHaveText)
+                        if ((divCount > 1) && !iHaveText || divCount && iHaveText)
+                            return false;
+                    }
+
+                    return true;
+                })()
+            );
+        }
         while (
             node?.id !== uniqueId &&
             node.parentNode &&
             node.parentNode.closest('#' + uniqueId) &&
             node.parentNode.id !== uniqueId &&
-            (singleChildParent ? this._isSingleChildParent(node?.parentNode) : true)
+            (singleChildParent ? _isSingleChildParent(node?.parentNode) : true)
         ) {
 
             let cb = callback(node.parentNode);
@@ -755,6 +752,30 @@ class Wysiwyg4All {
         return node;
     }
 
+    _getStartEndLine(range = this.range, element = this.element, getInbetween = false) {
+        if (this.logExecution) console.log('_getStartEndLine()', {range, element});
+        if (!range)
+            return [null, null];
+
+        let startLine = this._climbUpToEldestParent(range.startContainer, element);
+        let endLine = this._climbUpToEldestParent(range.endContainer, element);
+
+        let inBetween = [];
+        if (getInbetween) {
+            // collect all the lines in between startLine and endLine. line is a block element
+            let currentLine = startLine.nextSibling;
+            while (currentLine && currentLine !== endLine) {
+                if (currentLine.nodeType === 1 && this.blockElement_queryArray.some(q => currentLine.matches(this._classNameToQuery(q)))) {
+                    inBetween.push(currentLine);
+                }
+                currentLine = currentLine.nextSibling;
+            }
+        }
+        if (this.logExecution) console.log('startLine | endLine', {startLine, endLine, inBetween});
+
+        return [startLine, endLine, inBetween];
+    }
+
     _isSelectionWithinRestrictedRange(range = this.range, element = this.element) {
         if (this.logExecution) console.log('_isSelectionWithinRestrictedRange()', {range, element});
         if (!range)
@@ -762,8 +783,11 @@ class Wysiwyg4All {
 
         let { commonAncestorContainer, startContainer, endContainer } = range;
         let restrict = this.restrictedElement_queryArray;
-        let startLine = this._climbUpToEldestParent(startContainer, element);
-        let endLine = this._climbUpToEldestParent(endContainer, element);
+        // let startLine = this._climbUpToEldestParent(startContainer, element);
+        // let endLine = this._climbUpToEldestParent(endContainer, element);
+
+        // if (this.logExecution) console.log('startLine | endLine', {startLine, endLine});
+        let [startLine, endLine] = this._getStartEndLine(range, element);
 
         if (startLine === endLine) {
             commonAncestorContainer = commonAncestorContainer.nodeType === 3 ? commonAncestorContainer.parentNode : commonAncestorContainer;
@@ -869,9 +893,9 @@ class Wysiwyg4All {
         return commandTracker;
     }
 
-    _lastLineBlank() {
-        if (this.logExecution) console.log('_lastLineBlank()');
-        if (this.lastLineBlank) {
+    _lastLineBlank(force) {
+        if (this.logExecution) console.log('_lastLineBlank()', {force});
+        if (this.lastLineBlank || force) {
             let lastLine = this.element.lastChild;
             if (lastLine.nodeName !== 'P' ||
                 lastLine.nodeName === 'P' && lastLine.textContent && lastLine.textContent !== '\u200B') {
@@ -1003,7 +1027,7 @@ class Wysiwyg4All {
                 else if (caratEl.nodeType === 1)
                     caratPosition = caratEl.getBoundingClientRect();
 
-                this._callback({ commandTracker, range: this.range, caratPosition }).catch(err => err);
+                this._callback({ commandTracker, range: this.range, caratPosition }).catch(err => console.error(err));
                 this._lastLineBlank();
             });
         }).bind(this);
@@ -1038,6 +1062,19 @@ class Wysiwyg4All {
                 // delete key
                 if (['BACKSPACE', 'DELETE'].includes(key)) {
                     this.isRangeDirectionForward = true;
+                    
+                    // if (
+                    //     this.element.childNodes.length === 1 &&
+                    //     this._isTextBlockElement(this.element.childNodes[0]) &&
+                    //     this.element.childNodes[0].textContent.length === 0
+                    // ) {
+                    //     if(this.logExecution) console.log('dead end');
+                    //     e.preventDefault();
+                    //     // Optionally, reset to a blank paragraph
+                    //     // this.element.childNodes[0].innerHTML = '<br>';
+                    //     // this.range = this._adjustSelection({ node: this.element.childNodes[0], position: 0 });
+                    //     this._lastLineBlank(true);
+                    // }
 
                     if (
                         !this.element.textContent &&
@@ -1237,8 +1274,8 @@ class Wysiwyg4All {
 
                 this.isRangeDirectionForward = true;
             });
-
         }).bind(this);
+
         this._normalize = (function (e) {
             e.stopPropagation();
             this._modifySelection(() => {
@@ -1974,8 +2011,9 @@ class Wysiwyg4All {
     _append(i, insertAfter, wrap = false, focusElement) {
         if (this.logExecution) console.log('_append', {i, insertAfter, wrap, focusElement});
         let common = this._climbUpToEldestParent(this.range.commonAncestorContainer, this.element);
-        let startLine = this._climbUpToEldestParent(this.range.startContainer, this.element);
-        let endLine = this._climbUpToEldestParent(this.range.endContainer, this.element);
+        let [startLine, endLine] = this._getStartEndLine();
+        // let startLine = this._climbUpToEldestParent(this.range.startContainer, this.element);
+        // let endLine = this._climbUpToEldestParent(this.range.endContainer, this.element);
         let insertRestricted = ['HR', 'UL', 'LI', '._media_', '._custom_'];
 
         let append = (node) => {
@@ -3312,7 +3350,7 @@ class Wysiwyg4All {
         bool = this.element ? bool : false;
 
         if (this.element)
-            this.element.setAttribute("contenteditable", JSON.stringify(bool));
+            this.element.setAttribute("contenteditable", bool ? "true" : "false");
 
         this._setEventListener(bool);
         this._observeMutation(bool);
