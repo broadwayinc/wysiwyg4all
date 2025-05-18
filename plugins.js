@@ -1,3 +1,5 @@
+// plugin example: create a table with editable cells
+
 let createTable = (cols, rows) => {
     let table = document.createElement('table');
     table.setAttribute('contenteditable', 'true');

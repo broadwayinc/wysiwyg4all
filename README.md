@@ -284,8 +284,7 @@ HTML string or node element can be assigned in `wysiwyg.command()` element value
 let customElement = () => {
     // add smile emoji. This can be html string (ex - <div>Hello</div>) or node element (ex - document.createElement('div'))
     wysiwyg.command({
-        element: '&#128512;',
-        contenteditable: false // when true, added custom element is editable
+        element: '&#128512;'
     });
 };
 ```
