@@ -1094,9 +1094,10 @@ class Wysiwyg4All {
         let unSel = this._isUnSelectableElement(rangeHeader);
         if (unSel) {
           let selNext = isForward ? unSel.nextSibling : unSel.previousSibling;
-          
-          if(this.logExecution) console.log('nudging range', {unSel, selNext, isForward});
-          
+
+          if (this.logExecution)
+            console.log("nudging range", { unSel, selNext, isForward });
+
           if (!selNext && !isForward) {
             selNext = document.createTextNode("\u200B");
             unSel.parentNode.insertBefore(
@@ -1244,68 +1245,80 @@ class Wysiwyg4All {
             this._isTextElement(this.element.childNodes[0]) &&
             this.element.childNodes[0] === startLine
           ) {
-            if(this.logExecution) console.log('nothing to delete');
+            if (this.logExecution) console.log("nothing to delete");
             // there is nothing to delete
             e.preventDefault();
-          } else {
-            let stc = this.range.startContainer;
-            if (this.range.collapsed) {
-              let block = (stc.nodeType === 3 ? stc.parentNode : stc).closest(
-                "blockquote"
-              );
-              if (
-                block &&
-                block.childNodes[0] ===
-                  this._climbUpToEldestParent(stc, block) &&
-                this.range.startOffset === 0
-              ) {
-                // if the block is empty and the cursor is on the first offset position within the blockquote
-                // cursor is on the first offset position within the blockquote
-                e.preventDefault();
-                this.command("quote");
-              }
+            return;
+          }
 
-              if(this.range.startOffset === 0) {
-                let ceil = this._climbUpToEldestParent(stc, this.element).previousSibling;
-                for(let cl of this.restrictedElement_queryArray) {
-                  if(ceil && ceil.closest(cl)) {
-                    // remove the element
-                    this.element.removeChild(ceil);
-                    e.preventDefault();
-                    return;
-                  }
+          let stc = this.range.startContainer;
+          if (this.range.collapsed) {
+            let block = (stc.nodeType === 3 ? stc.parentNode : stc).closest(
+              "blockquote"
+            );
+            if (
+              block &&
+              block.childNodes[0] === this._climbUpToEldestParent(stc, block) &&
+              this.range.startOffset === 0
+            ) {
+              // if the block is empty and the cursor is on the first offset position within the blockquote
+              // cursor is on the first offset position within the blockquote
+
+              if (this.logExecution)
+                console.log(
+                  "block is empty and the cursor is on the first offset position within the blockquote"
+                );
+              e.preventDefault();
+              this.command("quote");
+              return;
+            } else if (this.range.startOffset === 0) {
+              let ceil = this._climbUpToEldestParent(
+                stc,
+                this.element
+              ).previousSibling;
+              for (let cl of this.restrictedElement_queryArray) {
+                if (ceil && ceil.closest(cl)) {
+                  // remove the element
+                  this.element.removeChild(ceil);
+
+                  if (this.logExecution)
+                    console.log("removing element", { ceil });
+                  e.preventDefault();
+                  return;
                 }
               }
             }
-
-            let commonAncestorContainer = this.range.commonAncestorContainer;
-            // check if commonAncestorContainer is the only element in this.element
-
-            // e.preventDefault();
-            if (
-              !this.range.startOffset &&
-              ((this.element.childNodes.length === 1 &&
-              commonAncestorContainer === this.element.childNodes[0]) ||
-              (commonAncestorContainer === this.element && this.element.childNodes.length === 0))
-            ) {
-              // if the element is empty and the cursor is on the first offset position within the block
-              // let t = document.createTextNode("\u200B");
-              // let stcEl = stc.nodeType === 3 ? stc.parentNode : stc;
-              // stcEl.insertBefore(t, stcEl[0]);
-              e.preventDefault();
-              return;
-            }
-
-            // // Not sure what this is meant to do...
-            // if (stc.nodeType === 1 && this._isTextBlockElement(stc) && !this.range.startOffset) {
-            //     let t = document.createTextNode('\u200B');
-            //     stc.insertBefore(t, stc.childNodes[0]);
-            //     this.range = this._adjustSelection({
-            //         node: t,
-            //         position: 0
-            //     });
-            // }
+            return;
           }
+
+          let commonAncestorContainer = this.range.commonAncestorContainer;
+          // check if commonAncestorContainer is the only element in this.element
+
+          // e.preventDefault();
+          if (
+            !this.range.startOffset &&
+            ((this.element.childNodes.length === 1 &&
+              commonAncestorContainer === this.element.childNodes[0]) ||
+              (commonAncestorContainer === this.element &&
+                this.element.childNodes.length === 0))
+          ) {
+            // if the element is empty and the cursor is on the first offset position within the block
+            // let t = document.createTextNode("\u200B");
+            // let stcEl = stc.nodeType === 3 ? stc.parentNode : stc;
+            // stcEl.insertBefore(t, stcEl[0]);
+            e.preventDefault();
+            return;
+          }
+
+          // // Not sure what this is meant to do...
+          // if (stc.nodeType === 1 && this._isTextBlockElement(stc) && !this.range.startOffset) {
+          //     let t = document.createTextNode('\u200B');
+          //     stc.insertBefore(t, stc.childNodes[0]);
+          //     this.range = this._adjustSelection({
+          //         node: t,
+          //         position: 0
+          //     });
+          // }
 
           return;
         }
