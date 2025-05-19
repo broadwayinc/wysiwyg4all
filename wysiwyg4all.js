@@ -111,8 +111,8 @@ class Wysiwyg4All {
     ];
     this.specialTextElement_queryArray = ["._hashtag_", "._urllink_"];
     this.restrictedElement_queryArray = ["._media_", "._custom_"];
-    this.textAreaElement_queryArray = ["BLOCKQUOTE", "LI", "TD", "TH"];
-    this.textBlockElement_queryArray = ["P", "LI"]; //, "TD", "TH", '._color', '._small', '._h1`', '._h2', '._h3', '._h4', '._h5', '._h6', '._b', '._i', '._u', '._del'
+    this.textAreaElement_queryArray = ["BLOCKQUOTE", "LI"];
+    this.textBlockElement_queryArray = ["P", "LI", "TD", "TH"]; //, "TD", "TH", '._color', '._small', '._h1`', '._h2', '._h3', '._h4', '._h5', '._h6', '._b', '._i', '._u', '._del'
     this.ceilingElement_queryArray = [
       "UL",
       "OL",
