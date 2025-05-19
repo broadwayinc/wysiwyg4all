@@ -1,5 +1,14 @@
 import { ColorMangle } from "colormangle";
 
+// Add debouncing for frequent operations like selection changes
+const debounce = (fn, delay) => {
+  let timeout;
+  return function () {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, arguments), delay);
+  };
+};
+
 class Wysiwyg4All {
   /**
    * Wysiwyg4All is a simple framework for building a text editor for your website.
@@ -524,24 +533,6 @@ class Wysiwyg4All {
 
     const numb = new Date().getTime().toString().substring(7, 13); // SECOND, MILLISECOND
 
-    // const shuffleArray = (array) => {
-    //     let currentIndex = array.length;
-    //     let temporaryValue, randomIndex;
-    //     while (0 !== currentIndex) {
-    //         randomIndex = Math.floor(Math.random() * currentIndex);
-    //         currentIndex -= 1;
-    //         temporaryValue = array[currentIndex];
-    //         array[currentIndex] = array[randomIndex];
-    //         array[randomIndex] = temporaryValue;
-    //     }
-    //     return array;
-    // };
-
-    // const letter_array = shuffleArray((text + numb).split(''));
-
-    // let output = '';
-    // for (let i = 0; i < limit; i++) output += letter_array[i];
-
     return prefix + numb + text;
   }
 
@@ -622,10 +613,10 @@ class Wysiwyg4All {
     let endNode = nodeIsRange
       ? node.endContainer
       : commonContainer.childNodes[
-          commonContainer.childNodes.length
-            ? commonContainer.childNodes.length - 1
-            : 0
-        ];
+      commonContainer.childNodes.length
+        ? commonContainer.childNodes.length - 1
+        : 0
+      ];
 
     let withInRange = (cwl) => {
       if (!cwl || !(cwl instanceof Node)) return false;
@@ -883,6 +874,25 @@ class Wysiwyg4All {
     return false;
   }
 
+  // Add browser-specific normalization
+  _normalizeBrowserQuirks() {
+    // Handle Firefox's extra <br> tags
+    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+      this._nodeCrawler((node) => {
+        if (node.nodeName === 'BR' &&
+          (!node.nextSibling || node.nextSibling.nodeName === 'BR')) {
+          node.remove();
+        }
+        return node;
+      }, { node: this.element });
+    }
+
+    // Handle Safari's selection quirks
+    if (navigator.userAgent.toLowerCase().indexOf('safari') > -1) {
+      // Safari-specific fixes
+    }
+  }
+
   _isSelectionWithinRestrictedRange(
     range = this.range,
     element = this.element
@@ -1079,10 +1089,29 @@ class Wysiwyg4All {
       });
     });
 
-    this._selectionchange = function () {
+    this._selectionchange = debounce(function () {
+
+      // find the range direction
+      let isRangeDirectionForward = true;
+      if (this.range) {
+        let { startContainer, endContainer } = this.range;
+        if (startContainer === endContainer) {
+          isRangeDirectionForward =
+            this.range.startOffset <= this.range.endOffset;
+        } else {
+          let startLine = this.range.startLine;
+          let endLine = this.range.endLine;
+          isRangeDirectionForward =
+            startLine.compareDocumentPosition(endLine) ===
+            Node.DOCUMENT_POSITION_FOLLOWING;
+        }
+      }
+      this.isRangeDirectionForward = isRangeDirectionForward;
+      if (this.logExecution) console.log("isRangeDirectionForward", { isRangeDirectionForward, range: this.range });
+
       this._modifySelection(() => {
         let isForward =
-          !(this.lastKey === "DELETE" || this.lastKey === "BACKSPACE") ||
+          // !(this.lastKey === "DELETE" || this.lastKey === "BACKSPACE") ||
           this.isRangeDirectionForward;
 
         let rangeHeader = isForward
@@ -1090,9 +1119,11 @@ class Wysiwyg4All {
           : this.range.startContainer;
         this.lastKey = null;
 
+        if (this.logExecution)
+          console.log("isForward", { isForward });
         //  nudge range in-case carat is within non selectables
         let unSel = this._isUnSelectableElement(rangeHeader);
-        if (unSel) {
+        if (unSel && this.range.endContainer !== this.range.startContainer) {
           let selNext = isForward ? unSel.nextSibling : unSel.previousSibling;
 
           if (this.logExecution)
@@ -1109,16 +1140,16 @@ class Wysiwyg4All {
             this.range = this._adjustSelection({
               node: this.range.collapsed
                 ? selNext
-                : isForward
-                ? [null, selNext]
-                : [selNext, null],
+                : !isForward
+                  ? [null, selNext]
+                  : [selNext, null],
               position: this.range.collapsed
-                ? isForward
+                ? !isForward
                   ? 0
                   : selNext.textContent.length
-                : isForward
-                ? [null, 0]
-                : [0, null],
+                : !isForward
+                  ? [null, 0]
+                  : [0, null],
             });
         }
 
@@ -1148,8 +1179,8 @@ class Wysiwyg4All {
               return node.nodeType === 3
                 ? node.parentNode.closest(c)
                 : node.nodeType === 1
-                ? node.closest(c)
-                : !(node instanceof Node);
+                  ? node.closest(c)
+                  : !(node instanceof Node);
             };
 
             for (let p of skipTrack) {
@@ -1201,7 +1232,7 @@ class Wysiwyg4All {
         }).catch((err) => console.error(err));
         this._lastLineBlank();
       });
-    }.bind(this);
+    }.bind(this), 8);
 
     this._keydown = function (e) {
       if (this._isSelectionWithinRestrictedRange()) return;
@@ -1224,7 +1255,7 @@ class Wysiwyg4All {
 
         // delete key
         if (["BACKSPACE", "DELETE"].includes(key)) {
-          this.isRangeDirectionForward = true;
+          // this.isRangeDirectionForward = true;
 
           // if (
           //     this.element.childNodes.length === 1 &&
@@ -1253,6 +1284,7 @@ class Wysiwyg4All {
 
           let stc = this.range.startContainer;
           if (this.range.collapsed) {
+            if (this.logExecution) console.log('range is collapsed');
             let block = (stc.nodeType === 3 ? stc.parentNode : stc).closest(
               "blockquote"
             );
@@ -1271,7 +1303,8 @@ class Wysiwyg4All {
               e.preventDefault();
               this.command("quote");
               return;
-            } else if (this.range.startOffset === 0) {
+            }
+            else if (this.range.startOffset === 0) {
               let ceil = this._climbUpToEldestParent(
                 stc,
                 this.element
@@ -1288,13 +1321,27 @@ class Wysiwyg4All {
                 }
               }
             }
+            else {
+              let ceil = this.isRangeDirectionForward ? this.range.startLine.previousSibling : this.range.endLine;
+              if (ceil)
+                this.restrictedElement_queryArray.forEach((cl) => {
+                  if (ceil.closest(cl)) {
+                    if (this.isRangeDirectionForward ? this.range.startOffset <= 1 : this.range.endOffset <= 1) {
+                      // remove the element
+                      this.element.removeChild(ceil);
+
+                      if (this.logExecution)
+                        console.log("removing element", { ceil });
+                      e.preventDefault();
+                    }
+                  }
+                });
+            }
             return;
           }
 
           let commonAncestorContainer = this.range.commonAncestorContainer;
           // check if commonAncestorContainer is the only element in this.element
-
-          // e.preventDefault();
           if (
             !this.range.startOffset &&
             ((this.element.childNodes.length === 1 &&
@@ -1302,6 +1349,7 @@ class Wysiwyg4All {
               (commonAncestorContainer === this.element &&
                 this.element.childNodes.length === 0))
           ) {
+            if (this.logExecution) console.log('element is empty and the cursor is on the first offset position within the block');
             // if the element is empty and the cursor is on the first offset position within the block
             // let t = document.createTextNode("\u200B");
             // let stcEl = stc.nodeType === 3 ? stc.parentNode : stc;
@@ -1309,7 +1357,25 @@ class Wysiwyg4All {
             e.preventDefault();
             return;
           }
+          // else {
+          //   console.log({ isRangeDirectionForward: this.isRangeDirectionForward });
+          //   let ceil = this.isRangeDirectionForward ? this.range.startLine : this.range.endLine;
+          //   console.log({ range: this.range, ceil });
+          //   if (ceil)
+          //     this.restrictedElement_queryArray.forEach((cl) => {
+          //       if (ceil.closest(cl)) {
+          //         console.log('removed')
+          //         // remove the element
+          //         if (this.isRangeDirectionForward ? this.range.startOffset <= 1 : this.range.endOffset <= 1) {
+          //           this.element.removeChild(ceil);
 
+          //           if (this.logExecution)
+          //             console.log("removing element", { ceil });
+          //           e.preventDefault();
+          //         }
+          //       }
+          //     });
+          // }
           // // Not sure what this is meant to do...
           // if (stc.nodeType === 1 && this._isTextBlockElement(stc) && !this.range.startOffset) {
           //     let t = document.createTextNode('\u200B');
@@ -1347,17 +1413,17 @@ class Wysiwyg4All {
         // when user press shift + arrows to expand the selection range,
         // this.isRangeDirectionForward is responsible of setting direction to expand
         // when set to true, the endOffset will change when using shift + arrow
-        if (shift) {
-          if (key === "PAGEUP" || key === "HOME") {
-            this.isRangeDirectionForward = false;
-            return;
-          }
+        // if (shift) {
+        //   if (key === "PAGEUP" || key === "HOME") {
+        //     this.isRangeDirectionForward = false;
+        //     return;
+        //   }
 
-          if (key === "PAGEDOWN" || key === "END") {
-            this.isRangeDirectionForward = true;
-            return;
-          }
-        }
+        //   if (key === "PAGEDOWN" || key === "END") {
+        //     this.isRangeDirectionForward = true;
+        //     return;
+        //   }
+        // }
 
         if (key.includes("ARROW")) {
           this._setArrow(e);
@@ -1365,7 +1431,7 @@ class Wysiwyg4All {
         }
 
         if (key === "TAB") {
-          this.isRangeDirectionForward = true;
+          // this.isRangeDirectionForward = true;
 
           e.preventDefault();
           let sweep_array = [];
@@ -1488,7 +1554,7 @@ class Wysiwyg4All {
           }
         }
 
-        this.isRangeDirectionForward = true;
+        // this.isRangeDirectionForward = true;
       });
     }.bind(this);
 
@@ -1541,6 +1607,17 @@ class Wysiwyg4All {
     window.addEventListener("mousedown", this._normalize);
     this.element.addEventListener("paste", this._paste);
     this.element.addEventListener("keyup", this._keyup);
+  }
+
+  // Current code doesn't properly clean up event listeners
+  destroy() {
+    this.observer.disconnect();
+    document.removeEventListener("selectionchange", this._selectionchange);
+    this.element.removeEventListener("keydown", this._keydown);
+    this.element.removeEventListener("mousedown", this._normalize);
+    window.removeEventListener("mousedown", this._normalize);
+    this.element.removeEventListener("paste", this._paste);
+    this.element.removeEventListener("keyup", this._keyup);
   }
 
   _observeMutation(track) {
@@ -1743,13 +1820,13 @@ class Wysiwyg4All {
                   let line = isWysiwygEldestChild
                     ? i
                     : isWysiwygChild &&
-                      (() => {
-                        let m = i;
-                        while (m && !this._isCeilingElement(m.parentNode)) {
-                          m = m.parentNode;
-                        }
-                        return m;
-                      })();
+                    (() => {
+                      let m = i;
+                      while (m && !this._isCeilingElement(m.parentNode)) {
+                        m = m.parentNode;
+                      }
+                      return m;
+                    })();
 
                   return {
                     isWysiwygChild,
@@ -1993,12 +2070,6 @@ class Wysiwyg4All {
         caratElement?.nodeType === 3 ? caratElement?.parentNode : caratElement;
     };
 
-    let preventDefault = () => {
-      try {
-        e.preventDefault();
-      } catch (err) {}
-    };
-
     let removeZeroSpace = () => {
       let targetContainer = this.isRangeDirectionForward
         ? endContainer
@@ -2055,7 +2126,7 @@ class Wysiwyg4All {
                 });
 
                 rangeSetup();
-                preventDefault();
+                e.preventDefault();
                 return "BREAK";
               }
             }
@@ -2152,7 +2223,7 @@ class Wysiwyg4All {
         arrowDirection = arrowDirection || "RIGHT";
 
         if (metaKey || (collapsed && shift)) {
-          this.isRangeDirectionForward = arrowDirection === "RIGHT";
+          // this.isRangeDirectionForward = arrowDirection === "RIGHT";
           rangeSetup();
         }
 
@@ -2174,7 +2245,7 @@ class Wysiwyg4All {
         arrowDirection = arrowDirection || "DOWN";
 
         if (!collapsed && !shift) {
-          preventDefault();
+          e.preventDefault();
           let adj =
             arrowDirection === "UP"
               ? [startContainer, startOffset]
@@ -2187,7 +2258,7 @@ class Wysiwyg4All {
         }
 
         if (collapsed || isAllRangeOnSameLine) {
-          this.isRangeDirectionForward = arrowDirection === "DOWN";
+          // this.isRangeDirectionForward = arrowDirection === "DOWN";
           rangeSetup();
         }
 
@@ -2239,7 +2310,7 @@ class Wysiwyg4All {
           : forwardNode;
         if (_forwardNode) {
           if (this._isBlockElement(_forwardNode) && !shift) {
-            preventDefault();
+            e.preventDefault();
 
             let leap =
               arrowDirection === "UP"
@@ -2268,7 +2339,7 @@ class Wysiwyg4All {
             )
               this.removeSandwichedLine_array.push(currentLine);
           } else if (!isMultiLine && arrowDirection === "DOWN") {
-            preventDefault();
+            e.preventDefault();
             let collectOffset = 0;
             let currentOffset = this.isRangeDirectionForward
               ? endOffset
@@ -2289,16 +2360,16 @@ class Wysiwyg4All {
               node: collapsed
                 ? forwardNode
                 : this.isRangeDirectionForward
-                ? [null, forwardNode]
-                : [forwardNode, null],
+                  ? [null, forwardNode]
+                  : [forwardNode, null],
               position: collapsed
                 ? collectOffset
                 : this.isRangeDirectionForward
-                ? [null, collectOffset]
-                : [collectOffset, null],
+                  ? [null, collectOffset]
+                  : [collectOffset, null],
             });
           }
-        } else preventDefault();
+        } // else e.preventDefault();
     }
   }
 
@@ -3022,8 +3093,8 @@ class Wysiwyg4All {
           c[0] === "#"
             ? node.id === c.substring(1)
             : c[0] === "."
-            ? node.classList.contains(c.substring(1))
-            : node.nodeName === c
+              ? node.classList.contains(c.substring(1))
+              : node.nodeName === c
         )
           return true;
       }
@@ -3033,14 +3104,14 @@ class Wysiwyg4All {
   _isUnSelectableElement(node) {
     if (this.logExecution) console.log("_isUnSelectableElement", { node });
     node = node?.nodeType === 3 ? node.parentNode : node;
-    let exceptions = {
-      "._custom_": { attr: "contenteditable", value: "true" },
-    };
+    // let exceptions = {
+    //   "._custom_": { attr: "contenteditable", value: "true" },
+    // };
     return this._checkElement(
       node,
       this.unSelectable_queryArray,
       true,
-      exceptions
+      // exceptions
     );
   }
 
@@ -3270,7 +3341,7 @@ class Wysiwyg4All {
     try {
       isColor = new ColorMangle(action).hex();
       action = "color";
-    } catch {}
+    } catch { }
 
     //  style command
     if (this.styleTagOfCommand[action]) {
@@ -3296,7 +3367,7 @@ class Wysiwyg4All {
               isColor === this.commandTracker[action] ||
               (isColor === undefined &&
                 this.commandTracker[action] ===
-                  this.cssVariable["--content-focus"]);
+                this.cssVariable["--content-text_focus"]);
           } else pass = true;
 
           if (pass) {
