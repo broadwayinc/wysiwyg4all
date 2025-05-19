@@ -1,6 +1,6 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.34",
+  "version": "1.0.35",
   "description": "Free opensource minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
   "browser": "dist/wysiwyg4all.js",

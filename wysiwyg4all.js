@@ -111,8 +111,8 @@ class Wysiwyg4All {
     ];
     this.specialTextElement_queryArray = ["._hashtag_", "._urllink_"];
     this.restrictedElement_queryArray = ["._media_", "._custom_"];
-    this.textAreaElement_queryArray = ["BLOCKQUOTE", "LI", "TD", "TH"];
-    this.textBlockElement_queryArray = ["P", "LI", "TD", "TH"]; //, "TD", "TH", '._color', '._small', '._h1`', '._h2', '._h3', '._h4', '._h5', '._h6', '._b', '._i', '._u', '._del'
+    this.textAreaElement_queryArray = ["BLOCKQUOTE", "LI"]; // , "TD", "TH"
+    this.textBlockElement_queryArray = ["P", "LI"]; //, "TD", "TH", '._color', '._small', '._h1`', '._h2', '._h3', '._h4', '._h5', '._h6', '._b', '._i', '._u', '._del'
     this.ceilingElement_queryArray = [
       "UL",
       "OL",
@@ -907,7 +907,6 @@ class Wysiwyg4All {
       element,
       true
     );
-    console.log("startLine | endLine", { startLine, endLine, inBetween });
     if (startLine === endLine) {
       commonAncestorContainer =
         commonAncestorContainer.nodeType === 3
@@ -1095,7 +1094,9 @@ class Wysiwyg4All {
         let unSel = this._isUnSelectableElement(rangeHeader);
         if (unSel) {
           let selNext = isForward ? unSel.nextSibling : unSel.previousSibling;
-
+          
+          if(this.logExecution) console.log('nudging range', {unSel, selNext, isForward});
+          
           if (!selNext && !isForward) {
             selNext = document.createTextNode("\u200B");
             unSel.parentNode.insertBefore(
@@ -1243,6 +1244,7 @@ class Wysiwyg4All {
             this._isTextElement(this.element.childNodes[0]) &&
             this.element.childNodes[0] === startLine
           ) {
+            if(this.logExecution) console.log('nothing to delete');
             // there is nothing to delete
             e.preventDefault();
           } else {
@@ -1257,9 +1259,22 @@ class Wysiwyg4All {
                   this._climbUpToEldestParent(stc, block) &&
                 this.range.startOffset === 0
               ) {
+                // if the block is empty and the cursor is on the first offset position within the blockquote
                 // cursor is on the first offset position within the blockquote
                 e.preventDefault();
                 this.command("quote");
+              }
+
+              if(this.range.startOffset === 0) {
+                let ceil = this._climbUpToEldestParent(stc, this.element).previousSibling;
+                for(let cl of this.restrictedElement_queryArray) {
+                  if(ceil && ceil.closest(cl)) {
+                    // remove the element
+                    this.element.removeChild(ceil);
+                    e.preventDefault();
+                    return;
+                  }
+                }
               }
             }
 
@@ -1269,12 +1284,16 @@ class Wysiwyg4All {
             // e.preventDefault();
             if (
               !this.range.startOffset &&
-              this.element.childNodes.length === 1 &&
-              commonAncestorContainer === this.element.childNodes[0]
+              ((this.element.childNodes.length === 1 &&
+              commonAncestorContainer === this.element.childNodes[0]) ||
+              (commonAncestorContainer === this.element && this.element.childNodes.length === 0))
             ) {
-              let t = document.createTextNode("\u200B");
-              let stcEl = stc.nodeType === 3 ? stc.parentNode : stc;
-              stcEl.insertBefore(t, stcEl[0]);
+              // if the element is empty and the cursor is on the first offset position within the block
+              // let t = document.createTextNode("\u200B");
+              // let stcEl = stc.nodeType === 3 ? stc.parentNode : stc;
+              // stcEl.insertBefore(t, stcEl[0]);
+              e.preventDefault();
+              return;
             }
 
             // // Not sure what this is meant to do...
@@ -3484,7 +3503,7 @@ class Wysiwyg4All {
         else if (action.element instanceof HTMLElement)
           custom.append(action.element);
 
-        if (!custom.children.length) action.insert = true;
+        if (!custom.children.length) action.insert = true; // insert if only text node
 
         if (!this.range) this.element.focus();
 
@@ -3492,9 +3511,11 @@ class Wysiwyg4All {
 
         this._callback({ custom: action }).then((_) => {
           if (action.insert) {
+            let txt = document.createTextNode("");
+            this.range.insertNode(txt); // when inserted in range, it will push the next el back
             this.range.insertNode(custom);
             this.range = this._adjustSelection({
-              node: custom,
+              node: txt,
               position: false,
             });
           } else this._append(custom, this._createEmptyParagraph(), false);
