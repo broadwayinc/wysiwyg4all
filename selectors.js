@@ -191,11 +191,12 @@ function nodeCrawler(run, option) {
 
     if (nodeIsRange) {
         commonContainer = node.commonAncestorContainer;
-        commonContainer =
-            commonContainer.nodeType === 3
-                ? commonContainer.parentNode || commonContainer
-                : commonContainer;
     } else commonContainer = node;
+
+    commonContainer =
+        commonContainer.nodeType === 3
+            ? commonContainer?.parentNode || commonContainer
+            : commonContainer;
 
     if (startFromEldestChild)
         commonContainer = climbUpToEldestParent(
@@ -257,51 +258,46 @@ function nodeCrawler(run, option) {
         if (!cwl || !(cwl instanceof Node)) return false;
         if (cwl.nodeType === 1)
             return cwl.id !== uniqueId && cwl.parentNode?.closest("#" + uniqueId);
-        else return true;
+        else if (cwl.nodeType === 3)
+            return cwl.parentNode && cwl.parentNode?.closest("#" + uniqueId);
+        else return false;
     };
-
+    let diving = false;
     while (withInRange(crawl)) {
-        if (crawl.nodeType === 1 && crawl.childNodes.length) {
+        console.log({ crawl })
+        if (!diving && crawl.nodeType === 1 && crawl.childNodes.length) {
             // dive down to deepest child's first crawl
             crawl = crawl.childNodes[0];
         } else if (crawl) {
+            diving = true;
             // entering the deepest elements first child.
 
             if (typeof run === "function") crawl = run(crawl);
-            if (crawl === "BREAK" || !withInRange(crawl)) break;
+            if (crawl === "BREAK") break;
 
-            outputNodes.push(crawl);
-
-            // break out if the crawl hits the end
-            if (crawl === endNode) break;
+            if (withInRange(crawl))
+                outputNodes.push(crawl);
 
             /**
              * Climb up the node if the node doesn't have any next siblings
              * Stop when it hits the commonContainer
              */
-            let breakOut = false;
-            while (
-                !crawl.nextSibling &&
-                crawl.parentNode &&
-                withInRange(crawl.parentNode)
+            if (
+                crawl.nextSibling
             ) {
-                crawl = crawl.parentNode;
-                if (crawl) {
-                    if (typeof run === "function") crawl = run(crawl);
-
-                    if (crawl === "BREAK" || !withInRange(crawl)) {
-                        breakOut = true;
-                        break;
-                    }
-
-                    if (crawl) outputNodes.push(crawl);
+                crawl = crawl.nextSibling;
+            } else if (crawl.parentNode) {
+                if (crawl.parentNode === commonContainer) {
+                    crawl = crawl.nextSibling;
+                    diving = false;
+                }
+                else {
+                    crawl = crawl.parentNode;
                 }
             }
-
-            if (breakOut) break;
-
-            // move on to next crawl
-            crawl = crawl.nextSibling;
+            else {
+                break;
+            }
         }
     }
 

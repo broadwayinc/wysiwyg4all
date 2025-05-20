@@ -46,7 +46,7 @@
 </button>
 
 <!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
-<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)"
+<input id='colorInput' type='color' oninput="wysiwyg.command(event.target.value)"
     onblur="wysiwyg.restoreLastSelection()" />
 <!-- .command('color') changes text to highlight color set on constructor -->
 <button onclick="wysiwyg.command('color')">
@@ -188,13 +188,14 @@
     let customElement = () => {
         // add emoji
         wysiwyg.command({
-            element: '&#128512;' // can be html string (ex - <div>Hello</div>) or Node elements (ex - document.createElement('div'))
+            element: '😃' // can be html string (ex - <div>Hello</div>) or Node elements (ex - document.createElement('div'))
         });
     };
 
     let tablePlugin = (col, row) => {
         wysiwyg.command({
             element: createTable(col, row), // create custom table element, from plugins.js
+            contenteditable: true
         });
     }
 

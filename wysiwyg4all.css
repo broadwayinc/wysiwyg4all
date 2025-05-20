@@ -129,20 +129,6 @@
 ._wysiwyg4all th span:empty {
   display: inline-block;
 }
-._wysiwyg4all p span:empty::after,
-._wysiwyg4all h1 span:empty::after,
-._wysiwyg4all h2 span:empty::after,
-._wysiwyg4all h3 span:empty::after,
-._wysiwyg4all h4 span:empty::after,
-._wysiwyg4all h5 span:empty::after,
-._wysiwyg4all h6 span:empty::after,
-._wysiwyg4all small span:empty::after,
-._wysiwyg4all i span:empty::after,
-._wysiwyg4all li span:empty::after,
-._wysiwyg4all td span:empty::after,
-._wysiwyg4all th span:empty::after {
-  content: '\200B';
-}
 ._wysiwyg4all p ._hashtag_,
 ._wysiwyg4all h1 ._hashtag_,
 ._wysiwyg4all h2 ._hashtag_,

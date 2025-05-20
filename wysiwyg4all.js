@@ -2,14 +2,6 @@ import { ColorMangle } from "colormangle";
 import { adjustSelection, nodeCrawler, climbUpToEldestParent } from "./selectors.js";
 import { regexr, generateId } from "./util.js";
 // Add debouncing for frequent operations like selection changes
-const debounce = (fn, delay) => {
-  let timeout;
-  return function () {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn.apply(this, arguments), delay);
-  };
-};
-
 class Wysiwyg4All {
   constructor(option) {
     let {
@@ -478,11 +470,6 @@ class Wysiwyg4All {
     let { commonAncestorContainer, startContainer, endContainer, startLine, endLine, inBetween } = range;
     let restrict = this.restrictedElement_queryArray;
 
-    // let [startLine, endLine, inBetween] = this._getStartEndLine(
-    //   range,
-    //   element,
-    //   true
-    // );
     if (startLine === endLine) {
       commonAncestorContainer =
         commonAncestorContainer.nodeType === 3
@@ -698,9 +685,7 @@ class Wysiwyg4All {
 
     this.commandTracker = commandTracker;
     let caratPosition;
-    let caratEl = this.isRangeDirectionForward
-      ? this.range.endContainer
-      : this.range.startContainer;
+    let caratEl = this.range.endContainer || this.range.startContainer;
 
     if (caratEl.nodeType === 3)
       caratPosition = this.range.getBoundingClientRect();
@@ -758,7 +743,6 @@ class Wysiwyg4All {
       //   return;
       // };
 
-      // this._setRange(() => {
       if (!this.range) return;
       let { startContainer, startOffset, collapsed, startLine, endLine, inBetween } =
         this.range;
@@ -790,6 +774,11 @@ class Wysiwyg4All {
           return;
         }
 
+        if (startLine === this.element || endLine === this.element) {
+          e.preventDefault();
+          return;
+        }
+
         let stc = this.range.startContainer;
         if (this.range.collapsed) {
           if (this.logExecution) console.log("range is collapsed");
@@ -815,7 +804,7 @@ class Wysiwyg4All {
           }
 
           if (this.range.startOffset === 0 || this.range.startOffset === 1 && (stc.textContent[0] === "\u200B" || stc.textContent.length === 0)) {
-            let prevsib=this.range.startLine.previousSibling;
+            let prevsib = this.range.startLine.previousSibling;
             for (let cl of this.unSelectable_queryArray) {
               // check if startLine element has a class name cl
               // if cl starts with . then it's a class name
@@ -853,11 +842,6 @@ class Wysiwyg4All {
         return;
       }
 
-      // if(this._isSelectionTrespassRestrictedRange()) {
-      //   e.preventDefault();
-      //   return;
-      // }
-
       //  hashtag flag
       if (key === "#" && !this.hashtag_flag) {
         this.hashtag_flag = true;
@@ -877,11 +861,6 @@ class Wysiwyg4All {
       ) {
         this._replaceText();
         // return;
-      }
-
-      if (key.includes("ARROW")) {
-        this._setArrow(e);
-        return;
       }
 
       if (key === "TAB") {
@@ -1005,22 +984,29 @@ class Wysiwyg4All {
           }
         }
       }
-      // })
     }.bind(this);
 
     this._normalize = function (e) {
+
       e.stopPropagation();
-      // this._setRange(() => {
-      if (this._isSelectionTrespassRestrictedRange()) return;
-      this._normalizeDocument(true);
-      this.range_backup = this.range.cloneRange();
+      // if (this._isSelectionTrespassRestrictedRange()) return;
+      this.restoreLastSelection();
+      this._normalizeDocument();
+      // this.range_backup = this.range.cloneRange();
       this._replaceText(true);
-      // });
     }.bind(this);
+
+    this._backupSelection = function (e) { 
+      // e.stopPropagation();
+      if (this.logExecution) console.log("_backupSelection()");
+      if (this.range) {
+        this.range_backup = this.range.cloneRange();
+      }
+    }
+
     this._paste = function (e) {
       e.preventDefault();
       if (this._isSelectionTrespassRestrictedRange()) return;
-      // this._setRange(() => {
       if (this.range) {
         if (this._isSelectionTrespassRestrictedRange()) return;
         let doc = document.createDocumentFragment();
@@ -1041,7 +1027,6 @@ class Wysiwyg4All {
         if (!this.range.collapsed) this.range.extractContents();
         this.range.insertNode(doc);
       }
-      // });
     }.bind(this);
     this._keyup = function () {
       if (this.removeSandwichedLine_array.length)
@@ -1051,10 +1036,10 @@ class Wysiwyg4All {
 
     document.addEventListener("selectionchange", this._selectionchange);
     this.element.addEventListener("keydown", this._keydown);
-    this.element.addEventListener("mousedown", this._normalize);
+    this.element.addEventListener("mouseup", this._normalize);
     // this.element.addEventListener('blur', this._normalize);
     // fuck safari, firefox
-    window.addEventListener("mousedown", this._normalize);
+    window.addEventListener("mousedown", this._backupSelection);
     this.element.addEventListener("paste", this._paste);
     this.element.addEventListener("keyup", this._keyup);
   }
@@ -1064,8 +1049,8 @@ class Wysiwyg4All {
     this.observer.disconnect();
     document.removeEventListener("selectionchange", this._selectionchange);
     this.element.removeEventListener("keydown", this._keydown);
-    this.element.removeEventListener("mousedown", this._normalize);
-    window.removeEventListener("mousedown", this._normalize);
+    this.element.removeEventListener("mouseup", this._normalize);
+    window.removeEventListener("mousedown", this._backupSelection);
     this.element.removeEventListener("paste", this._paste);
     this.element.removeEventListener("keyup", this._keyup);
   }
@@ -1076,6 +1061,23 @@ class Wysiwyg4All {
     this.observer = null;
 
     if (!track) return;
+
+    this._elementRemovalObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const removedNode of mutation.removedNodes) {
+          if (removedNode === this.element) {
+            // Element was removed from DOM
+            if (this.logExecution) console.log("wysiwyg element removed from DOM");
+            this.destroy(); // Clean up listeners, observers, etc.
+            // Optionally, emit a callback or event here
+          }
+        }
+      }
+    });
+
+    this._elementRemovalObserver.observe(this.element.parentNode, {
+      childList: true,
+    });
 
     this.observer = new MutationObserver((mutation_array) => {
       if (this.logMutation) {
@@ -1171,16 +1173,19 @@ class Wysiwyg4All {
               };
 
               if (m?.classList?.contains("_media_")) {
-                let child = m.childNodes;
-                let childIdx = child.length;
-                while (childIdx--) {
-                  let c = child[childIdx];
-                  switch (c.nodeName) {
-                    case "IMG":
-                      callbackRemoved("image", c);
-                      break;
-                  }
+                // let child = m.childNodes;
+                // let childIdx = child.length;
+                // while (childIdx--) {
+                // let c = child[childIdx];
+
+                // switch (c.nodeName) {
+                switch (m.nodeName) {
+                  case "IMG":
+                    // callbackRemoved("image", c);
+                    callbackRemoved("image", m);
+                    break;
                 }
+                // }
                 continue;
               }
 
@@ -1250,6 +1255,11 @@ class Wysiwyg4All {
               }
 
               if (i.nodeType === 1) {
+                if (i.childNodes.length > 0 && i.firstChild.tagName !== "BR") {
+                  let br = getBr(mutationTarget);
+                  if (br.length) for (let b of br) b.remove();
+                }
+
                 let node = (() => {
                   let isWysiwygChild =
                     i.closest(`#${this.elementId}`) && i.id !== this.elementId;
@@ -1484,334 +1494,22 @@ class Wysiwyg4All {
     });
   }
 
-  _setArrow(e) {
-    if (this.logExecution) console.log("_setArrow", { e });
-    if (!this.range || !e?.key) return;
-
-    let endContainer,
-      endOffset,
-      startContainer,
-      startOffset,
-      collapsed,
-      startLine,
-      endLine,
-      isAllRangeOnSameLine,
-      currentLine,
-      caratElement,
-      arrowDirection;
-
-    let key = e.key.toUpperCase();
-    let shift = e?.shiftKey || false;
-    let metaKey = e?.ctrlKey || e?.metaKey || false;
-    let rangeSetup = () => {
-      endContainer = this.range?.endContainer;
-      endOffset = this.range?.endOffset;
-      startContainer = this.range?.startContainer;
-      startOffset = this.range?.startOffset;
-      collapsed = this.range?.collapsed;
-      startLine = this.range?.startLine;
-      endLine = this.range?.endLine;
-      isAllRangeOnSameLine = startLine === endLine;
-      currentLine = this.isRangeDirectionForward ? endLine : startLine;
-      caratElement = this.isRangeDirectionForward
-        ? endContainer
-        : startContainer;
-      caratElement =
-        caratElement?.nodeType === 3 ? caratElement?.parentNode : caratElement;
-    };
-
-    let removeZeroSpace = () => {
-      let targetContainer = this.isRangeDirectionForward
-        ? endContainer
-        : startContainer;
-      let nudged = false;
-
-      if (
-        collapsed &&
-        (targetContainer.textContent.includes("\u200B") ||
-          !targetContainer.textContent)
-      ) {
-        nodeCrawler(
-          (n) => {
-            if (
-              n.nodeType === 3 &&
-              (n.textContent === "\u200B" || !n.textContent)
-            ) {
-              let r = n.nextSibling || n.parentNode;
-              let siblingDirection = this.isRangeDirectionForward
-                ? "nextSibling"
-                : "previousSibling";
-
-              if (
-                n === targetContainer ||
-                (() => {
-                  // fuck safari
-                  if (targetContainer.nodeType === 1) {
-                    let idx = targetContainer.childNodes.length;
-                    while (idx--) {
-                      if (targetContainer.childNodes[idx] === n) return true;
-                    }
-                    return false;
-                  }
-                })()
-              ) {
-                let run = r;
-                if (run.nodeType === 1 && n.parentNode === run) {
-                  if (run[siblingDirection]) nudged = run[siblingDirection];
-                } else nudged = r;
-
-                n.remove();
-
-                this.range = adjustSelection({
-                  node: !collapsed
-                    ? this.isRangeDirectionForward
-                      ? [null, nudged || r]
-                      : [nudged || r, null]
-                    : nudged,
-                  position: !collapsed
-                    ? this.isRangeDirectionForward
-                      ? [null, nudged]
-                      : [!nudged, null]
-                    : this.isRangeDirectionForward,
-                }, this.ceilingElement_queryArray);
-
-                rangeSetup();
-                e.preventDefault();
-                return "BREAK";
-              }
-            }
-            return n;
-          },
-          { node: targetContainer }
-        );
-      }
-      return !!nudged;
-    };
-
-    let nudgeRangeToInlineElement = () => {
-      let rem = removeZeroSpace();
-
-      if (
-        !rem &&
-        window.getComputedStyle(caratElement).display === "inline-block"
-      ) {
-        let _caratElement =
-          caratElement.nodeType === 3 ? caratElement.parentNode : caratElement;
-        while (
-          window.getComputedStyle(_caratElement).display === "inline-block"
-        ) {
-          _caratElement = _caratElement.parentNode;
-        }
-
-        let siblingDirection =
-          arrowDirection === "UP" ? "previousSibling" : "nextSibling";
-        let nextEl = _caratElement[siblingDirection];
-
-        if (!nextEl) {
-          let t = document.createTextNode("");
-          _caratElement.parentNode.insertBefore(
-            t,
-            siblingDirection === "previousSibling" ? _caratElement : nextEl
-          );
-        }
-
-        _caratElement = _caratElement[siblingDirection];
-
-        if (_caratElement) {
-          let setDirection = (() => {
-            return arrowDirection === "DOWN";
-          })();
-
-          this.range = adjustSelection({
-            node: shift
-              ? this.isRangeDirectionForward
-                ? [null, _caratElement]
-                : [_caratElement, null]
-              : _caratElement,
-            position: shift
-              ? this.isRangeDirectionForward
-                ? [null, setDirection]
-                : [setDirection, null]
-              : setDirection,
-          }, this.ceilingElement_queryArray);
-
-          rangeSetup();
-
-          return true;
-        }
-      }
-      return false;
-    };
-
-    rangeSetup();
-
-    switch (key) {
-      case "ARROWLEFT":
-        arrowDirection = "LEFT";
-      case "ARROWRIGHT":
-        arrowDirection = arrowDirection || "RIGHT";
-
-        if (metaKey || (collapsed && shift)) {
-          // this.isRangeDirectionForward = arrowDirection === "RIGHT";
-          rangeSetup();
-        }
-
-        let caratOnSingleLine = this.range?.startLine === this.range?.endLine;
-
-        let nudged;
-        if (caratOnSingleLine) {
-          if (metaKey && arrowDirection === "RIGHT")
-            nudged = nudgeRangeToInlineElement();
-        }
-
-        if (!nudged) removeZeroSpace();
-
-        break;
-
-      case "ARROWUP":
-        arrowDirection = "UP";
-      case "ARROWDOWN":
-        arrowDirection = arrowDirection || "DOWN";
-
-        if (!collapsed && !shift) {
-          e.preventDefault();
-          let adj =
-            arrowDirection === "UP"
-              ? [startContainer, startOffset]
-              : [endContainer, endOffset];
-          this.range = adjustSelection({
-            node: adj[0],
-            position: adj[1],
-          }, this.ceilingElement_queryArray);
-          break;
-        }
-
-        if (collapsed || isAllRangeOnSameLine) {
-          // this.isRangeDirectionForward = arrowDirection === "DOWN";
-          rangeSetup();
-        }
-
-        if (this.range?.startLine !== this.range?.endLine) break;
-
-        let iNudged = nudgeRangeToInlineElement();
-
-        if (iNudged) break;
-        else removeZeroSpace();
-
-        let isMultiLine = this.range?.startLine !== this.range?.endLine;
-        if (isMultiLine) break;
-
-        let eldestParentOfCurrentLine = climbUpToEldestParent(
-          currentLine,
-          this.element
-        );
-
-        let isCurrentLineInsideSubCeiling =
-          eldestParentOfCurrentLine.id !== this.elementId &&
-          this._isCeilingElement(eldestParentOfCurrentLine);
-
-        // break out if current line is inside the sub ceiling and it's not on the last line
-        if (
-          isCurrentLineInsideSubCeiling &&
-          ((arrowDirection === "UP" &&
-            eldestParentOfCurrentLine.firstChild !== currentLine) ||
-            (arrowDirection === "DOWN" &&
-              eldestParentOfCurrentLine.lastChild !== currentLine))
-        )
-          break;
-
-        let siblingSet = [
-          isCurrentLineInsideSubCeiling
-            ? eldestParentOfCurrentLine.previousSibling
-            : currentLine.previousSibling,
-          isCurrentLineInsideSubCeiling
-            ? eldestParentOfCurrentLine.nextSibling
-            : currentLine.nextSibling,
-        ];
-
-        if (arrowDirection === "UP") siblingSet.reverse();
-
-        let [backwardNode, forwardNode] = siblingSet;
-
-        // if current line is on last line of sub ceiling set forward node to sub ceiling
-        let _forwardNode = isCurrentLineInsideSubCeiling
-          ? eldestParentOfCurrentLine
-          : forwardNode;
-        if (_forwardNode) {
-          if (this._isBlockElement(_forwardNode) && !shift) {
-            e.preventDefault();
-
-            let leap =
-              arrowDirection === "UP"
-                ? _forwardNode.previousSibling
-                : _forwardNode.nextSibling;
-
-            if (!leap || this._isBlockElement(leap)) {
-              let p = this._createEmptyParagraph();
-              _forwardNode.parentNode.insertBefore(
-                p,
-                arrowDirection === "UP" ? _forwardNode : leap
-              );
-              _forwardNode = p;
-            } else _forwardNode = leap;
-
-            this.range = adjustSelection({
-              node: _forwardNode,
-              position: arrowDirection === "DOWN",
-            }, this.ceilingElement_queryArray);
-
-            if (
-              !shift &&
-              !currentLine.textContent &&
-              (this._isBlockElement(backwardNode) ||
-                (!backwardNode && currentLine === this.element.firstChild))
-            )
-              this.removeSandwichedLine_array.push(currentLine);
-          } else if (!isMultiLine && arrowDirection === "DOWN") {
-            e.preventDefault();
-            let collectOffset = 0;
-            let currentOffset = this.isRangeDirectionForward
-              ? endOffset
-              : startOffset;
-            nodeCrawler(
-              (n) => {
-                if (n === endContainer) return "BREAK";
-                else if (n.nodeType === 3 && n.textContent)
-                  collectOffset += n.textContent.length;
-                return n;
-              },
-              {
-                node: currentLine,
-              }
-            );
-            collectOffset += currentOffset;
-            this.range = adjustSelection({
-              node: collapsed
-                ? forwardNode
-                : this.isRangeDirectionForward
-                  ? [null, forwardNode]
-                  : [forwardNode, null],
-              position: collapsed
-                ? collectOffset
-                : this.isRangeDirectionForward
-                  ? [null, collectOffset]
-                  : [collectOffset, null],
-            }, this.ceilingElement_queryArray);
-          }
-        } // else e.preventDefault();
-    }
-  }
-
   _append(i, insertAfter, wrap = false, focusElement) {
     if (this.logExecution)
       console.log("_append", { i, insertAfter, wrap, focusElement });
+
+    if (!this.range) {
+      this.restoreLastSelection();
+      if (!this.range) return;
+    }
+
     let common = climbUpToEldestParent(
       this.range.commonAncestorContainer,
       this.element
     );
     let startLine = this.range.startLine;
     let endLine = this.range.endLine;
-    let insertRestricted = ["HR", "UL", "LI", "._media_", "._custom_"];
+    let insertRestricted = ["HR", "UL", "LI"]; //["HR", "UL", "LI", "._media_", "._custom_"];
 
     let append = (node) => {
       if (node === this.element)
@@ -1994,6 +1692,7 @@ class Wysiwyg4All {
     if (!this.range) {
       this.restoreLastSelection();
     }
+
     if (
       !this.range ||
       (() => {
@@ -2004,16 +1703,27 @@ class Wysiwyg4All {
     )
       this.element.focus();
 
-    // this._setRange(() => {
-    for (let img of feedback.image) {
-      let media = this._loadImage(img, document.createElement("div"));
-      this._append(media, this._createEmptyParagraph());
+    if (!this.range) return;
+
+    if (feedback.image.length === 0) return;
+
+    // reverse the order of images
+    feedback.image.reverse();
+    let lasttxt = this._createEmptyParagraph();
+    this.element.insertBefore(lasttxt, this.range.endLine.nextSibling);
+    for (let i = 0; i < feedback.image.length; i++) {
+      let img = feedback.image[i];
+      let media = this._loadImage(img);
+      this.range.insertNode(media);
+      if (i === feedback.image.length - 1) {
+        this.range = adjustSelection({ node: lasttxt, position: true }, this.ceilingElement_queryArray);
+      }
     }
-    // });
+
+    this.setSafeLine();
   }
 
-  _loadImage(imageObject, wrapper) {
-    if (this.logExecution) console.log("_loadImage", { imageObject, wrapper });
+  _loadImage(i) {
     /**
          elementId: "img_uniqueId"
          element: HTML
@@ -2024,72 +1734,66 @@ class Wysiwyg4All {
          filename: "selectedLocalFilename.jpg"
          */
 
-    if (wrapper instanceof Node) {
-      if (!wrapper.classList.contains("_media_"))
-        wrapper.classList.add("_media_");
+    let image = i?.element instanceof Node ? i.element : null;
 
-      if (wrapper.getAttribute("contenteditable") !== "false")
-        wrapper.setAttribute("contenteditable", "false");
-    } else throw "image needs _media_ wrapper";
+    if (image) {
+      if (image.id) i.elementId = image.id;
+      else image.id = i.elementId;
+    }
 
-    let process = (i) => {
-      let image = i?.element instanceof Node ? i.element : null;
+    if (!image) {
+      image = document.createElement("img");
+      i.element = image;
 
-      if (image) {
-        if (image.id) i.elementId = image.id;
-        else image.id = i.elementId;
+      let classname =
+        "_img_" +
+        i.source
+          .substring(i.source.length - 128)
+          .replace(/[/:."'\\@#$%\?= \{\}\|&*`!<>+]/g, "");
+      if (image.classList.contains(classname)) image.classList.add(classname);
+
+      if (Array.isArray(i.class)) {
+        for (let cl of i.class) image.classList.add(cl);
       }
 
-      if (!image) {
-        image = document.createElement("img");
-        i.element = image;
+      if (image.tagName === "IMG") image.setAttribute("src", i.source);
 
-        let classname =
-          "_img_" +
-          i.source
-            .substring(i.source.length - 128)
-            .replace(/[/:."'\\@#$%\?= \{\}\|&*`!<>+]/g, "");
-        if (image.classList.contains(classname)) image.classList.add(classname);
-
-        if (Array.isArray(i.class)) {
-          for (let cl of i.class) image.classList.add(cl);
-        }
-
-        if (image.tagName === "IMG") image.setAttribute("src", i.source);
-
-        if (typeof i.onclick === "function") {
-          image.addEventListener("click", i.onclick);
-          image.classList.add("_hover_");
-        }
-
-        if (
-          i.style &&
-          typeof i.style === "object" &&
-          Object.keys(i.style).length
-        ) {
-          for (let st in i.style) {
-            wrapper.style.setProperty(st, i.style[st]);
-          }
-        }
+      if (typeof i.onclick === "function") {
+        image.addEventListener("click", i.onclick);
+        image.classList.add("_hover_");
       }
 
-      wrapper.setAttribute("contenteditable", "false");
-      wrapper.append(image);
-
-      let pushArray = true;
-
-      for (let chk of this.image_array)
-        if (chk.elementId === i.elementId) {
-          pushArray = false;
-          break;
+      if (
+        i.style &&
+        typeof i.style === "object" &&
+        Object.keys(i.style).length
+      ) {
+        for (let st in i.style) {
+          image.style.setProperty(st, i.style[st]);
         }
+      }
+    }
 
-      if (pushArray) this.image_array.push(i);
-    };
+    // wrapper.setAttribute("contenteditable", "false");
+    // wrapper.append(image);
 
-    process(imageObject);
+    if (!image.classList.contains("_media_"))
+      image.classList.add("_media_");
 
-    return wrapper;
+
+    let pushArray = true;
+
+    for (let chk of this.image_array)
+      if (chk.elementId === i.elementId) {
+        pushArray = false;
+        break;
+      }
+
+    if (pushArray) this.image_array.push(i);
+
+
+    // return wrapper;
+    return image;
   }
 
   _getAnchorOffsetFromLine(line) {
@@ -2159,10 +1863,7 @@ class Wysiwyg4All {
     return offset;
   }
 
-  _normalizeDocument(normalize) {
-    if (this.logExecution) console.log("_normalizeDocument", { normalize });
-    if (!normalize) return;
-
+  _normalizeDocument() {
     nodeCrawler(
       (n) => {
         if (n.nodeType === 3 && n.textContent.includes("\u200B")) {
@@ -2190,7 +1891,21 @@ class Wysiwyg4All {
             }
             return n;
           }
-        } else if (n.nodeType === 1) n.normalize();
+        } else if (n.nodeType === 1 && n.nodeName !== "BR") {
+          console.log("normalize", n);  
+          if (n.childNodes.length === 0 || n.childNodes.length === 1 && n.childNodes[0].nodeType === 3 && n.childNodes[0].textContent === "") {
+            let st = this.range.startContainer;
+            if(st.nodeType === 3) {
+              st = st.parentNode;
+            }
+            console.log({st, n});
+            if (st !== n) {
+              n.remove();
+            }
+            return n;
+          }
+          n.normalize();
+        }
 
         return n;
       },
@@ -2504,7 +2219,32 @@ class Wysiwyg4All {
       !this._isSpecialTextElement(node)
     );
   }
-
+  setSafeLine() {
+    let firstChild = this.element.firstChild;
+    let lastChild = this.element.lastChild;
+    console.log({ firstChild, lastChild });
+    this.unSelectable_queryArray.forEach((cl) => {
+      if (cl[0] === ".") {
+        cl = cl.substring(1);
+        if (firstChild && firstChild.nodeType === 1 && firstChild.classList.contains(cl))
+          this.element.insertBefore(
+            this._createEmptyParagraph(),
+            firstChild
+          );
+        if (lastChild && lastChild.nodeType === 1 && lastChild.classList.contains(cl))
+          this.element.appendChild(this._createEmptyParagraph());
+      }
+      else {
+        if (firstChild && firstChild?.tagName === cl)
+          this.element.insertBefore(
+            this._createEmptyParagraph(),
+            firstChild
+          );
+        if (lastChild && lastChild?.tagName === cl)
+          this.element.appendChild(this._createEmptyParagraph());
+      }
+    });
+  }
   /**
    * List of command for editing wysiwyg text.
    * @param {'quote'} action - Add blockquote below selected line.
@@ -2553,7 +2293,7 @@ class Wysiwyg4All {
         let p = this._createEmptyParagraph();
         let bq = document.createElement("blockquote");
         this._append(bq, p, true);
-        return;
+        break;
       }
       case "unorderedList": {
         if (
@@ -2571,7 +2311,7 @@ class Wysiwyg4All {
           ul = document.createElement("ul");
         ul.append(li);
         this._append(ul, p, false, li);
-        return;
+        break;
       }
       case "orderedList": {
         if (
@@ -2589,7 +2329,7 @@ class Wysiwyg4All {
           ul = document.createElement("ol");
         ul.append(li);
         this._append(ul, p, false, li);
-        return;
+        break;
       }
       case "divider": {
         if (
@@ -2602,15 +2342,17 @@ class Wysiwyg4All {
         )
           this.element.focus();
 
-        let p = this._createEmptyParagraph(),
-          hr = document.createElement("hr");
+        // let p = this._createEmptyParagraph(),
+        let hr = document.createElement("hr");
         hr.setAttribute("contenteditable", "false");
-        this._append(hr, p, false);
-        return;
+        // this._append(hr, p, false);
+        this._append(hr, null, false);
+        this.setSafeLine();
+        break;
       }
       case "image":
         this.imgInput.click();
-        return;
+        break;
       case "alignLeft":
       case "alignCenter":
       case "alignRight":
@@ -2671,9 +2413,6 @@ class Wysiwyg4All {
           commandTracker,
           range: this.range,
         }).catch((err) => err);
-        return;
-
-      default:
         break;
     }
 
@@ -2685,7 +2424,6 @@ class Wysiwyg4All {
 
     //  style command
     if (this.styleTagOfCommand[action]) {
-      // this._setRange(() => {
       let wrapper,
         query = this.styleTagOfCommand[action],
         stopperMode = false;
@@ -2738,9 +2476,11 @@ class Wysiwyg4All {
             this.range.startContainer
           );
         else this.range.insertNode(wrapper);
-
+        
+        console.log('setrange')
         this.range = adjustSelection({ node: text, position: false }, this.ceilingElement_queryArray);
-      } else {
+      }
+      else {
         if (restrictedClass) {
           this.range = adjustSelection({
             node: this.range.endContainer,
@@ -2890,8 +2630,7 @@ class Wysiwyg4All {
         )
           prev.remove();
       }
-      // }, true);
-
+      // this._normalizeDocument();
       return;
     }
 
@@ -2907,45 +2646,45 @@ class Wysiwyg4All {
         }
       */
 
-      // this._setRange(() => {
       //  setup wrapper
-      let custom = document.createElement("div");
-      custom.classList.add("_custom_");
-      custom.setAttribute(
-        "contenteditable",
-        (!!action?.contenteditable).toString()
-      );
+      let custom = null;
 
       if (action.style)
         for (let s in action.style) custom.style[s] = action.style[s];
 
       action.elementId = action.elementId || generateId("custom");
-      custom.id = action.elementId;
 
-      if (typeof action.element === "string")
-        custom.innerHTML = action.element;
-      else if (action.element instanceof HTMLElement)
-        custom.append(action.element);
-
-      if (!custom.children.length) action.insert = true; // insert if only text node
-
+      if (typeof action.element === "string") {
+        custom = document.createTextNode(action.element);
+        action.insert = true;
+      }
+      else if (action.element instanceof HTMLElement) {
+        custom = action.element;
+        custom.id = action.elementId;
+        custom.classList.add("_custom_");
+      }
       if (!this.range) this.element.focus();
 
       this.custom_array.push(action);
 
       this._callback({ custom: action }).then((_) => {
+
+        let txt = document.createTextNode("");
         if (action.insert) {
-          let txt = document.createTextNode("");
           this.range.insertNode(txt); // when inserted in range, it will push the next el back
           this.range.insertNode(custom);
-          this.range = adjustSelection({
-            node: txt,
-            position: false,
-          }, this.ceilingElement_queryArray);
-        } else this._append(custom, this._createEmptyParagraph(), false);
+        } else {
+          this._append(custom, txt, false);
+        }
+        this.range = adjustSelection({
+          node: txt,
+          position: false,
+        }, this.ceilingElement_queryArray);
+
+        this.setSafeLine();
       });
-      // });
     }
+
   }
 
   /**
@@ -2991,19 +2730,19 @@ class Wysiwyg4All {
     const imgCallback = [];
     if (img.length)
       for (let i of img) {
-        const imageParent = i.closest("._media_");
+        // const imageParent = i.closest("._media_");
 
-        if (imageParent) {
-          const source = i.getAttribute("src");
-          let imgId = i.id || generateId("img");
-          i.setAttribute("id", imgId);
+        // if (imageParent) {
+        const source = i.getAttribute("src");
+        let imgId = i.id || generateId("img");
+        i.setAttribute("id", imgId);
 
-          imgCallback.push({
-            source,
-            elementId: imgId,
-            element: i,
-          });
-        }
+        imgCallback.push({
+          source,
+          elementId: imgId,
+          element: i,
+        });
+        // }
 
         this.image_array = JSON.parse(JSON.stringify(imgCallback));
       }
@@ -3064,9 +2803,9 @@ class Wysiwyg4All {
       if (f === "image") {
         let img = fb[f];
         for (let i of img) {
-          let imgEl = div.querySelector("#" + i.elementId);
-          const imageParent = imgEl.closest("._media_");
-          this._loadImage(i, imageParent);
+          // let imgEl = div.querySelector("#" + i.elementId);
+          // const imageParent = imgEl.closest("._media_");
+          this._loadImage(i);
         }
       } else this[f + "_array"] = fb[f];
     }
@@ -3084,7 +2823,7 @@ class Wysiwyg4All {
    * @return {object} - Exported wysiwyg data object
    */
   async export(pre) {
-    this._normalizeDocument(true);
+    this._normalizeDocument();
     const dom = this.element.cloneNode(true);
 
     const { hashtag_array, image_array, urllink_array, custom_array } = this;
