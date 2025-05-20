@@ -1,5 +1,5 @@
 import { ColorMangle } from "colormangle";
-
+import { adjustSelection, nodeCrawler, generateId, climbUpToEldestParent } from "./selectors.js";
 // Add debouncing for frequent operations like selection changes
 const debounce = (fn, delay) => {
   let timeout;
@@ -353,168 +353,6 @@ class Wysiwyg4All {
     });
   }
 
-  _adjustSelection(
-    target,
-    ceilingElement_query = this.ceilingElement_queryArray
-  ) {
-    if (this.logExecution)
-      console.log("_adjustSelection()", { target, ceilingElement_query });
-
-    let toArray = (v, allowObject = false) => {
-      if (Array.isArray(v)) return v;
-      else if (
-        (typeof v === "string" && v) ||
-        typeof v === "number" ||
-        typeof v === "boolean" ||
-        (allowObject && typeof v === "object")
-      )
-        return [v];
-      else return [];
-    };
-
-    let setRange = !!target;
-
-    let { node = null, position = true } = target || {};
-
-    let sel = window.getSelection();
-    if (!sel) return null;
-
-    let range;
-    try {
-      range = sel.getRangeAt(0);
-    } catch (err) {
-      if (setRange) range = document.createRange();
-    }
-
-    if (setRange) {
-      node = toArray(node, true);
-      position = toArray(position, true);
-
-      for (let p of position)
-        if (typeof p !== "number" && typeof p !== "boolean" && p !== null)
-          throw "INVALID_POSITION";
-
-      for (let n of node) {
-        if (!(n instanceof Node) && n !== null) {
-          if (n === false) return;
-          throw "INVALID_NODE";
-        }
-      }
-
-      const setTarget = (node, position) => {
-        if (node instanceof Node) {
-          if (node.nodeType === 1) {
-            if (typeof position === "boolean")
-              while (position === false ? node.lastChild : node.firstChild)
-                node = position === false ? node.lastChild : node.firstChild;
-            else if (typeof position === "number") {
-              let textLength = 0;
-              this._nodeCrawler(
-                (n) => {
-                  if (n.nodeType === 3 && n.textContent.length) {
-                    let length = n.textContent.length;
-                    if (
-                      n.parentNode.getAttribute("contenteditable") === "false"
-                    ) {
-                      if (position - (textLength + length) >= 0)
-                        textLength += length;
-                      else {
-                        position = length;
-                        return "BREAK";
-                      }
-                      return n;
-                    } else {
-                      node = n;
-
-                      if (position - (textLength + length) >= 0) {
-                        textLength += length;
-                      } else {
-                        position -= textLength;
-                        return "BREAK";
-                      }
-                    }
-                  }
-                  return n;
-                },
-                {
-                  node,
-                }
-              );
-              if (node.nodeType === 1) {
-                let text = document.createTextNode("\u200B");
-                node.insertBefore(text, node.childNodes[0]);
-                node = text;
-                position = 0;
-              }
-            }
-
-            if (node.nodeName === "BR" && node.parentNode.childNodes.length > 1)
-              node = node.previousSibling || node;
-          }
-          if (typeof position === "boolean")
-            position = position ? 0 : node.textContent.length;
-          else
-            position =
-              position > node.textContent.length
-                ? node.textContent.length
-                : position;
-
-          return { node, position };
-        }
-      };
-
-      let doCollapse = false,
-        setEnd,
-        setStart = (() => {
-          node[0] = node[0] === null ? range.startContainer : node[0];
-          position[0] = position[0] === null ? range.startOffset : position[0];
-          return setTarget(node[0], position[0]);
-        })();
-      range.setStart(setStart.node, setStart.position);
-
-      if (position.length > 1)
-        setEnd = setTarget(
-          (node[1] === null ? range.endContainer : node[1]) || node[0],
-          position[1] === null ? range.endOffset : position[1]
-        );
-      else {
-        setEnd = setStart;
-        doCollapse = true;
-      }
-
-      range.setEnd(setEnd.node, setEnd.position);
-
-      if (doCollapse) range.collapse(true);
-
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-
-    if (ceilingElement_query && range) {
-      let startLine, endLine;
-      for (let q of ceilingElement_query) {
-        let e =
-          range.endContainer.nodeType === 3
-            ? range.endContainer.parentNode
-            : range.endContainer;
-        let s =
-          range.startContainer.nodeType === 3
-            ? range.startContainer.parentNode
-            : range.startContainer;
-
-        if (!startLine && s.closest(q))
-          startLine = this._climbUpToEldestParent(s, s.closest(q));
-        if (!endLine && e.closest(q))
-          endLine = this._climbUpToEldestParent(e, e.closest(q));
-      }
-
-      range.startLine = startLine;
-      range.endLine = endLine;
-    }
-
-    return range;
-  }
-
   _generateId(option) {
     if (this.logExecution) console.log("_generateId()", { option });
     let limit = 12;
@@ -737,15 +575,15 @@ class Wysiwyg4All {
     // restore range
     if ((stripped || node).textContent && (start || end)) {
       if (start && start === end && startOffset === endOffset)
-        range = this._adjustSelection({
+        range = adjustSelection({
           node: stripped || node,
           position: startOffset,
-        });
+        }, this.ceilingElement_queryArray);
       else
-        range = this._adjustSelection({
+        range = adjustSelection({
           node: [start, end],
           position: [startOffset, endOffset],
-        });
+        }, this.ceilingElement_queryArray);
     }
 
     this.range = range;
@@ -1137,20 +975,20 @@ class Wysiwyg4All {
             );
           }
           if (selNext)
-            this.range = this._adjustSelection({
+            this.range = adjustSelection({
               node: this.range.collapsed
                 ? selNext
-                : !isForward
+                : isForward
                   ? [null, selNext]
                   : [selNext, null],
               position: this.range.collapsed
-                ? !isForward
+                ? isForward
                   ? 0
                   : selNext.textContent.length
-                : !isForward
+                : isForward
                   ? [null, 0]
                   : [0, null],
-            });
+            }, this.ceilingElement_queryArray);
         }
 
         //  track commandTracker
@@ -1466,10 +1304,10 @@ class Wysiwyg4All {
                 if (n.textContent[0] === "\t") diveAndRemoveTab(n);
               }
               if (hasIndent)
-                this._adjustSelection({
+                adjustSelection({
                   node: [startLine, endLine],
                   position: [true, false],
-                });
+                }, this.ceilingElement_queryArray);
             } else if (startLine.textContent[0] === "\t") {
               let lineOffset = (line, container, containerOffset) => {
                 if (line === container) return containerOffset;
@@ -1494,7 +1332,7 @@ class Wysiwyg4All {
 
               diveAndRemoveTab(startLine);
               if (hasIndent)
-                this._adjustSelection({ node: startLine, position: offset });
+                adjustSelection({ node: startLine, position: offset }, this.ceilingElement_queryArray);
             }
           } else {
             // indent
@@ -1506,14 +1344,14 @@ class Wysiwyg4All {
                 n.insertBefore(tab, n.childNodes[0]);
               }
               if (hasIndent)
-                this._adjustSelection({
+                adjustSelection({
                   node: [startLine, endLine],
                   position: [true, false],
-                });
+                }, this.ceilingElement_queryArray);
             } else {
               let tab = document.createTextNode("\t");
               this.range.insertNode(tab);
-              this._adjustSelection({ node: tab, position: false });
+              adjustSelection({ node: tab, position: false }, this.ceilingElement_queryArray);
             }
           }
           return;
@@ -1923,7 +1761,7 @@ class Wysiwyg4All {
                     );
                     node.line.insertBefore(tab, node.line.childNodes[0]);
                     this.insertTabPending_tabString = "";
-                    this._adjustSelection({ node: tab, position: false });
+                    adjustSelection({ node: tab, position: false }, this.ceilingElement_queryArray);
                   }
 
                   // if empty text block is added add br
@@ -2112,7 +1950,7 @@ class Wysiwyg4All {
 
                 n.remove();
 
-                this.range = this._adjustSelection({
+                this.range = adjustSelection({
                   node: !collapsed
                     ? this.isRangeDirectionForward
                       ? [null, nudged || r]
@@ -2123,7 +1961,7 @@ class Wysiwyg4All {
                       ? [null, nudged]
                       : [!nudged, null]
                     : this.isRangeDirectionForward,
-                });
+                }, this.ceilingElement_queryArray);
 
                 rangeSetup();
                 e.preventDefault();
@@ -2193,7 +2031,7 @@ class Wysiwyg4All {
             return arrowDirection === "DOWN";
           })();
 
-          this.range = this._adjustSelection({
+          this.range = adjustSelection({
             node: shift
               ? this.isRangeDirectionForward
                 ? [null, _caratElement]
@@ -2204,7 +2042,7 @@ class Wysiwyg4All {
                 ? [null, setDirection]
                 : [setDirection, null]
               : setDirection,
-          });
+          }, this.ceilingElement_queryArray);
 
           rangeSetup();
 
@@ -2250,10 +2088,10 @@ class Wysiwyg4All {
             arrowDirection === "UP"
               ? [startContainer, startOffset]
               : [endContainer, endOffset];
-          this.range = this._adjustSelection({
+          this.range = adjustSelection({
             node: adj[0],
             position: adj[1],
-          });
+          }, this.ceilingElement_queryArray);
           break;
         }
 
@@ -2326,10 +2164,10 @@ class Wysiwyg4All {
               _forwardNode = p;
             } else _forwardNode = leap;
 
-            this.range = this._adjustSelection({
+            this.range = adjustSelection({
               node: _forwardNode,
               position: arrowDirection === "DOWN",
-            });
+            }, this.ceilingElement_queryArray);
 
             if (
               !shift &&
@@ -2356,7 +2194,7 @@ class Wysiwyg4All {
               }
             );
             collectOffset += currentOffset;
-            this.range = this._adjustSelection({
+            this.range = adjustSelection({
               node: collapsed
                 ? forwardNode
                 : this.isRangeDirectionForward
@@ -2367,7 +2205,7 @@ class Wysiwyg4All {
                 : this.isRangeDirectionForward
                   ? [null, collectOffset]
                   : [collectOffset, null],
-            });
+            }, this.ceilingElement_queryArray);
           }
         } // else e.preventDefault();
     }
@@ -2476,10 +2314,10 @@ class Wysiwyg4All {
           }
         } else i.append(this._createEmptyParagraph());
 
-        this.range = this._adjustSelection({
+        this.range = adjustSelection({
           node: focusElement || i,
           position: false,
-        });
+        }, this.ceilingElement_queryArray);
 
         //  remove garbage node
         let fc = i.previousSibling;
@@ -2506,7 +2344,7 @@ class Wysiwyg4All {
     append(endLine);
 
     if (insertAfter)
-      this.range = this._adjustSelection({ node: focusElement || insertAfter });
+      this.range = adjustSelection({ node: focusElement || insertAfter }, this.ceilingElement_queryArray);
   }
 
   async _callback(data) {
@@ -2750,12 +2588,12 @@ class Wysiwyg4All {
             this.element.appendChild(lastChild);
 
             // Adjust selection
-            this.range = this._adjustSelection({
+            this.range = adjustSelection({
               node: lastChild,
               position: true,
-            });
+            }, this.ceilingElement_queryArray);
           }
-        } else this.range = this._adjustSelection(null);
+        } else this.range = adjustSelection(null, this.ceilingElement_queryArray);
 
         if (typeof run === "function") run();
         return;
@@ -2971,10 +2809,10 @@ class Wysiwyg4All {
       let textEl = res.element;
 
       if (!wholeDocument) {
-        this.range = this._adjustSelection({
+        this.range = adjustSelection({
           node: res.anchorText,
           position: false,
-        });
+        }, this.ceilingElement_queryArray);
       }
 
       let toCallback = [];
@@ -3399,13 +3237,13 @@ class Wysiwyg4All {
             );
           else this.range.insertNode(wrapper);
 
-          this.range = this._adjustSelection({ node: text, position: false });
+          this.range = adjustSelection({ node: text, position: false }, this.ceilingElement_queryArray);
         } else {
           if (restrictedClass) {
-            this.range = this._adjustSelection({
+            this.range = adjustSelection({
               node: this.range.endContainer,
               position: this.range.endOffset,
-            });
+            }, this.ceilingElement_queryArray);
             return;
           }
           //  selection has range
@@ -3527,10 +3365,10 @@ class Wysiwyg4All {
           }
 
           this.range.insertNode(output);
-          this.range = this._adjustSelection({
+          this.range = adjustSelection({
             node: [fc, lc],
             position: [true, false],
-          });
+          }, this.ceilingElement_queryArray);
 
           //  remove garbage node
           fc = fc.nodeType === 3 ? fc.parentNode : fc;
@@ -3598,10 +3436,10 @@ class Wysiwyg4All {
             let txt = document.createTextNode("");
             this.range.insertNode(txt); // when inserted in range, it will push the next el back
             this.range.insertNode(custom);
-            this.range = this._adjustSelection({
+            this.range = adjustSelection({
               node: txt,
               position: false,
-            });
+            }, this.ceilingElement_queryArray);
           } else this._append(custom, this._createEmptyParagraph(), false);
         });
       });
@@ -3615,13 +3453,13 @@ class Wysiwyg4All {
     if (this.logExecution)
       console.log("restoreLastSelection", { range_backup: this.range_backup });
     if (this.range_backup) {
-      this.range = this._adjustSelection({
+      this.range = adjustSelection({
         node: [
           this.range_backup.startContainer,
           this.range_backup.endContainer,
         ],
         position: [this.range_backup.startOffset, this.range_backup.endOffset],
-      });
+      }, this.ceilingElement_queryArray);
       let sel = window.getSelection();
       let range = document.createRange();
       range.setStart(this.range.startContainer, this.range.startOffset);
