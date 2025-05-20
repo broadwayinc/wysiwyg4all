@@ -46,7 +46,7 @@
 </button>
 
 <!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
-<input id='colorInput' type='color' oninput="wysiwyg.command(event.target.value)"
+<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)"
     onblur="wysiwyg.restoreLastSelection()" />
 <!-- .command('color') changes text to highlight color set on constructor -->
 <button onclick="wysiwyg.command('color')">

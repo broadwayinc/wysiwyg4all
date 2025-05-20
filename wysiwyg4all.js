@@ -31,7 +31,7 @@ class Wysiwyg4All {
       logMutation = false,
       logExecution = false,
     } = option;
-
+    this.restoreWhenFocus = false;
     this.hashtag = hashtag;
     this.urllink = urllink;
     this.logMutation = logMutation;
@@ -525,6 +525,8 @@ class Wysiwyg4All {
 
   _trackStyle(n, cls) {
     if (this.logExecution) console.log("_trackStyle()", { n, cls });
+    if (n.nodeType === 3) n = n.parentNode;
+
     let commandTracker = {};
     let style = window.getComputedStyle(n);
 
@@ -708,13 +710,13 @@ class Wysiwyg4All {
 
     document.removeEventListener("selectionchange", this._selectionchange);
     this.imgInput = null;
-    if (this.element) {
-      this.element.removeEventListener("keydown", this._keydown);
-      this.element.removeEventListener("mousedown", this._normalize);
-      window.removeEventListener("mousedown", this._normalize);
-      this.element.removeEventListener("paste", this._paste);
-      this.element.removeEventListener("keyup", this._keyup);
-    }
+    // if (this.element) {
+    //   this.element.removeEventListener("keydown", this._keydown);
+    //   this.element.removeEventListener("mousedown", this._normalize);
+    //   window.removeEventListener("mousedown", this._normalize);
+    //   this.element.removeEventListener("paste", this._paste);
+    //   this.element.removeEventListener("keyup", this._keyup);
+    // }
 
     if (!listen) return;
 
@@ -987,22 +989,28 @@ class Wysiwyg4All {
     }.bind(this);
 
     this._normalize = function (e) {
-
       e.stopPropagation();
+
       // if (this._isSelectionTrespassRestrictedRange()) return;
       this.restoreLastSelection();
+      if (this.range && this.restoreWhenFocus) {
+        e.preventDefault();
+      }
+      this.restoreWhenFocus = false;
       this._normalizeDocument();
       // this.range_backup = this.range.cloneRange();
       this._replaceText(true);
     }.bind(this);
 
-    this._backupSelection = function (e) { 
+    this._backupSelection = function (e) {
       // e.stopPropagation();
       if (this.logExecution) console.log("_backupSelection()");
       if (this.range) {
         this.range_backup = this.range.cloneRange();
       }
-    }
+      this._normalizeDocument();
+      this._replaceText(true);
+    }.bind(this);
 
     this._paste = function (e) {
       e.preventDefault();
@@ -1036,7 +1044,7 @@ class Wysiwyg4All {
 
     document.addEventListener("selectionchange", this._selectionchange);
     this.element.addEventListener("keydown", this._keydown);
-    this.element.addEventListener("mouseup", this._normalize);
+    this.element.addEventListener("mousedown", this._normalize);
     // this.element.addEventListener('blur', this._normalize);
     // fuck safari, firefox
     window.addEventListener("mousedown", this._backupSelection);
@@ -1049,7 +1057,7 @@ class Wysiwyg4All {
     this.observer.disconnect();
     document.removeEventListener("selectionchange", this._selectionchange);
     this.element.removeEventListener("keydown", this._keydown);
-    this.element.removeEventListener("mouseup", this._normalize);
+    this.element.removeEventListener("mousedown", this._normalize);
     window.removeEventListener("mousedown", this._backupSelection);
     this.element.removeEventListener("paste", this._paste);
     this.element.removeEventListener("keyup", this._keyup);
@@ -1864,45 +1872,27 @@ class Wysiwyg4All {
   }
 
   _normalizeDocument() {
+    let toRemove = [];
     nodeCrawler(
       (n) => {
-        if (n.nodeType === 3 && n.textContent.includes("\u200B")) {
-          //!n.textContent ||
-          n.textContent = n.textContent.replace("\u200B", "");
-
-          if (!n.textContent) {
-            let cel;
-            for (let c of this.ceilingElement_queryArray)
-              if (n.parentNode.closest(c)) {
-                cel = n.parentNode.closest(c);
-                break;
-              }
-
-            let el = climbUpToEldestParent(n, cel, true);
-
-            let par = el.parentNode;
-            if (
-              !this._isCeilingElement(par) &&
-              !el.textContent &&
-              this.element.lastChild !== el
-            ) {
-              par.removeChild(el);
-              n = par;
-            }
-            return n;
-          }
-        } else if (n.nodeType === 1 && n.nodeName !== "BR") {
-          console.log("normalize", n);  
+        if (n.nodeType === 1 && n.nodeName !== "BR") {
+          
           if (n.childNodes.length === 0 || n.childNodes.length === 1 && n.childNodes[0].nodeType === 3 && n.childNodes[0].textContent === "") {
-            let st = this.range.startContainer;
-            if(st.nodeType === 3) {
+            let st = this.range?.startContainer;
+            if(st && st.nodeType === 3) {
               st = st.parentNode;
             }
-            console.log({st, n});
-            if (st !== n) {
-              n.remove();
+            
+            if (n === st) {
+              n.normalize();
+              return n;
             }
-            return n;
+
+            if (n.tagName === 'SPAN') {
+              // n.remove();
+              toRemove.push(n);
+              return n;
+            }
           }
           n.normalize();
         }
@@ -1911,6 +1901,11 @@ class Wysiwyg4All {
       },
       { node: this.element }
     );
+    if (toRemove.length) {
+      for (let r of toRemove) {
+        r.remove();
+      }
+    }
   }
 
   _replaceText(wholeDocument = false) {
@@ -2125,8 +2120,6 @@ class Wysiwyg4All {
      * chkArr is an array of class names or tag names
      * closest is a boolean to check if the element is closest to the node
      */
-    if (this.logExecution)
-      console.log("_checkElement", { node, chkArr, closest, exp });
     if (node && node.nodeType === 1)
       for (let c of chkArr) {
         if (closest) {
@@ -2222,7 +2215,6 @@ class Wysiwyg4All {
   setSafeLine() {
     let firstChild = this.element.firstChild;
     let lastChild = this.element.lastChild;
-    console.log({ firstChild, lastChild });
     this.unSelectable_queryArray.forEach((cl) => {
       if (cl[0] === ".") {
         cl = cl.substring(1);
@@ -2466,8 +2458,8 @@ class Wysiwyg4All {
       if (this.range.collapsed) {
         if (restrictedClass) return;
 
-        let text = document.createTextNode("");
-        // let text = document.createTextNode("\u200B");
+        // let text = document.createTextNode(" ");
+        let text = document.createTextNode("\u200B");
         wrapper.append(text);
 
         if (this.range.startContainer.nodeName === "BR")
@@ -2476,9 +2468,8 @@ class Wysiwyg4All {
             this.range.startContainer
           );
         else this.range.insertNode(wrapper);
-        
-        console.log('setrange')
-        this.range = adjustSelection({ node: text, position: false }, this.ceilingElement_queryArray);
+
+        this.range = adjustSelection({ node: text, position: [true, false] }, this.ceilingElement_queryArray);
       }
       else {
         if (restrictedClass) {
@@ -2631,6 +2622,9 @@ class Wysiwyg4All {
           prev.remove();
       }
       // this._normalizeDocument();
+      // this.restoreLastSelection();
+      this.restoreWhenFocus = true;
+      // this._backupSelection();
       return;
     }
 

@@ -272,6 +272,11 @@ function nodeCrawler(run, option) {
             diving = true;
             // entering the deepest elements first child.
 
+            if (crawl.nodeType === 3) {
+                crawl = crawl.nextSibling || crawl.parentNode;
+                continue;
+            }
+
             if (typeof run === "function") crawl = run(crawl);
             if (crawl === "BREAK") break;
 
