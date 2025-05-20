@@ -1,5 +1,6 @@
 import { ColorMangle } from "colormangle";
-import { adjustSelection, nodeCrawler, generateId, climbUpToEldestParent } from "./selectors.js";
+import { adjustSelection, nodeCrawler, climbUpToEldestParent } from "./selectors.js";
+import { hashtag_regex, hashtag_stopper_regex, urllink_regex, generateId } from "./util.js";
 // Add debouncing for frequent operations like selection changes
 const debounce = (fn, delay) => {
   let timeout;
@@ -10,32 +11,7 @@ const debounce = (fn, delay) => {
 };
 
 class Wysiwyg4All {
-  /**
-   * Wysiwyg4All is a simple framework for building a text editor for your website.
-   * Focused on expandability and customizations.
-   * Additional library ColorMangle is required for text colors.
-   * @param {{}} option - Options
-   * @param {string} option.elementId - ID of target <DIV>.
-   * @param {boolean} [option.editable=true] - When set to false, Wysiwyg will not be editable. By doing this, it can be used as readonly.
-   * @param {string} [option.placeholder=''] - Add placeholder string.
-   * @param {boolean} [option.spellcheck=false] - Set spellcheck to true/false.
-   * @param {string | object} [option.highlightColor='teal'] - Sets the highlight color of the wysiwyg (web color name | hex | rgb | hsl). Or can provide custom color scheme object (more details in api doc).
-   * @param {string} [option.html=''] - HTML string to load on initialization.
-   * @param {function} [option.callback=(cb)=>{return cb}] - Setup callback function. Callback argument contains array of information such as current text style, added images, hashtags, urllinks, selected range... etc.
-   * @param {{} | number} [option.fontSize={desktop:18, tablet: 16, phone: 14}] - Set default font size of each screen size in px. If number is given all screen size will share the same give font size.
-   * @param {boolean} [option.lastLineBlank=false] - When set to true, Blank line will always be added on the last line of wysiwyg.
-   * @param {boolean} [option.hashtag=false] - When set to true, wysiwyg will auto detect hashtag strings.
-   * @param {boolean} [option.urllink=false] - When set to true, wysiwyg will auto detect url strings.
-   * @param {boolean} [option.logMutation=false] - When set to true, wysiwyg will output dom mutation data via callback function.
-   */
   constructor(option) {
-    this.hashtag_regex =
-      /#[\u0041-\u005A\u0061-\u007A\u00AA\u00B5\u00BA\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0\u08A2-\u08AC\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097F\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C33\u0C35-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191C\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005\u3006\u3031-\u3035\u303B\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA697\uA6A0-\uA6E5\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA793\uA7A0-\uA7AA\uA7F8-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA80-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC\w-]+(?:\+[\w-]+)*/g;
-    this.hashtag_stopper_regex =
-      /[^\u0041-\u005A\u0061-\u007A\u00AA\u00B5\u00BA\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0\u08A2-\u08AC\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097F\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C33\u0C35-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191C\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005\u3006\u3031-\u3035\u303B\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA697\uA6A0-\uA6E5\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA793\uA7A0-\uA7AA\uA7F8-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA80-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC\w-]/g;
-    this.urllink_regex =
-      /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
-
     let {
       elementId = "",
       editable = true,
@@ -215,13 +191,6 @@ class Wysiwyg4All {
 
     const fontSizeRatio = {
       //  should always be the same em value as css
-      // h1: 4.2,
-      // h2: 3.56,
-      // h3: 2.92,
-      // h4: 2.28,
-      // h5: 1.64,
-      // h6: 1.15,
-      // small: 0.8,
       h1: fontSize.h1 || 4.2,
       h2: fontSize.h2 || 3.56,
       h3: fontSize.h3 || 2.92,
@@ -353,166 +322,6 @@ class Wysiwyg4All {
     });
   }
 
-  _generateId(option) {
-    if (this.logExecution) console.log("_generateId()", { option });
-    let limit = 12;
-    let prefix = "";
-
-    if (typeof option === "number") limit = option;
-    else if (typeof option === "string") prefix = `${option}_`;
-
-    const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    let text = "";
-    for (let i = 0; i < limit - 6; i++)
-      text += possible.charAt(
-        Math.floor(Math.random() * (possible.length - 1))
-      );
-
-    const numb = new Date().getTime().toString().substring(7, 13); // SECOND, MILLISECOND
-
-    return prefix + numb + text;
-  }
-
-  _nodeCrawler(run, option) {
-    if (this.logExecution) console.log("_nodeCrawler()", { run, option });
-    const { parentNode, node, startFromEldestChild, startNode } = option;
-
-    if (startFromEldestChild && !parentNode)
-      throw new Error("Need parentNode to crawl up single child");
-
-    if (!node || !(node instanceof Node || node?.commonAncestorContainer))
-      throw new Error("No node to crawl");
-
-    let outputNodes = [],
-      nodeIsRange = !!node.commonAncestorContainer,
-      commonContainer = null,
-      parentAnchor;
-
-    if (parentNode && parentNode instanceof Node && parentNode?.nodeType === 1)
-      parentAnchor = parentNode;
-
-    if (nodeIsRange) {
-      commonContainer = node.commonAncestorContainer;
-      commonContainer =
-        commonContainer.nodeType === 3
-          ? commonContainer.parentNode || commonContainer
-          : commonContainer;
-    } else commonContainer = node;
-
-    if (startFromEldestChild)
-      commonContainer = this._climbUpToEldestParent(
-        commonContainer,
-        parentNode,
-        true
-      );
-
-    if (parentAnchor) {
-      while (
-        commonContainer.nodeType === 3 ||
-        (commonContainer !== parentAnchor &&
-          commonContainer.parentNode &&
-          commonContainer.parentNode !== parentAnchor)
-      )
-        commonContainer = commonContainer.parentNode;
-    }
-
-    /** crawl order below (outputs node on the way)
-     *  If 'BREAK' is returned, the node is not saved in outputNode
-     *
-     *  start   ->  [                   end
-     *                  |               ^ (finish)
-     *                  v               | (outputNode)
-     *              outputNode  ->  outputNode
-     *
-     *  NOTE: Will not crawl when node is textNode
-     */
-
-    if (commonContainer.nodeType === 3) {
-      outputNodes.push(run(commonContainer));
-
-      return { nodes: outputNodes, commonContainer };
-    }
-
-    let id, uniqueId;
-    if (commonContainer.nodeType === 1) {
-      uniqueId =
-        commonContainer.id ||
-        (() => {
-          id = this._generateId("crawl");
-          commonContainer.id = id;
-          return id;
-        })();
-    }
-
-    let crawl =
-      (startNode instanceof Node ? startNode : null) ||
-      (nodeIsRange ? node.startContainer : commonContainer.childNodes[0]);
-    let endNode = nodeIsRange
-      ? node.endContainer
-      : commonContainer.childNodes[
-      commonContainer.childNodes.length
-        ? commonContainer.childNodes.length - 1
-        : 0
-      ];
-
-    let withInRange = (cwl) => {
-      if (!cwl || !(cwl instanceof Node)) return false;
-      if (cwl.nodeType === 1)
-        return cwl.id !== uniqueId && cwl.parentNode?.closest("#" + uniqueId);
-      else return true;
-    };
-
-    while (withInRange(crawl)) {
-      if (crawl.nodeType === 1 && crawl.childNodes.length) {
-        // dive down to deepest child's first crawl
-        crawl = crawl.childNodes[0];
-      } else if (crawl) {
-        // entering the deepest elements first child.
-
-        if (typeof run === "function") crawl = run(crawl);
-        if (crawl === "BREAK" || !withInRange(crawl)) break;
-
-        outputNodes.push(crawl);
-
-        // break out if the crawl hits the end
-        if (crawl === endNode) break;
-
-        /**
-         * Climb up the node if the node doesn't have any next siblings
-         * Stop when it hits the commonContainer
-         */
-        let breakOut = false;
-        while (
-          !crawl.nextSibling &&
-          crawl.parentNode &&
-          withInRange(crawl.parentNode)
-        ) {
-          crawl = crawl.parentNode;
-          if (crawl) {
-            if (typeof run === "function") crawl = run(crawl);
-
-            if (crawl === "BREAK" || !withInRange(crawl)) {
-              breakOut = true;
-              break;
-            }
-
-            if (crawl) outputNodes.push(crawl);
-          }
-        }
-
-        if (breakOut) break;
-
-        // move on to next crawl
-        crawl = crawl.nextSibling;
-      }
-    }
-
-    if (id) commonContainer.removeAttribute("id");
-
-    return { node: outputNodes, commonContainer };
-  }
-
   _wrapNode(node, wrapper, appendWhole = false) {
     if (this.logExecution)
       console.log("_wrapNode()", { node, wrapper, appendWhole });
@@ -538,7 +347,7 @@ class Wysiwyg4All {
     };
 
     if (node.nodeType === 1) {
-      this._nodeCrawler(
+      nodeCrawler(
         (n) => {
           withinRange(n);
           return n;
@@ -590,82 +399,6 @@ class Wysiwyg4All {
     return { node: stripped || node, range };
   }
 
-  _climbUpToEldestParent(node, wrapper, singleChildParent = false, callback) {
-    if (this.logExecution)
-      console.log("_climbUpToEldestParent()", {
-        node,
-        wrapper,
-        singleChildParent,
-        callback,
-      });
-    callback =
-      callback ||
-      ((n) => {
-        return n;
-      });
-
-    if (!(wrapper instanceof Node) || wrapper?.nodeType === 3)
-      throw new Error("invalid wrapper node");
-
-    let id;
-    let uniqueId =
-      wrapper.id ||
-      (() => {
-        id = this._generateId("eldest");
-        wrapper.id = id;
-        return id;
-      })();
-    // on single parent mode climb up if parent has only 1 child or 2 child with zero space text
-    function _isSingleChildParent(n) {
-      if (!n || n.nodeType === 3) return false;
-
-      let childrenCount = n?.children?.length;
-      return (
-        childrenCount === 0 ||
-        (() => {
-          let sweep = n.childNodes.length;
-          let divCount = 0;
-          let iHaveText = false;
-
-          while (sweep--) {
-            let s = n.childNodes[sweep];
-
-            if (
-              s.nodeType === 3 &&
-              s.textContent.length > 0 &&
-              s.textContent !== "\u200B"
-            )
-              iHaveText = true;
-            else if (s.nodeType === 1 && s.nodeName !== "BR") divCount++;
-
-            // if (divCount > 1 || divCount && iHaveText)
-            if ((divCount > 1 && !iHaveText) || (divCount && iHaveText))
-              return false;
-          }
-
-          return true;
-        })()
-      );
-    }
-    while (
-      node?.id !== uniqueId &&
-      node.parentNode &&
-      node.parentNode.closest("#" + uniqueId) &&
-      node.parentNode.id !== uniqueId &&
-      (singleChildParent ? _isSingleChildParent(node?.parentNode) : true)
-    ) {
-      let cb = callback(node.parentNode);
-
-      if (!cb || cb === "BREAK") break;
-
-      node = cb;
-    }
-
-    if (id) wrapper.removeAttribute("id");
-
-    return node;
-  }
-
   _getStartEndLine(
     range = this.range,
     element = this.element,
@@ -675,8 +408,8 @@ class Wysiwyg4All {
       console.log("_getStartEndLine()", { range, element });
     if (!range) return [null, null, null];
 
-    let startLine = this._climbUpToEldestParent(range.startContainer, element);
-    let endLine = this._climbUpToEldestParent(range.endContainer, element);
+    let startLine = climbUpToEldestParent(range.startContainer, element);
+    let endLine = climbUpToEldestParent(range.endContainer, element);
 
     let inBetween = [];
     if (getInbetween) {
@@ -694,8 +427,6 @@ class Wysiwyg4All {
         currentLine = currentLine.nextSibling;
       }
     }
-    if (this.logExecution)
-      console.log("startLine | endLine", { startLine, endLine, inBetween });
 
     return [startLine, endLine, inBetween];
   }
@@ -716,7 +447,7 @@ class Wysiwyg4All {
   _normalizeBrowserQuirks() {
     // Handle Firefox's extra <br> tags
     if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-      this._nodeCrawler((node) => {
+      nodeCrawler((node) => {
         if (node.nodeName === 'BR' &&
           (!node.nextSibling || node.nextSibling.nodeName === 'BR')) {
           node.remove();
@@ -731,30 +462,27 @@ class Wysiwyg4All {
     }
   }
 
-  _isSelectionWithinRestrictedRange(
+  _isSelectionTrespassRestrictedRange(
     range = this.range,
     element = this.element
   ) {
     if (!range) {
       if (this.logExecution)
-        console.log("_isSelectionWithinRestrictedRange():true", {
+        console.log("_isSelectionTrespassRestrictedRange():true", {
           range,
           element,
         });
       return true;
     }
 
-    let { commonAncestorContainer, startContainer, endContainer } = range;
+    let { commonAncestorContainer, startContainer, endContainer, startLine, endLine, inBetween } = range;
     let restrict = this.restrictedElement_queryArray;
-    // let startLine = this._climbUpToEldestParent(startContainer, element);
-    // let endLine = this._climbUpToEldestParent(endContainer, element);
 
-    // if (this.logExecution) console.log('startLine | endLine', {startLine, endLine});
-    let [startLine, endLine, inBetween] = this._getStartEndLine(
-      range,
-      element,
-      true
-    );
+    // let [startLine, endLine, inBetween] = this._getStartEndLine(
+    //   range,
+    //   element,
+    //   true
+    // );
     if (startLine === endLine) {
       commonAncestorContainer =
         commonAncestorContainer.nodeType === 3
@@ -763,9 +491,6 @@ class Wysiwyg4All {
       for (let r of restrict) {
         let cl = commonAncestorContainer.closest(this._classNameToQuery(r));
         if (cl) {
-          // if (cl.getAttribute('contenteditable') !== 'true') {
-          //     return r;
-          // }
           let isThere = this._isThereContentEditableOverMyHead(
             commonAncestorContainer,
             element
@@ -774,9 +499,6 @@ class Wysiwyg4All {
             return true;
           }
         }
-        // let cl = commonAncestorContainer.closest(this._classNameToQuery(r));
-        // if (cl)
-        //     return r;
       }
     } else if (inBetween?.length) {
       for (let i = 0; i < inBetween.length; i++) {
@@ -789,22 +511,6 @@ class Wysiwyg4All {
           }
         }
       }
-      // while (startLine && startLine !== endLine) {
-      //     startLine = startLine.nextSibling;
-      //     if (startLine) {
-      //         if (startLine.nodeType === 1)
-      //             for (let r of restrict) {
-      //                 if (startLine.classList.contains(r)) {
-      //                     if (startLine.getAttribute('contenteditable') !== 'true') {
-      //                         return r;
-      //                     }
-      //                 }
-      //                 // if (startLine.classList.contains(r))
-      //                 //     return r;
-      //             }
-      //     } else
-      //         break;
-      // }
     }
 
     return false;
@@ -890,6 +596,125 @@ class Wysiwyg4All {
     }
   }
 
+  _selectionchange = () => {
+    let sel = window.getSelection();
+
+    let anchorElement =
+      sel.anchorNode?.nodeType === 3
+        ? sel.anchorNode.parentNode
+        : sel.anchorNode;
+
+    let focusElement =
+      sel.focusNode?.nodeType === 3
+        ? sel.focusNode.parentNode
+        : sel.focusNode;
+
+    if (anchorElement.closest(`#${this.elementId}`) && focusElement.closest(`#${this.elementId}`)) {
+      let lastChild = this.element.lastChild;
+      if (!lastChild) {
+        // Wysiwyg is empty
+        lastChild = this._createEmptyParagraph();
+        this.element.appendChild(lastChild);
+
+        // Adjust selection
+        this.range = adjustSelection({
+          node: lastChild,
+          position: true,
+        }, this.ceilingElement_queryArray);
+      }
+      else {
+        this.range = adjustSelection(null);
+      }
+    }
+    else {
+      this.range = null;
+      this.commandTracker = {};
+      return;
+    }
+
+    //  track commandTracker
+    let commandTracker = {};
+    for (let style in this.styleTagOfCommand) {
+      commandTracker[style] = false;
+    }
+
+    let [startLine, endLine, inBetween] = this._getStartEndLine(
+      this.range,
+      this.element,
+      true
+    );
+    this.range.startLine = startLine;
+    this.range.endLine = endLine;
+    this.range.inBetween = inBetween;
+
+    let restricted = this.restrictedElement_queryArray.concat(
+      this.specialTextElement_queryArray
+    );
+
+    let crawlResult = nodeCrawler(
+      (node) => {
+        if (
+          (node.nodeType === 1 && node.closest("blockquote")) ||
+          (node.nodeType === 3 && node.parentNode.closest("blockquote"))
+        )
+          commandTracker.quote = true;
+
+
+        for (let c of restricted) {
+          if (node.nodeType === 3
+            ? node.parentNode.closest(c)
+            : node.nodeType === 1
+              ? node.closest(c)
+              : !(node instanceof Node)) {
+            return node;
+          }
+        }
+
+        if (
+          node.nodeType === 3 ||
+          node.nodeName === "BR" ||
+          (node.nodeType === 1 &&
+            node.childNodes.length === 1 &&
+            (node.childNodes[0].nodeName === "BR" ||
+              node.childNodes[0].nodeType === 3))
+        ) {
+          let n =
+            node.nodeType === 3 || node.nodeName === "BR"
+              ? node.parentNode
+              : node;
+
+          let comm = this._trackStyle(n);
+          for (let c in comm) commandTracker[c] = comm[c];
+        }
+        return node;
+      },
+      { node: this.range, parentNode: this.element }
+    );
+
+    if (!crawlResult.node.length) {
+      let comm = this._trackStyle(this.range.startContainer);
+      for (let c in comm) commandTracker[c] = comm[c];
+    }
+
+    this.commandTracker = commandTracker;
+    let caratPosition;
+    let caratEl = this.isRangeDirectionForward
+      ? this.range.endContainer
+      : this.range.startContainer;
+
+    if (caratEl.nodeType === 3)
+      caratPosition = this.range.getBoundingClientRect();
+    else if (caratEl.nodeType === 1)
+      caratPosition = caratEl.getBoundingClientRect();
+
+    this._callback({
+      commandTracker,
+      range: this.range,
+      caratPosition,
+    }).catch((err) => console.error(err));
+    this._lastLineBlank();
+  }
+
   _setEventListener(listen) {
     if (this.logExecution) console.log("_setEventListener()", { listen });
     /**
@@ -911,7 +736,7 @@ class Wysiwyg4All {
     //  image selector
     let imgInput = document.createElement("input");
     for (const [key, value] of Object.entries({
-      id: this._generateId("imageInput"),
+      id: generateId("imageInput"),
       type: "file",
       accept: "image/gif,image/png,image/jpeg,image/webp",
       hidden: true,
@@ -927,509 +752,291 @@ class Wysiwyg4All {
       });
     });
 
-    this._selectionchange = debounce(function () {
-
-      // find the range direction
-      let isRangeDirectionForward = true;
-      if (this.range) {
-        let { startContainer, endContainer } = this.range;
-        if (startContainer === endContainer) {
-          isRangeDirectionForward =
-            this.range.startOffset <= this.range.endOffset;
-        } else {
-          let startLine = this.range.startLine;
-          let endLine = this.range.endLine;
-          isRangeDirectionForward =
-            startLine.compareDocumentPosition(endLine) ===
-            Node.DOCUMENT_POSITION_FOLLOWING;
-        }
-      }
-      this.isRangeDirectionForward = isRangeDirectionForward;
-      if (this.logExecution) console.log("isRangeDirectionForward", { isRangeDirectionForward, range: this.range });
-
-      this._modifySelection(() => {
-        let isForward =
-          // !(this.lastKey === "DELETE" || this.lastKey === "BACKSPACE") ||
-          this.isRangeDirectionForward;
-
-        let rangeHeader = isForward
-          ? this.range.endContainer
-          : this.range.startContainer;
-        this.lastKey = null;
-
-        if (this.logExecution)
-          console.log("isForward", { isForward });
-        //  nudge range in-case carat is within non selectables
-        let unSel = this._isUnSelectableElement(rangeHeader);
-        if (unSel && this.range.endContainer !== this.range.startContainer) {
-          let selNext = isForward ? unSel.nextSibling : unSel.previousSibling;
-
-          if (this.logExecution)
-            console.log("nudging range", { unSel, selNext, isForward });
-
-          if (!selNext && !isForward) {
-            selNext = document.createTextNode("\u200B");
-            unSel.parentNode.insertBefore(
-              selNext,
-              isForward ? unSel.nextSibling : unSel
-            );
-          }
-          if (selNext)
-            this.range = adjustSelection({
-              node: this.range.collapsed
-                ? selNext
-                : isForward
-                  ? [null, selNext]
-                  : [selNext, null],
-              position: this.range.collapsed
-                ? isForward
-                  ? 0
-                  : selNext.textContent.length
-                : isForward
-                  ? [null, 0]
-                  : [0, null],
-            }, this.ceilingElement_queryArray);
-        }
-
-        //  track commandTracker
-        let commandTracker = {};
-        for (let style in this.styleTagOfCommand) {
-          commandTracker[style] = false;
-        }
-
-        if (this._isSelectionWithinRestrictedRange()) {
-          this.commandTracker = commandTracker;
-          return;
-        }
-
-        let skipTrack = this.restrictedElement_queryArray.concat(
-          this.specialTextElement_queryArray
-        );
-        let crawlResult = this._nodeCrawler(
-          (node) => {
-            if (
-              (node.nodeType === 1 && node.closest("blockquote")) ||
-              (node.nodeType === 3 && node.parentNode.closest("blockquote"))
-            )
-              commandTracker.quote = true;
-
-            let styleRestrictedParents = (c) => {
-              return node.nodeType === 3
-                ? node.parentNode.closest(c)
-                : node.nodeType === 1
-                  ? node.closest(c)
-                  : !(node instanceof Node);
-            };
-
-            for (let p of skipTrack) {
-              let chk = styleRestrictedParents(p);
-              if (chk) return node;
-            }
-
-            if (
-              node.nodeType === 3 ||
-              node.nodeName === "BR" ||
-              (node.nodeType === 1 &&
-                node.childNodes.length === 1 &&
-                (node.childNodes[0].nodeName === "BR" ||
-                  node.childNodes[0].nodeType === 3))
-            ) {
-              let n =
-                node.nodeType === 3 || node.nodeName === "BR"
-                  ? node.parentNode
-                  : node;
-
-              let comm = this._trackStyle(n);
-              for (let c in comm) commandTracker[c] = comm[c];
-            }
-            return node;
-          },
-          { node: this.range, parentNode: this.element }
-        );
-
-        if (!crawlResult.node.length) {
-          let comm = this._trackStyle(this.range.startContainer);
-          for (let c in comm) commandTracker[c] = comm[c];
-        }
-
-        this.commandTracker = commandTracker;
-        let caratPosition;
-        let caratEl = this.isRangeDirectionForward
-          ? this.range.endContainer
-          : this.range.startContainer;
-
-        if (caratEl.nodeType === 3)
-          caratPosition = this.range.getBoundingClientRect();
-        else if (caratEl.nodeType === 1)
-          caratPosition = caratEl.getBoundingClientRect();
-
-        this._callback({
-          commandTracker,
-          range: this.range,
-          caratPosition,
-        }).catch((err) => console.error(err));
-        this._lastLineBlank();
-      });
-    }.bind(this), 8);
-
     this._keydown = function (e) {
-      if (this._isSelectionWithinRestrictedRange()) return;
+      // if (this._isSelectionTrespassRestrictedRange()) {
+      //   e.preventDefault();
+      //   return;
+      // };
 
-      this._modifySelection(() => {
-        if (!this.range) return;
-        let { startContainer, startOffset, collapsed, startLine, endLine } =
-          this.range;
+      // this._setRange(() => {
+      if (!this.range) return;
+      let { startContainer, startOffset, collapsed, startLine, endLine, inBetween } =
+        this.range;
 
-        let key = e.key.toUpperCase();
-        let shift = e.shiftKey;
+      let key = e.key.toUpperCase();
+      let shift = e.shiftKey;
 
-        this.lastKey = key;
+      this.lastKey = key;
 
-        if (key === "ENTER" && e.shiftKey) {
-          // prevent shift+enter
-          if (!this.range.endLine.closest("LI")) e.preventDefault();
-          return;
-        }
+      if (key === "ENTER" && e.shiftKey) {
+        // prevent shift+enter
+        if (!this.range.endLine.closest("LI")) e.preventDefault();
+        return;
+      }
 
-        // delete key
-        if (["BACKSPACE", "DELETE"].includes(key)) {
-          // this.isRangeDirectionForward = true;
-
-          // if (
-          //     this.element.childNodes.length === 1 &&
-          //     this._isTextBlockElement(this.element.childNodes[0]) &&
-          //     this.element.childNodes[0].textContent.length === 0
-          // ) {
-          //     if(this.logExecution) console.log('dead end');
-          //     e.preventDefault();
-          //     // Optionally, reset to a blank paragraph
-          //     // this.element.childNodes[0].innerHTML = '<br>';
-          //     // this.range = this._adjustSelection({ node: this.element.childNodes[0], position: 0 });
-          //     this._lastLineBlank(true);
-          // }
-
-          if (
-            !this.element.textContent &&
+      // delete key
+      if (["BACKSPACE", "DELETE"].includes(key)) {
+        if (
+          (!this.element.textContent &&
             this.element.childNodes.length <= 1 &&
             this._isTextElement(this.element.childNodes[0]) &&
-            this.element.childNodes[0] === startLine
+            this.element.childNodes[0] === startLine)
+          ||
+          this.element.childNodes.length === 0
+        ) {
+          if (this.logExecution) console.log("nothing to delete");
+          // there is nothing to delete
+          e.preventDefault();
+          return;
+        }
+
+        let stc = this.range.startContainer;
+        if (this.range.collapsed) {
+          if (this.logExecution) console.log("range is collapsed");
+          let block = (stc.nodeType === 3 ? stc.parentNode : stc).closest(
+            "blockquote"
+          );
+          if (
+            block &&
+            block.childNodes[0] === climbUpToEldestParent(stc, block) &&
+            this.range.startOffset === 0
           ) {
-            if (this.logExecution) console.log("nothing to delete");
-            // there is nothing to delete
+            // if the block is empty and the cursor is on the first offset position within the blockquote
+            // cursor is on the first offset position within the blockquote
+
+            if (this.logExecution)
+              console.log(
+                "block is empty and the cursor is on the first offset position within the blockquote"
+              );
             e.preventDefault();
+
+            this.command("quote");
             return;
           }
 
-          let stc = this.range.startContainer;
-          if (this.range.collapsed) {
-            if (this.logExecution) console.log('range is collapsed');
-            let block = (stc.nodeType === 3 ? stc.parentNode : stc).closest(
-              "blockquote"
-            );
-            if (
-              block &&
-              block.childNodes[0] === this._climbUpToEldestParent(stc, block) &&
-              this.range.startOffset === 0
-            ) {
-              // if the block is empty and the cursor is on the first offset position within the blockquote
-              // cursor is on the first offset position within the blockquote
-
-              if (this.logExecution)
-                console.log(
-                  "block is empty and the cursor is on the first offset position within the blockquote"
-                );
-              e.preventDefault();
-              this.command("quote");
-              return;
-            }
-            else if (this.range.startOffset === 0) {
-              let ceil = this._climbUpToEldestParent(
-                stc,
-                this.element
-              ).previousSibling;
-              for (let cl of this.restrictedElement_queryArray) {
-                if (ceil && ceil.closest(cl)) {
-                  // remove the element
-                  this.element.removeChild(ceil);
-
-                  if (this.logExecution)
-                    console.log("removing element", { ceil });
-                  e.preventDefault();
-                  return;
-                }
+          if (this.range.startOffset === 0 || this.range.startOffset === 1 && (stc.textContent[0] === "\u200B" || stc.textContent.length === 0)) {
+            let prevsib=this.range.startLine.previousSibling;
+            for (let cl of this.unSelectable_queryArray) {
+              // check if startLine element has a class name cl
+              // if cl starts with . then it's a class name
+              if (cl[0] === ".") {
+                cl = cl.substring(1);
+                if (prevsib && prevsib.classList.contains(cl))
+                  prevsib.remove();
               }
+              else {
+                if (prevsib && prevsib.tagName === cl)
+                  prevsib.remove();
+              }
+            }
+          }
+        }
+        if (startLine !== endLine) {
+          for (let cl of this.unSelectable_queryArray) {
+            // check if startLine element has a class name cl
+            // if cl starts with . then it's a class name
+            if (cl[0] === ".") {
+              cl = cl.substring(1);
+              if (startLine.classList.contains(cl))
+                startLine.remove();
+              if (endLine.classList.contains(cl))
+                endLine.remove();
             }
             else {
-              let ceil = this.isRangeDirectionForward ? this.range.startLine.previousSibling : this.range.endLine;
-              if (ceil)
-                this.restrictedElement_queryArray.forEach((cl) => {
-                  if (ceil.closest(cl)) {
-                    if (this.isRangeDirectionForward ? this.range.startOffset <= 1 : this.range.endOffset <= 1) {
-                      // remove the element
-                      this.element.removeChild(ceil);
-
-                      if (this.logExecution)
-                        console.log("removing element", { ceil });
-                      e.preventDefault();
-                    }
-                  }
-                });
+              if (startLine.tagName === cl)
+                startLine.remove();
+              if (endLine.tagName === cl)
+                endLine.remove();
             }
-            return;
           }
+        }
+        return;
+      }
 
-          let commonAncestorContainer = this.range.commonAncestorContainer;
-          // check if commonAncestorContainer is the only element in this.element
-          if (
-            !this.range.startOffset &&
-            ((this.element.childNodes.length === 1 &&
-              commonAncestorContainer === this.element.childNodes[0]) ||
-              (commonAncestorContainer === this.element &&
-                this.element.childNodes.length === 0))
-          ) {
-            if (this.logExecution) console.log('element is empty and the cursor is on the first offset position within the block');
-            // if the element is empty and the cursor is on the first offset position within the block
-            // let t = document.createTextNode("\u200B");
-            // let stcEl = stc.nodeType === 3 ? stc.parentNode : stc;
-            // stcEl.insertBefore(t, stcEl[0]);
-            e.preventDefault();
-            return;
+      //  hashtag flag
+      if (key === "#" && !this.hashtag_flag) {
+        this.hashtag_flag = true;
+        return;
+      }
+
+      //  url flag
+      if ([":", "/", "."].includes(key) && !this.urllink_flag) {
+        this.urllink_flag = true;
+        return;
+      }
+
+      // insert hashtag | urllink
+      if (
+        (this.hashtag_flag || this.urllink_flag) &&
+        ([" ", "ENTER", "TAB"].includes(key) || key.includes("ARROW"))
+      ) {
+        this._replaceText();
+        // return;
+      }
+
+      if (key.includes("ARROW")) {
+        this._setArrow(e);
+        return;
+      }
+
+      if (key === "TAB") {
+        e.preventDefault();
+        let sweep_array = [];
+
+        if (!collapsed) {
+          let sweep = startLine;
+          while (sweep && sweep !== endLine) {
+            sweep_array.push(sweep);
+            sweep = sweep.nextSibling;
           }
-          // else {
-          //   console.log({ isRangeDirectionForward: this.isRangeDirectionForward });
-          //   let ceil = this.isRangeDirectionForward ? this.range.startLine : this.range.endLine;
-          //   console.log({ range: this.range, ceil });
-          //   if (ceil)
-          //     this.restrictedElement_queryArray.forEach((cl) => {
-          //       if (ceil.closest(cl)) {
-          //         console.log('removed')
-          //         // remove the element
-          //         if (this.isRangeDirectionForward ? this.range.startOffset <= 1 : this.range.endOffset <= 1) {
-          //           this.element.removeChild(ceil);
-
-          //           if (this.logExecution)
-          //             console.log("removing element", { ceil });
-          //           e.preventDefault();
-          //         }
-          //       }
-          //     });
-          // }
-          // // Not sure what this is meant to do...
-          // if (stc.nodeType === 1 && this._isTextBlockElement(stc) && !this.range.startOffset) {
-          //     let t = document.createTextNode('\u200B');
-          //     stc.insertBefore(t, stc.childNodes[0]);
-          //     this.range = this._adjustSelection({
-          //         node: t,
-          //         position: 0
-          //     });
-          // }
-
-          return;
+          sweep_array.push(endLine);
         }
 
-        //  hashtag flag
-        if (key === "#" && !this.hashtag_flag) {
-          this.hashtag_flag = true;
-          return;
-        }
+        if (shift) {
+          // delete indent
+          let hasIndent = false;
+          let diveAndRemoveTab = (n) => {
+            while (n.childNodes[0]) {
+              n = n.childNodes[0];
 
-        //  url flag
-        if ([":", "/", "."].includes(key) && !this.urllink_flag) {
-          this.urllink_flag = true;
-          return;
-        }
+              while (n.nodeType === 3 && !n.textContent) n = n.nextSibling;
 
-        // insert hashtag | urllink
-        if (
-          (this.hashtag_flag || this.urllink_flag) &&
-          ([" ", "ENTER", "TAB"].includes(key) || key.includes("ARROW"))
-        ) {
-          this._replaceText();
-          // return;
-        }
-
-        // when user press shift + arrows to expand the selection range,
-        // this.isRangeDirectionForward is responsible of setting direction to expand
-        // when set to true, the endOffset will change when using shift + arrow
-        // if (shift) {
-        //   if (key === "PAGEUP" || key === "HOME") {
-        //     this.isRangeDirectionForward = false;
-        //     return;
-        //   }
-
-        //   if (key === "PAGEDOWN" || key === "END") {
-        //     this.isRangeDirectionForward = true;
-        //     return;
-        //   }
-        // }
-
-        if (key.includes("ARROW")) {
-          this._setArrow(e);
-          return;
-        }
-
-        if (key === "TAB") {
-          // this.isRangeDirectionForward = true;
-
-          e.preventDefault();
-          let sweep_array = [];
-
-          if (!collapsed) {
-            let sweep = startLine;
-            while (sweep && sweep !== endLine) {
-              sweep_array.push(sweep);
-              sweep = sweep.nextSibling;
-            }
-            sweep_array.push(endLine);
-          }
-
-          if (shift) {
-            // delete indent
-            let hasIndent = false;
-            let diveAndRemoveTab = (n) => {
-              while (n.childNodes[0]) {
-                n = n.childNodes[0];
-
-                while (n.nodeType === 3 && !n.textContent) n = n.nextSibling;
-
-                if (n.nodeType === 3 && n.textContent[0] === "\t") {
-                  hasIndent = true;
-                  n.textContent = n.textContent.substring(1);
-                  break;
-                }
-              }
-            };
-            if (sweep_array.length) {
-              for (let n of sweep_array) {
-                if (n.textContent[0] === "\t") diveAndRemoveTab(n);
-              }
-              if (hasIndent)
-                adjustSelection({
-                  node: [startLine, endLine],
-                  position: [true, false],
-                }, this.ceilingElement_queryArray);
-            } else if (startLine.textContent[0] === "\t") {
-              let lineOffset = (line, container, containerOffset) => {
-                if (line === container) return containerOffset;
-
-                this._nodeCrawler(
-                  (n) => {
-                    if (container === n) return "BREAK";
-
-                    if (n.nodeType === 3 && n.textContent.length)
-                      containerOffset += n.textContent.length;
-
-                    return n;
-                  },
-                  { node: line }
-                );
-                return containerOffset;
-              };
-
-              let offset =
-                lineOffset(startLine, startContainer, startOffset) - 1;
-              offset = offset < 0 ? 0 : offset;
-
-              diveAndRemoveTab(startLine);
-              if (hasIndent)
-                adjustSelection({ node: startLine, position: offset }, this.ceilingElement_queryArray);
-            }
-          } else {
-            // indent
-            if (sweep_array.length) {
-              let hasIndent = false;
-              for (let n of sweep_array) {
+              if (n.nodeType === 3 && n.textContent[0] === "\t") {
                 hasIndent = true;
-                let tab = document.createTextNode("\t");
-                n.insertBefore(tab, n.childNodes[0]);
+                n.textContent = n.textContent.substring(1);
+                break;
               }
-              if (hasIndent)
-                adjustSelection({
-                  node: [startLine, endLine],
-                  position: [true, false],
-                }, this.ceilingElement_queryArray);
-            } else {
+            }
+          };
+          if (sweep_array.length) {
+            for (let n of sweep_array) {
+              if (n.textContent[0] === "\t") diveAndRemoveTab(n);
+            }
+            if (hasIndent)
+              adjustSelection({
+                node: [startLine, endLine],
+                position: [true, false],
+              }, this.ceilingElement_queryArray);
+          } else if (startLine.textContent[0] === "\t") {
+            let lineOffset = (line, container, containerOffset) => {
+              if (line === container) return containerOffset;
+
+              nodeCrawler(
+                (n) => {
+                  if (container === n) return "BREAK";
+
+                  if (n.nodeType === 3 && n.textContent.length)
+                    containerOffset += n.textContent.length;
+
+                  return n;
+                },
+                { node: line }
+              );
+              return containerOffset;
+            };
+
+            let offset =
+              lineOffset(startLine, startContainer, startOffset) - 1;
+            offset = offset < 0 ? 0 : offset;
+
+            diveAndRemoveTab(startLine);
+            if (hasIndent)
+              adjustSelection({ node: startLine, position: offset }, this.ceilingElement_queryArray);
+          }
+        } else {
+          // indent
+          if (sweep_array.length) {
+            let hasIndent = false;
+            for (let n of sweep_array) {
+              hasIndent = true;
               let tab = document.createTextNode("\t");
-              this.range.insertNode(tab);
-              adjustSelection({ node: tab, position: false }, this.ceilingElement_queryArray);
+              n.insertBefore(tab, n.childNodes[0]);
             }
+            if (hasIndent)
+              adjustSelection({
+                node: [startLine, endLine],
+                position: [true, false],
+              }, this.ceilingElement_queryArray);
+          } else {
+            let tab = document.createTextNode("\t");
+            this.range.insertNode(tab);
+            adjustSelection({ node: tab, position: false }, this.ceilingElement_queryArray);
           }
-          return;
         }
+        return;
+      }
 
-        if (key === "ENTER") {
-          //  remove zero space
-          if (
-            collapsed &&
-            (startContainer.textContent.includes("\u200B") ||
-              !startContainer.textContent)
-          ) {
-            this._nodeCrawler(
-              (n) => {
-                if (
-                  n.nodeType === 3 &&
-                  (n.textContent === "\u200B" || !n.textContent)
-                ) {
-                  n.remove();
-                }
-
-                return n;
-              },
-              {
-                node:
-                  startContainer.nodeType === 3
-                    ? startContainer.parentNode
-                    : startContainer,
+      if (key === "ENTER") {
+        //  remove zero space
+        if (
+          collapsed &&
+          (startContainer.textContent.includes("\u200B") ||
+            !startContainer.textContent)
+        ) {
+          nodeCrawler(
+            (n) => {
+              if (
+                n.nodeType === 3 &&
+                (n.textContent === "\u200B" || !n.textContent)
+              ) {
+                n.remove();
               }
-            );
-          }
 
-          if (endLine.textContent[0] === "\t") {
-            for (let s of endLine.textContent) {
-              if (s === "\t") this.insertTabPending_tabString += "\t";
-              else break;
+              return n;
+            },
+            {
+              node:
+                startContainer.nodeType === 3
+                  ? startContainer.parentNode
+                  : startContainer,
             }
-          }
+          );
         }
 
-        // this.isRangeDirectionForward = true;
-      });
+        if (endLine.textContent[0] === "\t") {
+          for (let s of endLine.textContent) {
+            if (s === "\t") this.insertTabPending_tabString += "\t";
+            else break;
+          }
+        }
+      }
+      // })
     }.bind(this);
 
     this._normalize = function (e) {
       e.stopPropagation();
-      this._modifySelection(() => {
-        if (this._isSelectionWithinRestrictedRange()) return;
-        this._normalizeDocument(true);
-        this.range_backup = this.range.cloneRange();
-        this._replaceText(true);
-      });
+      // this._setRange(() => {
+      if (this._isSelectionTrespassRestrictedRange()) return;
+      this._normalizeDocument(true);
+      this.range_backup = this.range.cloneRange();
+      this._replaceText(true);
+      // });
     }.bind(this);
     this._paste = function (e) {
       e.preventDefault();
-      if (this._isSelectionWithinRestrictedRange()) return;
-      this._modifySelection(() => {
-        if (this.range) {
-          if (this._isSelectionWithinRestrictedRange()) return;
-          let doc = document.createDocumentFragment();
-          doc.textContent = e.clipboardData
-            .getData("text/plain")
-            .replace(/\n\n/g, "\n");
+      if (this._isSelectionTrespassRestrictedRange()) return;
+      // this._setRange(() => {
+      if (this.range) {
+        if (this._isSelectionTrespassRestrictedRange()) return;
+        let doc = document.createDocumentFragment();
+        doc.textContent = e.clipboardData
+          .getData("text/plain")
+          .replace(/\n\n/g, "\n");
 
-          if (doc.textContent.includes("#")) {
-            this.hashtag_flag = true;
-          }
-
-          //  url flag
-          for (let u of [":", "/", "."]) {
-            doc.textContent.includes(u);
-            this.urllink_flag = true;
-          }
-
-          if (!this.range.collapsed) this.range.extractContents();
-          this.range.insertNode(doc);
+        if (doc.textContent.includes("#")) {
+          this.hashtag_flag = true;
         }
-      });
+
+        //  url flag
+        for (let u of [":", "/", "."]) {
+          doc.textContent.includes(u);
+          this.urllink_flag = true;
+        }
+
+        if (!this.range.collapsed) this.range.extractContents();
+        this.range.insertNode(doc);
+      }
+      // });
     }.bind(this);
     this._keyup = function () {
       if (this.removeSandwichedLine_array.length)
@@ -1770,7 +1377,7 @@ class Wysiwyg4All {
                     node.line.textContent === "\u200B"
                   ) {
                     let addBr = true;
-                    this._nodeCrawler(
+                    nodeCrawler(
                       (n) => {
                         if (n.nodeName === "BR") {
                           addBr = false;
@@ -1806,7 +1413,7 @@ class Wysiwyg4All {
                 let toUnwrap = [];
 
                 if (i.classList.length) {
-                  this._climbUpToEldestParent(i, node.ceiling, true, (n) => {
+                  climbUpToEldestParent(i, node.ceiling, true, (n) => {
                     let cIdx = i.classList.length;
                     while (cIdx--) {
                       if (
@@ -1919,7 +1526,7 @@ class Wysiwyg4All {
         (targetContainer.textContent.includes("\u200B") ||
           !targetContainer.textContent)
       ) {
-        this._nodeCrawler(
+        nodeCrawler(
           (n) => {
             if (
               n.nodeType === 3 &&
@@ -1974,27 +1581,6 @@ class Wysiwyg4All {
         );
       }
       return !!nudged;
-    };
-
-    let isCaratOnMultiLine = (el) => {
-      // check if carat is on the first / last line of multi wrapped line
-
-      let posTarget = arrowDirection === "DOWN" ? "bottom" : "top";
-      let caratViewPortPosition = this.range.getBoundingClientRect();
-      let elPosition = el.getBoundingClientRect()[posTarget];
-      let phoneTextSize = parseInt(
-        this.fontSizeCssVariable["--wysiwyg-font-phone"]
-      );
-
-      if (caratViewPortPosition.height) {
-        let isLastLine =
-          (posTarget === "bottom"
-            ? elPosition - caratViewPortPosition[posTarget]
-            : caratViewPortPosition[posTarget] - elPosition) < phoneTextSize;
-        return !isLastLine;
-      }
-
-      return false;
     };
 
     let nudgeRangeToInlineElement = () => {
@@ -2065,7 +1651,7 @@ class Wysiwyg4All {
           rangeSetup();
         }
 
-        let caratOnSingleLine = !isCaratOnMultiLine(caratElement);
+        let caratOnSingleLine = this.range?.startLine === this.range?.endLine;
 
         let nudged;
         if (caratOnSingleLine) {
@@ -2100,17 +1686,17 @@ class Wysiwyg4All {
           rangeSetup();
         }
 
-        if (isCaratOnMultiLine(caratElement)) break;
+        if (this.range?.startLine !== this.range?.endLine) break;
 
         let iNudged = nudgeRangeToInlineElement();
 
         if (iNudged) break;
         else removeZeroSpace();
 
-        let isMultiLine = isCaratOnMultiLine(currentLine);
+        let isMultiLine = this.range?.startLine !== this.range?.endLine;
         if (isMultiLine) break;
 
-        let eldestParentOfCurrentLine = this._climbUpToEldestParent(
+        let eldestParentOfCurrentLine = climbUpToEldestParent(
           currentLine,
           this.element
         );
@@ -2182,7 +1768,7 @@ class Wysiwyg4All {
             let currentOffset = this.isRangeDirectionForward
               ? endOffset
               : startOffset;
-            this._nodeCrawler(
+            nodeCrawler(
               (n) => {
                 if (n === endContainer) return "BREAK";
                 else if (n.nodeType === 3 && n.textContent)
@@ -2214,13 +1800,12 @@ class Wysiwyg4All {
   _append(i, insertAfter, wrap = false, focusElement) {
     if (this.logExecution)
       console.log("_append", { i, insertAfter, wrap, focusElement });
-    let common = this._climbUpToEldestParent(
+    let common = climbUpToEldestParent(
       this.range.commonAncestorContainer,
       this.element
     );
-    let [startLine, endLine] = this._getStartEndLine();
-    // let startLine = this._climbUpToEldestParent(this.range.startContainer, this.element);
-    // let endLine = this._climbUpToEldestParent(this.range.endContainer, this.element);
+    let startLine = this.range.startLine;
+    let endLine = this.range.endLine;
     let insertRestricted = ["HR", "UL", "LI", "._media_", "._custom_"];
 
     let append = (node) => {
@@ -2266,7 +1851,7 @@ class Wysiwyg4All {
           checker(className, startLine.closest("." + className));
         }
       } else
-        this._nodeCrawler(
+        nodeCrawler(
           (n) => {
             let chk = n.nodeType === 3 ? n.parentNode : n;
             if (chk.nodeType !== 1) {
@@ -2319,9 +1904,7 @@ class Wysiwyg4All {
           position: false,
         }, this.ceilingElement_queryArray);
 
-        //  remove garbage node
         let fc = i.previousSibling;
-        // let lc = i.nextSibling;
 
         if (fc) {
           fc = fc.nodeType === 3 ? fc.parentNode : fc;
@@ -2383,7 +1966,7 @@ class Wysiwyg4All {
               fileSize: size,
               fileType: type,
               source,
-              elementId: this._generateId("img"),
+              elementId: generateId("img"),
             });
           };
           img.src = source;
@@ -2416,12 +1999,12 @@ class Wysiwyg4All {
     )
       this.element.focus();
 
-    this._modifySelection(() => {
-      for (let img of feedback.image) {
-        let media = this._loadImage(img, document.createElement("div"));
-        this._append(media, this._createEmptyParagraph());
-      }
-    });
+    // this._setRange(() => {
+    for (let img of feedback.image) {
+      let media = this._loadImage(img, document.createElement("div"));
+      this._append(media, this._createEmptyParagraph());
+    }
+    // });
   }
 
   _loadImage(imageObject, wrapper) {
@@ -2570,89 +2153,12 @@ class Wysiwyg4All {
     traverse(line);
     return offset;
   }
-  _modifySelection(run, lineByLine) {
-    if (this.logExecution) console.log("_modifySelection", { run });
-    let sel = window.getSelection();
-    let doSingleLine = (sel) => {
-      let anchorElement =
-        sel.anchorNode?.nodeType === 3
-          ? sel.anchorNode.parentNode
-          : sel.anchorNode;
-      if (anchorElement && anchorElement.closest(`#${this.elementId}`)) {
-        if (anchorElement.id === this.elementId) {
-          // In case selection is the wysiwyg element itself
-          let lastChild = this.element.lastChild;
-          if (!lastChild) {
-            // Wysiwyg is empty
-            lastChild = this._createEmptyParagraph();
-            this.element.appendChild(lastChild);
-
-            // Adjust selection
-            this.range = adjustSelection({
-              node: lastChild,
-              position: true,
-            }, this.ceilingElement_queryArray);
-          }
-        } else this.range = adjustSelection(null, this.ceilingElement_queryArray);
-
-        if (typeof run === "function") run();
-        return;
-      }
-    };
-
-    // if (lineByLine) { // TODO: line by line
-    //   let [startLine, endLine, inBetween] = this._getStartEndLine(
-    //     this.range,
-    //     this.element,
-    //     true
-    //   );
-
-    //   if (this.logExecution) console.log({ startLine, endLine, inBetween });
-
-    //   if (startLine === endLine) {
-    //     return doSingleLine(sel);
-    //   } else {
-    //     this.range_backup = this.range.cloneRange();
-    //     this.range = this._adjustSelection({
-    //       node: startLine,
-    //       position: [this._getAnchorOffsetFromLine(startLine), false],
-    //     });
-    //     if (typeof run === "function") run();
-
-    //     if (inBetween?.length) {
-    //       for (let i of inBetween) {
-    //         this.range = this._adjustSelection({
-    //           node: inBetween[i],
-    //           position: [true, false],
-    //         });
-
-    //         if (typeof run === "function") run();
-    //       }
-    //     }
-
-    //     this.range = this._adjustSelection({
-    //       node: endLine,
-    //       position: [true, this._getFocusOffsetFromLine(endLine)],
-    //     });
-
-    //     if (typeof run === "function") run();
-
-    //     this.restoreLastSelection();
-    //     return;
-    //   }
-    // } else if (sel) {
-    return doSingleLine(sel);
-    // }
-
-    this.range = null;
-    this.commandTracker = {};
-  }
 
   _normalizeDocument(normalize) {
     if (this.logExecution) console.log("_normalizeDocument", { normalize });
     if (!normalize) return;
 
-    this._nodeCrawler(
+    nodeCrawler(
       (n) => {
         if (n.nodeType === 3 && n.textContent.includes("\u200B")) {
           //!n.textContent ||
@@ -2666,7 +2172,7 @@ class Wysiwyg4All {
                 break;
               }
 
-            let el = this._climbUpToEldestParent(n, cel, true);
+            let el = climbUpToEldestParent(n, cel, true);
 
             let par = el.parentNode;
             if (
@@ -2713,7 +2219,7 @@ class Wysiwyg4All {
         let collected = [];
 
         let textNodes = [];
-        this._nodeCrawler(
+        nodeCrawler(
           (n) => {
             if (n.nodeType === 3 && n.textContent) {
               if (
@@ -2820,7 +2326,7 @@ class Wysiwyg4All {
 
       if (textEl[0])
         for (let el of textEl) {
-          let elementId = this._generateId(typeName);
+          let elementId = generateId(typeName);
           el.setAttribute("id", elementId);
           let tc = setData(el) || {};
           tc.elementId = el.id;
@@ -2942,14 +2448,14 @@ class Wysiwyg4All {
   _isUnSelectableElement(node) {
     if (this.logExecution) console.log("_isUnSelectableElement", { node });
     node = node?.nodeType === 3 ? node.parentNode : node;
-    // let exceptions = {
-    //   "._custom_": { attr: "contenteditable", value: "true" },
-    // };
+    let exceptions = {
+      "._custom_": { attr: "contenteditable", value: "true" },
+    };
     return this._checkElement(
       node,
       this.unSelectable_queryArray,
       true,
-      // exceptions
+      exceptions
     );
   }
 
@@ -3028,7 +2534,7 @@ class Wysiwyg4All {
     if (!this.range) this.restoreLastSelection();
 
     switch (action) {
-      case "quote":
+      case "quote": {
         if (
           !this.range ||
           (() => {
@@ -3039,13 +2545,12 @@ class Wysiwyg4All {
         )
           this.element.focus();
 
-        this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            bq = document.createElement("blockquote");
-          this._append(bq, p, true);
-        });
+        let p = this._createEmptyParagraph();
+        let bq = document.createElement("blockquote");
+        this._append(bq, p, true);
         return;
-      case "unorderedList":
+      }
+      case "unorderedList": {
         if (
           !this.range ||
           (() => {
@@ -3056,16 +2561,14 @@ class Wysiwyg4All {
         )
           this.element.focus();
 
-        this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            li = document.createElement("li"),
-            ul = document.createElement("ul");
-          ul.append(li);
-          this._append(ul, p, false, li);
-        });
-
+        let p = this._createEmptyParagraph();
+        let li = document.createElement("li"),
+          ul = document.createElement("ul");
+        ul.append(li);
+        this._append(ul, p, false, li);
         return;
-      case "orderedList":
+      }
+      case "orderedList": {
         if (
           !this.range ||
           (() => {
@@ -3076,16 +2579,14 @@ class Wysiwyg4All {
         )
           this.element.focus();
 
-        this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            li = document.createElement("li"),
-            ul = document.createElement("ol");
-          ul.append(li);
-          this._append(ul, p, false, li);
-        });
-
+        let p = this._createEmptyParagraph();
+        let li = document.createElement("li"),
+          ul = document.createElement("ol");
+        ul.append(li);
+        this._append(ul, p, false, li);
         return;
-      case "divider":
+      }
+      case "divider": {
         if (
           !this.range ||
           (() => {
@@ -3096,13 +2597,12 @@ class Wysiwyg4All {
         )
           this.element.focus();
 
-        this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            hr = document.createElement("hr");
-          hr.setAttribute("contenteditable", "false");
-          this._append(hr, p, false);
-        });
+        let p = this._createEmptyParagraph(),
+          hr = document.createElement("hr");
+        hr.setAttribute("contenteditable", "false");
+        this._append(hr, p, false);
         return;
+      }
       case "image":
         this.imgInput.click();
         return;
@@ -3110,65 +2610,62 @@ class Wysiwyg4All {
       case "alignCenter":
       case "alignRight":
         if (!this.range) return;
+        let startLine = this.range.startLine;
+        let endLine = this.range.endLine;
 
-        this._modifySelection(() => {
-          let startLine = this.range.startLine;
-          let endLine = this.range.endLine;
+        let collectLines = [];
+        collectLines.push(startLine);
 
-          let collectLines = [];
-          collectLines.push(startLine);
+        while (collectLines[collectLines.length - 1] !== endLine) {
+          let nextLine = collectLines[collectLines.length - 1].nextSibling;
 
-          while (collectLines[collectLines.length - 1] !== endLine) {
-            let nextLine = collectLines[collectLines.length - 1].nextSibling;
-
-            while (nextLine && !this._isTextBlockElement(nextLine)) {
-              if (
-                this._isCeilingElement(nextLine) &&
-                nextLine.firstChild &&
-                this._isTextBlockElement(nextLine.firstChild)
-              ) {
-                nextLine = nextLine.firstChild;
-                break;
-              }
-              nextLine = nextLine.nextSibling;
-            }
-
+          while (nextLine && !this._isTextBlockElement(nextLine)) {
             if (
-              !nextLine &&
-              this._isCeilingElement(
-                collectLines[collectLines.length - 1].parentNode
-              )
+              this._isCeilingElement(nextLine) &&
+              nextLine.firstChild &&
+              this._isTextBlockElement(nextLine.firstChild)
+            ) {
+              nextLine = nextLine.firstChild;
+              break;
+            }
+            nextLine = nextLine.nextSibling;
+          }
+
+          if (
+            !nextLine &&
+            this._isCeilingElement(
+              collectLines[collectLines.length - 1].parentNode
             )
-              nextLine =
-                collectLines[collectLines.length - 1].parentNode.nextSibling;
+          )
+            nextLine =
+              collectLines[collectLines.length - 1].parentNode.nextSibling;
 
-            if (nextLine) collectLines.push(nextLine);
-            else break;
+          if (nextLine) collectLines.push(nextLine);
+          else break;
+        }
+
+        let commandTracker = Object.assign({}, this.commandTracker);
+
+        for (let l of collectLines) {
+          for (let c of this.alignClass) {
+            if (l.classList.contains(c)) l.classList.remove(c);
+            commandTracker[c.substring(1, c.length - 1)] = false;
           }
 
-          let commandTracker = Object.assign({}, this.commandTracker);
-
-          for (let l of collectLines) {
+          if (action !== "alignLeft" && !this.commandTracker[action]) {
             for (let c of this.alignClass) {
-              if (l.classList.contains(c)) l.classList.remove(c);
-              commandTracker[c.substring(1, c.length - 1)] = false;
+              if (c.includes(action)) l.classList.add(c);
             }
-
-            if (action !== "alignLeft" && !this.commandTracker[action]) {
-              for (let c of this.alignClass) {
-                if (c.includes(action)) l.classList.add(c);
-              }
-              commandTracker[action] = true;
-            }
+            commandTracker[action] = true;
           }
+        }
 
-          this.commandTracker = commandTracker;
+        this.commandTracker = commandTracker;
 
-          this._callback({
-            commandTracker,
-            range: this.range,
-          }).catch((err) => err);
-        });
+        this._callback({
+          commandTracker,
+          range: this.range,
+        }).catch((err) => err);
         return;
 
       default:
@@ -3183,212 +2680,212 @@ class Wysiwyg4All {
 
     //  style command
     if (this.styleTagOfCommand[action]) {
-      this._modifySelection(() => {
-        let wrapper,
-          query = this.styleTagOfCommand[action],
-          stopperMode = false;
+      // this._setRange(() => {
+      let wrapper,
+        query = this.styleTagOfCommand[action],
+        stopperMode = false;
 
-        let counter = this.counterTagOf[query]
-          ? this.counterTagOf[query].map((c) => this._classNameToQuery(c))
-          : [];
-        if (counter.length)
-          counter = counter.concat(counter.map((c) => c + "_stop"));
+      let counter = this.counterTagOf[query]
+        ? this.counterTagOf[query].map((c) => this._classNameToQuery(c))
+        : [];
+      if (counter.length)
+        counter = counter.concat(counter.map((c) => c + "_stop"));
 
-        //  setup query
-        query = this._classNameToQuery(query);
+      //  setup query
+      query = this._classNameToQuery(query);
 
-        if (this.commandTracker[action]) {
-          let pass;
+      if (this.commandTracker[action]) {
+        let pass;
 
-          if (action === "color") {
-            pass =
-              isColor === this.commandTracker[action] ||
-              (isColor === undefined &&
-                this.commandTracker[action] ===
-                this.cssVariable["--content-text_focus"]);
-          } else pass = true;
+        if (action === "color") {
+          pass =
+            isColor === this.commandTracker[action] ||
+            (isColor === undefined &&
+              this.commandTracker[action] ===
+              this.cssVariable["--content-text_focus"]);
+        } else pass = true;
 
-          if (pass) {
-            query = this._classNameToQuery(query + "_stop");
-            stopperMode = true;
-          }
+        if (pass) {
+          query = this._classNameToQuery(query + "_stop");
+          stopperMode = true;
+        }
+      }
+
+      //  setup wrapper element
+      if (query[0] === ".") {
+        wrapper = document.createElement("SPAN");
+        wrapper.classList.add(query.substring(1));
+      } else wrapper = document.createElement(query);
+
+      if (isColor && !stopperMode) wrapper.style.color = isColor;
+
+      let restrictedClass = this._isSelectionTrespassRestrictedRange();
+      if (this.range.collapsed) {
+        if (restrictedClass) return;
+
+        let text = document.createTextNode("");
+        // let text = document.createTextNode("\u200B");
+        wrapper.append(text);
+
+        if (this.range.startContainer.nodeName === "BR")
+          this.range.startContainer.parentNode.insertBefore(
+            wrapper,
+            this.range.startContainer
+          );
+        else this.range.insertNode(wrapper);
+
+        this.range = adjustSelection({ node: text, position: false }, this.ceilingElement_queryArray);
+      } else {
+        if (restrictedClass) {
+          this.range = adjustSelection({
+            node: this.range.endContainer,
+            position: this.range.endOffset,
+          }, this.ceilingElement_queryArray);
+          return;
+        }
+        //  selection has range
+        let extract = this.range.extractContents();
+        let span = document.createElement("span");
+
+        while (extract.childNodes[0]) span.append(extract.childNodes[0]);
+
+        nodeCrawler(
+          (n) => {
+            let res = restrictedClass
+              ? this._classNameToQuery(restrictedClass)
+              : null;
+            let par = n.nodeType === 3 ? n.parentNode : n;
+            let restricted =
+              res && par.hasOwnProperty("closest") ? par.closest(res) : false;
+
+            if (n.nodeType === 3 && !restricted)
+              n.textContent = n.textContent.replaceAll("\t", "");
+
+            return n;
+          },
+          { node: span, startFromEldestChild: true, parentNode: this.element }
+        );
+
+        while (span.childNodes[0]) extract.append(span.childNodes[0]);
+
+        //  unwrap duplicates and stopper | counter
+        let unwrapTarget = [query];
+
+        //  add countering | opposite tag to unwrap
+        if (stopperMode) {
+          let rev = query.replace("_stop", "").substring(1);
+          rev = rev[0] === "_" ? "." + rev : rev;
+          unwrapTarget.push(rev);
+        } else {
+          let rev = query + "_stop";
+          rev = rev[0] === "." ? rev : "." + rev;
+          unwrapTarget.push(rev);
         }
 
-        //  setup wrapper element
-        if (query[0] === ".") {
-          wrapper = document.createElement("SPAN");
-          wrapper.classList.add(query.substring(1));
-        } else wrapper = document.createElement(query);
+        unwrapTarget = unwrapTarget.concat(counter);
+        let del = extract.querySelectorAll(unwrapTarget.join());
+        let idx = del.length;
+        if (idx) while (idx--) this._wrapNode(del[idx]);
 
-        if (isColor && !stopperMode) wrapper.style.color = isColor;
+        //  split wrapper
+        let wrapperSplit = [wrapper.cloneNode(true)];
 
-        let restrictedClass = this._isSelectionWithinRestrictedRange();
-        if (this.range.collapsed) {
-          if (restrictedClass) return;
+        while (extract.childNodes[0]) {
+          let child = extract.childNodes[0];
 
-          let text = document.createTextNode("");
-          // let text = document.createTextNode("\u200B");
-          wrapper.append(text);
+          if (child.nodeType === 1 && this._isBlockElement(child)) {
+            let nest = this._isTextAreaElement(child);
 
-          if (this.range.startContainer.nodeName === "BR")
-            this.range.startContainer.parentNode.insertBefore(
-              wrapper,
-              this.range.startContainer
-            );
-          else this.range.insertNode(wrapper);
+            if (nest) {
+              for (let idx = 0; child.childNodes.length > idx; idx++) {
+                let text = child.childNodes[idx];
 
-          this.range = adjustSelection({ node: text, position: false }, this.ceilingElement_queryArray);
-        } else {
-          if (restrictedClass) {
-            this.range = adjustSelection({
-              node: this.range.endContainer,
-              position: this.range.endOffset,
-            }, this.ceilingElement_queryArray);
-            return;
-          }
-          //  selection has range
-          let extract = this.range.extractContents();
-          let span = document.createElement("span");
-
-          while (extract.childNodes[0]) span.append(extract.childNodes[0]);
-
-          this._nodeCrawler(
-            (n) => {
-              let res = restrictedClass
-                ? this._classNameToQuery(restrictedClass)
-                : null;
-              let par = n.nodeType === 3 ? n.parentNode : n;
-              let restricted =
-                res && par.hasOwnProperty("closest") ? par.closest(res) : false;
-
-              if (n.nodeType === 3 && !restricted)
-                n.textContent = n.textContent.replaceAll("\t", "");
-
-              return n;
-            },
-            { node: span, startFromEldestChild: true, parentNode: this.element }
-          );
-
-          while (span.childNodes[0]) extract.append(span.childNodes[0]);
-
-          //  unwrap duplicates and stopper | counter
-          let unwrapTarget = [query];
-
-          //  add countering | opposite tag to unwrap
-          if (stopperMode) {
-            let rev = query.replace("_stop", "").substring(1);
-            rev = rev[0] === "_" ? "." + rev : rev;
-            unwrapTarget.push(rev);
-          } else {
-            let rev = query + "_stop";
-            rev = rev[0] === "." ? rev : "." + rev;
-            unwrapTarget.push(rev);
-          }
-
-          unwrapTarget = unwrapTarget.concat(counter);
-          let del = extract.querySelectorAll(unwrapTarget.join());
-          let idx = del.length;
-          if (idx) while (idx--) this._wrapNode(del[idx]);
-
-          //  split wrapper
-          let wrapperSplit = [wrapper.cloneNode(true)];
-
-          while (extract.childNodes[0]) {
-            let child = extract.childNodes[0];
-
-            if (child.nodeType === 1 && this._isBlockElement(child)) {
-              let nest = this._isTextAreaElement(child);
-
-              if (nest) {
-                for (let idx = 0; child.childNodes.length > idx; idx++) {
-                  let text = child.childNodes[idx];
-
-                  if (this._isTextElement(text)) {
-                    let nestedWrapper = wrapper.cloneNode(true);
-                    while (text.childNodes[0]) {
-                      if (text.childNodes[0].textContent)
-                        nestedWrapper.append(text.childNodes[0]);
-                      else text.childNodes[0].remove();
-                    }
-                    text.append(nestedWrapper);
+                if (this._isTextElement(text)) {
+                  let nestedWrapper = wrapper.cloneNode(true);
+                  while (text.childNodes[0]) {
+                    if (text.childNodes[0].textContent)
+                      nestedWrapper.append(text.childNodes[0]);
+                    else text.childNodes[0].remove();
                   }
-                }
-
-                if (!child.textContent) {
-                  child.remove();
-                  continue;
+                  text.append(nestedWrapper);
                 }
               }
 
+              if (!child.textContent) {
+                child.remove();
+                continue;
+              }
+            }
+
+            let doc = document.createDocumentFragment();
+            doc.append(child);
+            wrapperSplit.push(doc);
+          } else {
+            if (child.nodeType === 1 && this._isTextBlockElement(child)) {
+              let nestedWrapper = wrapper.cloneNode(true);
+
+              while (child.childNodes[0])
+                nestedWrapper.append(child.childNodes[0]);
+
+              if (
+                nestedWrapper.childNodes.length === 1 &&
+                nestedWrapper.childNodes[0].nodeName !== "BR" &&
+                !nestedWrapper.textContent.length
+              ) {
+                child.remove();
+                continue;
+              }
+
+              child.append(nestedWrapper);
               let doc = document.createDocumentFragment();
               doc.append(child);
               wrapperSplit.push(doc);
-            } else {
-              if (child.nodeType === 1 && this._isTextBlockElement(child)) {
-                let nestedWrapper = wrapper.cloneNode(true);
-
-                while (child.childNodes[0])
-                  nestedWrapper.append(child.childNodes[0]);
-
-                if (
-                  nestedWrapper.childNodes.length === 1 &&
-                  nestedWrapper.childNodes[0].nodeName !== "BR" &&
-                  !nestedWrapper.textContent.length
-                ) {
-                  child.remove();
-                  continue;
-                }
-
-                child.append(nestedWrapper);
-                let doc = document.createDocumentFragment();
-                doc.append(child);
-                wrapperSplit.push(doc);
-              } else wrapperSplit[wrapperSplit.length - 1].append(child);
-            }
+            } else wrapperSplit[wrapperSplit.length - 1].append(child);
           }
-
-          let output = document.createDocumentFragment();
-          for (let ws of wrapperSplit) output.append(ws);
-
-          let fc = output.firstChild;
-          let lc = output.lastChild;
-
-          if (this._isTextElement(fc) && !fc.textContent) {
-            let fn = fc.nextSibling;
-            fc.remove();
-            fc = fn;
-          }
-          if (this._isTextElement(lc) && !fc.textContent) {
-            let lp = lc.nextSibling;
-            lc.remove();
-            lc = lp;
-          }
-
-          this.range.insertNode(output);
-          this.range = adjustSelection({
-            node: [fc, lc],
-            position: [true, false],
-          }, this.ceilingElement_queryArray);
-
-          //  remove garbage node
-          fc = fc.nodeType === 3 ? fc.parentNode : fc;
-          lc = lc.nodeType === 3 ? lc.parentNode : lc;
-
-          let next = lc.nextSibling;
-          if (
-            this._isTextElement(next) &&
-            (!next.textContent || next.textContent === "\u200B")
-          )
-            next.remove();
-
-          let prev = fc.previousSibling;
-          if (
-            (this._isTextElement(prev) && !prev.textContent) ||
-            prev.textContent === "\u200B"
-          )
-            prev.remove();
         }
-      }, true);
+
+        let output = document.createDocumentFragment();
+        for (let ws of wrapperSplit) output.append(ws);
+
+        let fc = output.firstChild;
+        let lc = output.lastChild;
+
+        if (this._isTextElement(fc) && !fc.textContent) {
+          let fn = fc.nextSibling;
+          fc.remove();
+          fc = fn;
+        }
+        if (this._isTextElement(lc) && !fc.textContent) {
+          let lp = lc.nextSibling;
+          lc.remove();
+          lc = lp;
+        }
+
+        this.range.insertNode(output);
+        this.range = adjustSelection({
+          node: [fc, lc],
+          position: [true, false],
+        }, this.ceilingElement_queryArray);
+
+        //  remove garbage node
+        fc = fc.nodeType === 3 ? fc.parentNode : fc;
+        lc = lc.nodeType === 3 ? lc.parentNode : lc;
+
+        let next = lc.nextSibling;
+        if (
+          this._isTextElement(next) &&
+          (!next.textContent || next.textContent === "\u200B")
+        )
+          next.remove();
+
+        let prev = fc.previousSibling;
+        if (
+          (this._isTextElement(prev) && !prev.textContent) ||
+          prev.textContent === "\u200B"
+        )
+          prev.remove();
+      }
+      // }, true);
 
       return;
     }
@@ -3405,44 +2902,44 @@ class Wysiwyg4All {
         }
       */
 
-      this._modifySelection(() => {
-        //  setup wrapper
-        let custom = document.createElement("div");
-        custom.classList.add("_custom_");
-        custom.setAttribute(
-          "contenteditable",
-          (!!action?.contenteditable).toString()
-        );
+      // this._setRange(() => {
+      //  setup wrapper
+      let custom = document.createElement("div");
+      custom.classList.add("_custom_");
+      custom.setAttribute(
+        "contenteditable",
+        (!!action?.contenteditable).toString()
+      );
 
-        if (action.style)
-          for (let s in action.style) custom.style[s] = action.style[s];
+      if (action.style)
+        for (let s in action.style) custom.style[s] = action.style[s];
 
-        action.elementId = action.elementId || this._generateId("custom");
-        custom.id = action.elementId;
+      action.elementId = action.elementId || generateId("custom");
+      custom.id = action.elementId;
 
-        if (typeof action.element === "string")
-          custom.innerHTML = action.element;
-        else if (action.element instanceof HTMLElement)
-          custom.append(action.element);
+      if (typeof action.element === "string")
+        custom.innerHTML = action.element;
+      else if (action.element instanceof HTMLElement)
+        custom.append(action.element);
 
-        if (!custom.children.length) action.insert = true; // insert if only text node
+      if (!custom.children.length) action.insert = true; // insert if only text node
 
-        if (!this.range) this.element.focus();
+      if (!this.range) this.element.focus();
 
-        this.custom_array.push(action);
+      this.custom_array.push(action);
 
-        this._callback({ custom: action }).then((_) => {
-          if (action.insert) {
-            let txt = document.createTextNode("");
-            this.range.insertNode(txt); // when inserted in range, it will push the next el back
-            this.range.insertNode(custom);
-            this.range = adjustSelection({
-              node: txt,
-              position: false,
-            }, this.ceilingElement_queryArray);
-          } else this._append(custom, this._createEmptyParagraph(), false);
-        });
+      this._callback({ custom: action }).then((_) => {
+        if (action.insert) {
+          let txt = document.createTextNode("");
+          this.range.insertNode(txt); // when inserted in range, it will push the next el back
+          this.range.insertNode(custom);
+          this.range = adjustSelection({
+            node: txt,
+            position: false,
+          }, this.ceilingElement_queryArray);
+        } else this._append(custom, this._createEmptyParagraph(), false);
       });
+      // });
     }
   }
 
@@ -3493,7 +2990,7 @@ class Wysiwyg4All {
 
         if (imageParent) {
           const source = i.getAttribute("src");
-          let imgId = i.id || this._generateId("img");
+          let imgId = i.id || generateId("img");
           i.setAttribute("id", imgId);
 
           imgCallback.push({
@@ -3513,7 +3010,7 @@ class Wysiwyg4All {
       for (let i of hashtag) {
         let clIdx = i.classList.length;
         let tag,
-          elementId = i.id || this._generateId("hashtag");
+          elementId = i.id || generateId("hashtag");
         while (clIdx--) {
           let cls = i.classList[clIdx];
           if (cls.replace("_hashtag_", "")[0] === "#") {
@@ -3529,7 +3026,7 @@ class Wysiwyg4All {
     const urllinkCallback = [];
     if (urllink.length)
       for (let i of urllink) {
-        let elementId = i.id || this._generateId("urllink");
+        let elementId = i.id || generateId("urllink");
         let url;
 
         let clIdx = i.classList.length;
@@ -3546,7 +3043,7 @@ class Wysiwyg4All {
     const customCallback = [];
     if (custom.length)
       for (let i of custom) {
-        let elementId = i.id || this._generateId("custom");
+        let elementId = i.id || generateId("custom");
         customCallback.push({ elementId, element: i });
       }
 

@@ -46,15 +46,6 @@ ${license}
             filename: 'wysiwyg4all.cjs',
             libraryTarget: 'commonjs2'
         },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    use: 'ts-loader',
-                    exclude: /node_modules/,
-                },
-            ],
-        },
         resolve: {
             extensions: ['.js'],
         },

@@ -1,14 +1,14 @@
-;
 function adjustSelection(
     target,
-    ceilingElement_query = [
-      "UL",
-      "OL",
-      "BLOCKQUOTE",
-      "TD",
-      "TH",
-    ]
+    ceilingElement_query
 ) {
+    // Adjusts the selection range in the document
+    // target: { node: [Node], position: [number] }
+    // ceilingElement_query: [string] (CSS selector)
+    // Returns: { startLine: Node, endLine: Node }
+    // If target is null, it will not set the selection range
+    // If ceilingElement_query is null, it will not set the startLine and endLine
+
     let toArray = (v, allowObject = false) => {
         if (Array.isArray(v)) return v;
         else if (
@@ -28,7 +28,7 @@ function adjustSelection(
     let sel = window.getSelection();
     if (!sel) return null;
 
-    let range;
+    let range = null;
     try {
         range = sel.getRangeAt(0);
     } catch (err) {
@@ -168,6 +168,12 @@ function adjustSelection(
 
 function nodeCrawler(run, option) {
     const { parentNode, node, startFromEldestChild, startNode } = option;
+    // const options = {
+    //   node: document.getElementById('content'),
+    //   parentNode: document.body,
+    //   startFromEldestChild: true
+    //   startNode: document.getElementById('start') // optional
+    // };
 
     if (startFromEldestChild && !parentNode)
         throw new Error("Need parentNode to crawl up single child");
@@ -392,3 +398,5 @@ function climbUpToEldestParent(node, wrapper, singleChildParent = false, callbac
 
     return node;
 }
+
+export { adjustSelection, nodeCrawler, generateId, climbUpToEldestParent };
