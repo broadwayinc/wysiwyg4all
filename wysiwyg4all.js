@@ -1,6 +1,6 @@
 import { ColorMangle } from "colormangle";
 import { adjustSelection, nodeCrawler, climbUpToEldestParent } from "./selectors.js";
-import { hashtag_regex, hashtag_stopper_regex, urllink_regex, generateId } from "./util.js";
+import { regexr, generateId } from "./util.js";
 // Add debouncing for frequent operations like selection changes
 const debounce = (fn, delay) => {
   let timeout;
@@ -852,6 +852,11 @@ class Wysiwyg4All {
         }
         return;
       }
+
+      // if(this._isSelectionTrespassRestrictedRange()) {
+      //   e.preventDefault();
+      //   return;
+      // }
 
       //  hashtag flag
       if (key === "#" && !this.hashtag_flag) {
@@ -2198,7 +2203,7 @@ class Wysiwyg4All {
     const process = (typeName, setData) => {
       if (!this[typeName]) return;
 
-      let regex = this[`${typeName}_regex`] || null;
+      let regex = regexr[typeName] || null;
 
       if (regex === null) throw new Error("no regex to process");
 

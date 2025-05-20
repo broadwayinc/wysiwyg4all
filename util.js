@@ -5,6 +5,12 @@ const hashtag_stopper_regex =
 const urllink_regex =
     /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
 
+const regexr = {
+    hashtag: hashtag_regex,
+    hashtag_stopper: hashtag_stopper_regex,
+    urllink: urllink_regex,
+};
+
 function generateId(option) {
     let limit = 12;
     let prefix = "";
@@ -25,4 +31,4 @@ function generateId(option) {
     return prefix + numb + text;
 }
 
-export { hashtag_regex, hashtag_stopper_regex, urllink_regex, generateId };
+export { regexr, generateId };
