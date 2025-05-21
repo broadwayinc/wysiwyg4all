@@ -587,6 +587,7 @@ class Wysiwyg4All {
 
   _selectionchange = () => {
     let sel = window.getSelection();
+    if(!sel) return;
 
     let anchorElement =
       sel.anchorNode?.nodeType === 3
@@ -598,7 +599,7 @@ class Wysiwyg4All {
         ? sel.focusNode.parentNode
         : sel.focusNode;
 
-    if (anchorElement.closest(`#${this.elementId}`) && focusElement.closest(`#${this.elementId}`)) {
+    if (anchorElement?.closest(`#${this.elementId}`) && focusElement?.closest(`#${this.elementId}`)) {
       let lastChild = this.element.lastChild;
       if (!lastChild) {
         // Wysiwyg is empty
@@ -989,21 +990,19 @@ class Wysiwyg4All {
     }.bind(this);
 
     this._normalize = function (e) {
-      e.stopPropagation();
 
-      // if (this._isSelectionTrespassRestrictedRange()) return;
-      this.restoreLastSelection();
       if (this.range && this.restoreWhenFocus) {
         e.preventDefault();
+        
+        if (this.range)
+          this.range_backup = this.range.cloneRange();
+
+        this.restoreLastSelection();
       }
       this.restoreWhenFocus = false;
-      this._normalizeDocument();
-      // this.range_backup = this.range.cloneRange();
-      this._replaceText(true);
     }.bind(this);
 
     this._backupSelection = function (e) {
-      // e.stopPropagation();
       if (this.logExecution) console.log("_backupSelection()");
       if (this.range) {
         this.range_backup = this.range.cloneRange();

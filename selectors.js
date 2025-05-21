@@ -151,9 +151,9 @@ function adjustSelection(
                     ? range.startContainer.parentNode
                     : range.startContainer;
 
-            if (!startLine && s.closest(q))
+            if (!startLine && s?.closest(q))
                 startLine = climbUpToEldestParent(s, s.closest(q));
-            if (!endLine && e.closest(q))
+            if (!endLine && e?.closest(q))
                 endLine = climbUpToEldestParent(e, e.closest(q));
 
             if (startLine && endLine) break;
