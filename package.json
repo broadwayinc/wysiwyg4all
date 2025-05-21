@@ -1,6 +1,6 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "Free opensource minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
   "browser": "dist/wysiwyg4all.js",
@@ -16,7 +16,7 @@
     "wysiwyg4all.js",
     "wysiwyg4all.css",
     "selectors.js",
-    "utils.js"
+    "util.js"
   ],
   "repository": {
     "type": "git",
