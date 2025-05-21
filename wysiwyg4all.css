@@ -32,7 +32,6 @@
   min-height: 1.6em;
   letter-spacing: 0.025em;
   display: block;
-  overflow: hidden;
   user-select: text;
   --wysiwyg-font: var(--wysiwyg-font-desktop);
   font-size: var(--wysiwyg-font-desktop);

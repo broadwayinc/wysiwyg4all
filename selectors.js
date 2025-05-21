@@ -264,7 +264,6 @@ function nodeCrawler(run, option) {
     };
     let diving = false;
     while (withInRange(crawl)) {
-        console.log({ crawl })
         if (!diving && crawl.nodeType === 1 && crawl.childNodes.length) {
             // dive down to deepest child's first crawl
             crawl = crawl.childNodes[0];
