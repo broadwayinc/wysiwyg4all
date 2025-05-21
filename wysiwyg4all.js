@@ -1317,16 +1317,16 @@ class Wysiwyg4All {
                   node.isHashtagElement ||
                   node.isUrlLinkElement
                 ) {
-                  // make sure un-editable element is secure
-                  let el =
-                    node.isCustomElement ||
-                    node.isMediaElement ||
-                    node.isHashtagElement ||
-                    node.isUrlLinkElement;
+                  // // make sure un-editable element is secure
+                  // let el =
+                  //   node.isCustomElement ||
+                  //   node.isMediaElement ||
+                  //   node.isHashtagElement ||
+                  //   node.isUrlLinkElement;
 
-                  // check if el has a value of contenteditable
-                  if (el.getAttribute("contenteditable") !== "true")
-                    el.setAttribute("contenteditable", "false");
+                  // // check if el has a value of contenteditable
+                  // if (el.getAttribute("contenteditable") !== "true")
+                  //   el.setAttribute("contenteditable", "false");
 
                   continue;
                 }
