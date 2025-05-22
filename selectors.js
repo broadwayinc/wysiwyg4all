@@ -1,6 +1,6 @@
 function adjustSelection(
     target,
-    ceilingElement_query
+    ceilingElement_query = this.ceilingElement_queryArray
 ) {
     // Adjusts the selection range in the document
     // target: { node: [Node], position: [number] }
@@ -8,7 +8,7 @@ function adjustSelection(
     // Returns: { startLine: Node, endLine: Node }
     // If target is null, it will not set the selection range
     // If ceilingElement_query is null, it will not set the startLine and endLine
-
+    console.log("adjustSelection", target, ceilingElement_query);
     let toArray = (v, allowObject = false) => {
         if (Array.isArray(v)) return v;
         else if (
@@ -424,13 +424,13 @@ function prepareSelection() {
             this.element.appendChild(lastChild);
 
             // Adjust selection
-            this.range = adjustSelection({
+            this.range = adjustSelection.bind(this)({
                 node: lastChild,
                 position: true,
-            }, this.ceilingElement_queryArray);
+            });
         }
         else {
-            this.range = adjustSelection(null);
+            this.range = adjustSelection.bind(this)(null);
         }
     }
     else {
@@ -545,11 +545,11 @@ export { adjustSelection, nodeCrawler, generateId, climbUpToEldestParent, select
 //                 this.element.appendChild(lastChild);
 
 //                 // Adjust selection
-//                 this.range = this._adjustSelection({ node: lastChild, position: true });
+//                 this.range = this._adjustSelection.bind(this)({ node: lastChild, position: true });
 //             }
 
 //         } else
-//             this.range = this._adjustSelection(null);
+//             this.range = this._adjustSelection.bind(this)(null);
 
 //         if (typeof run === 'function') run();
 //         return;
@@ -575,7 +575,7 @@ export { adjustSelection, nodeCrawler, generateId, climbUpToEldestParent, select
 //             unSel.parentNode.insertBefore(selNext, isForward ? unSel.nextSibling : unSel);
 //         }
 //         if (selNext)
-//             this.range = this._adjustSelection({
+//             this.range = this._adjustSelection.bind(this)({
 //                 node: this.range.collapsed ? selNext : isForward ? [null, selNext] : [selNext, null],
 //                 position: this.range.collapsed ? isForward ? 0 : selNext.textContent.length : isForward ? [null, 0] : [0, null],
 //             });

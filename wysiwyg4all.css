@@ -692,13 +692,11 @@
 ._wysiwyg4all th ._h6_stop {
   text-decoration: inherit;
 }
-._wysiwyg4all ._media_,
-._wysiwyg4all ._custom_ {
+._wysiwyg4all ._media_ {
   width: 100%;
   margin: auto;
 }
-._wysiwyg4all ._media_ > *,
-._wysiwyg4all ._custom_ > * {
+._wysiwyg4all ._media_ > * {
   max-width: 100%;
   margin: auto;
 }
