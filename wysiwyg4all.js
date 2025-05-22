@@ -1,4 +1,4 @@
-import {ColorMangle} from 'colormangle';
+import { ColorMangle } from 'colormangle';
 
 export class Wysiwyg4All {
     /**
@@ -28,22 +28,31 @@ export class Wysiwyg4All {
         this.urllink_regex = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
 
         let {
-            elementId = '',
+            elementId = "",
             editable = true,
-            placeholder = '',
+            placeholder = "",
             spellcheck = false,
-            highlightColor = 'teal',
-            html = '',
+            highlightColor = "teal",
+            html = "",
             callback,
             fontSize = {
-                desktop: 18,
-                tablet: 16,
-                phone: 14
+                desktop: "18px",
+                tablet: "16px",
+                phone: "14px",
+
+                h1: 4.2,
+                h2: 3.56,
+                h3: 2.92,
+                h4: 2.28,
+                h5: 1.64,
+                h6: 1.15,
+                small: 0.8,
             },
             lastLineBlank = false,
             hashtag = false,
             urllink = false,
-            logMutation = false
+            logMutation = false,
+            logExecution = false,
         } = option;
 
         this.hashtag = hashtag;
@@ -100,12 +109,12 @@ export class Wysiwyg4All {
 
         this.blockElement_queryArray = ['HR', 'BLOCKQUOTE', 'UL', 'OL', '._media_', '._custom_'];
         this.specialTextElement_queryArray = ['._hashtag_', '._urllink_'];
-        this.restrictedElement_queryArray = ['._media_', '._custom_'];
+        this.restrictedElement_queryArray = ['._media_']; // ['._media_', '._custom_'];
         this.textAreaElement_queryArray = ['BLOCKQUOTE', 'LI'];
-        this.textBlockElement_queryArray = ['P', 'LI'];
-        this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`];
+        this.textBlockElement_queryArray = ['P', 'LI', "TD", "TH"];
+        this.ceilingElement_queryArray = ['UL', 'OL', 'BLOCKQUOTE', `#${elementId}`, "TD", "TH"];
         this.unSelectable_queryArray = ['._media_', '._custom_', '._hashtag_', '._urllink_', 'HR'];
-        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_'];
+        this.styleAllowedElement_queryArray = ['._color', `#${elementId}`, '._hashtag_', '._urllink_', "TD", "TH"];
         this.alignClass = ['_alignCenter_', '_alignRight_'];
 
         this.hashtag_flag = false;
@@ -169,15 +178,41 @@ export class Wysiwyg4All {
 
         const fontSizeRatio = {
             //  should always be the same em value as css
-            h1: 4.2,
-            h2: 3.56,
-            h3: 2.92,
-            h4: 2.28,
-            h5: 1.64,
-            h6: 1.15,
-            small: 0.8,
+            // h1: 4.2,
+            // h2: 3.56,
+            // h3: 2.92,
+            // h4: 2.28,
+            // h5: 1.64,
+            // h6: 1.15,
+            // small: 0.8,
+            h1: fontSize.h1 || 4.2,
+            h2: fontSize.h2 || 3.56,
+            h3: fontSize.h3 || 2.92,
+            h4: fontSize.h4 || 2.28,
+            h5: fontSize.h5 || 1.64,
+            h6: fontSize.h6 || 1.15,
+            small: fontSize.small || 0.8,
         };
-
+        for (const [tag, ratio] of Object.entries(fontSizeRatio)) {
+            if (typeof ratio === "number") {
+                this.element.style.setProperty(
+                    `--wysiwyg-${tag}`,
+                    `calc(var(--wysiwyg-font) * ${ratio})`
+                );
+            } else if (typeof ratio === "string") {
+                if (ratio.includes("px")) {
+                    this.element.style.setProperty(`--wysiwyg-${tag}`, ratio);
+                } else if (ratio.includes("em") || ratio.includes("rem")) {
+                    let emSize = parseFloat(ratio);
+                    if (emSize > 0) {
+                        this.element.style.setProperty(
+                            `--wysiwyg-${tag}`,
+                            `calc(var(--wysiwyg-font) * ${emSize})`
+                        );
+                    }
+                }
+            }
+        }
         this.styleTagOfCommand = {};
         this.counterTagOf = {};
         this.cssPropertyOf = {};
@@ -814,13 +849,13 @@ export class Wysiwyg4All {
 
         document.removeEventListener('selectionchange', this._selectionchange);
         this.imgInput = null;
-        if (this.element) {
-            this.element.removeEventListener('keydown', this._keydown);
-            this.element.removeEventListener('mousedown', this._normalize);
-            window.removeEventListener('mousedown', this._normalize);
-            this.element.removeEventListener('paste', this._paste);
-            this.element.removeEventListener('keyup', this._keyup);
-        }
+        // if (this.element) {
+        //     this.element.removeEventListener('keydown', this._keydown);
+        //     this.element.removeEventListener('mousedown', this._normalize);
+        //     window.removeEventListener('mousedown', this._normalize);
+        //     this.element.removeEventListener('paste', this._paste);
+        //     this.element.removeEventListener('keyup', this._keyup);
+        // }
 
         if (!listen)
             return;
@@ -1150,7 +1185,7 @@ export class Wysiwyg4All {
 
         }).bind(this);
         this._normalize = (function (e) {
-            e.stopPropagation();
+            // e.stopPropagation();
             this._modifySelection(() => {
                 if (this._isSelectionWithinRestrictedRange())
                     return;
@@ -1195,7 +1230,7 @@ export class Wysiwyg4All {
 
         document.addEventListener('selectionchange', this._selectionchange);
         this.element.addEventListener('keydown', this._keydown);
-        this.element.addEventListener('mousedown', this._normalize);
+        // this.element.addEventListener('mousedown', this._normalize);
         // this.element.addEventListener('blur', this._normalize);
         // fuck safari, firefox
         window.addEventListener('mousedown', this._normalize);
@@ -2862,45 +2897,82 @@ export class Wysiwyg4All {
                    insert: true | false
                 }
              */
-
             this._modifySelection(() => {
                 //  setup wrapper
-                let custom = document.createElement('div');
-                custom.classList.add('_custom_');
-                custom.setAttribute('contenteditable', false);
+                let custom = document.createElement("div");
+                custom.classList.add("_custom_");
+                custom.setAttribute(
+                    "contenteditable",
+                    (!!action?.contenteditable).toString()
+                );
 
                 if (action.style)
-                    for (let s in action.style)
-                        custom.style[s] = action.style[s];
+                    for (let s in action.style) custom.style[s] = action.style[s];
 
-                action.elementId = action.elementId || this._generateId('custom');
+                action.elementId = action.elementId || this._generateId("custom");
                 custom.id = action.elementId;
 
-                if (typeof action.element === 'string')
+                if (typeof action.element === "string")
                     custom.innerHTML = action.element;
-
                 else if (action.element instanceof HTMLElement)
                     custom.append(action.element);
 
-                if (!custom.children.length)
-                    action.insert = true;
+                if (!custom.children.length) action.insert = true; // insert if only text node
 
-                if (!this.range)
-                    this.element.focus();
+                if (!this.range) this.element.focus();
 
                 this.custom_array.push(action);
 
-                this._callback({ custom: action }).then(_ => {
+                this._callback({ custom: action }).then((_) => {
                     if (action.insert) {
+                        let txt = document.createTextNode("");
+                        this.range.insertNode(txt); // when inserted in range, it will push the next el back
                         this.range.insertNode(custom);
                         this.range = this._adjustSelection({
-                            node: custom,
-                            position: false
+                            node: txt,
+                            position: false,
                         });
-                    } else
-                        this._append(custom, this._createEmptyParagraph(), false);
+                    } else this._append(custom, this._createEmptyParagraph(), false);
                 });
             });
+            // this._modifySelection(() => {
+            //     //  setup wrapper
+            //     let custom = document.createElement('div');
+            //     custom.classList.add('_custom_');
+            //     custom.setAttribute('contenteditable', false);
+
+            //     if (action.style)
+            //         for (let s in action.style)
+            //             custom.style[s] = action.style[s];
+
+            //     action.elementId = action.elementId || this._generateId('custom');
+            //     custom.id = action.elementId;
+
+            //     if (typeof action.element === 'string')
+            //         custom.innerHTML = action.element;
+
+            //     else if (action.element instanceof HTMLElement)
+            //         custom.append(action.element);
+
+            //     if (!custom.children.length)
+            //         action.insert = true;
+
+            //     if (!this.range)
+            //         this.element.focus();
+
+            //     this.custom_array.push(action);
+
+            //     this._callback({ custom: action }).then(_ => {
+            //         if (action.insert) {
+            //             this.range.insertNode(custom);
+            //             this.range = this._adjustSelection({
+            //                 node: custom,
+            //                 position: false
+            //             });
+            //         } else
+            //             this._append(custom, this._createEmptyParagraph(), false);
+            //     });
+            // });
         }
     }
 
