@@ -399,4 +399,250 @@ function climbUpToEldestParent(node, wrapper, singleChildParent = false, callbac
     return node;
 }
 
-export { adjustSelection, nodeCrawler, generateId, climbUpToEldestParent };
+function prepareSelection() {
+    let sel = window.getSelection();
+    if (!sel) {
+        this.range = null;
+        this.commandTracker = {};
+        return;
+    }
+    let anchorElement =
+        sel.anchorNode?.nodeType === 3
+            ? sel.anchorNode.parentNode
+            : sel.anchorNode;
+
+    let focusElement =
+        sel.focusNode?.nodeType === 3
+            ? sel.focusNode.parentNode
+            : sel.focusNode;
+
+    if (anchorElement?.closest(`#${this.elementId}`) && focusElement?.closest(`#${this.elementId}`)) {
+        let lastChild = this.element.lastChild;
+        if (!lastChild) {
+            // Wysiwyg is empty
+            lastChild = this._createEmptyParagraph();
+            this.element.appendChild(lastChild);
+
+            // Adjust selection
+            this.range = adjustSelection({
+                node: lastChild,
+                position: true,
+            }, this.ceilingElement_queryArray);
+        }
+        else {
+            this.range = adjustSelection(null);
+        }
+    }
+    else {
+        this.range = null;
+        this.commandTracker = {};
+        return;
+    }
+}
+
+function selectionChange() {
+    prepareSelection.bind(this)();
+
+    if(!this.range) {
+        return;
+    }
+
+    //  track commandTracker
+    let ct = {};
+    for (let style in this.styleTagOfCommand) {
+        ct[style] = false;
+    }
+
+    let [startLine, endLine, inBetween] = this._getStartEndLine(
+        this.range,
+        this.element,
+        true
+    );
+    this.range.startLine = startLine;
+    this.range.endLine = endLine;
+    this.range.inBetween = inBetween;
+
+    let restricted = this.restrictedElement_queryArray.concat(
+        this.specialTextElement_queryArray
+    );
+
+    let crawlResult = nodeCrawler(
+        (node) => {
+            if (
+                (node.nodeType === 1 && node.closest("blockquote")) ||
+                (node.nodeType === 3 && node.parentNode.closest("blockquote"))
+            )
+                ct.quote = true;
+
+
+            for (let c of restricted) {
+                if (node.nodeType === 3
+                    ? node.parentNode.closest(c)
+                    : node.nodeType === 1
+                        ? node.closest(c)
+                        : !(node instanceof Node)) {
+                    return node;
+                }
+            }
+
+            if (
+                node.nodeType === 3 ||
+                node.nodeName === "BR" ||
+                (node.nodeType === 1 &&
+                    node.childNodes.length === 1 &&
+                    (node.childNodes[0].nodeName === "BR" ||
+                        node.childNodes[0].nodeType === 3))
+            ) {
+                let n =
+                    node.nodeType === 3 || node.nodeName === "BR"
+                        ? node.parentNode
+                        : node;
+
+                let comm = this._trackStyle(n);
+                for (let c in comm) ct[c] = comm[c];
+            }
+            return node;
+        },
+        { node: this.range, parentNode: this.element }
+    );
+
+    if (!crawlResult.node.length) {
+        let comm = this._trackStyle(this.range.startContainer);
+        for (let c in comm) ct[c] = comm[c];
+    }
+
+    this.commandTracker = ct;
+    let caratPosition;
+    let caratEl = this.range.endContainer || this.range.startContainer;
+
+    if (caratEl.nodeType === 3)
+        caratPosition = this.range.getBoundingClientRect();
+    else if (caratEl.nodeType === 1)
+        caratPosition = caratEl.getBoundingClientRect();
+
+    this._callback({
+        commandTracker: ct,
+        range: this.range,
+        caratPosition,
+    }).catch((err) => console.error(err));
+    this._lastLineBlank();
+}
+
+export { adjustSelection, nodeCrawler, generateId, climbUpToEldestParent, selectionChange, prepareSelection };
+
+
+// let sel = window.getSelection();
+// if (sel) {
+//     let anchorElement = sel.anchorNode?.nodeType === 3 ? sel.anchorNode.parentNode : sel.anchorNode;
+//     if (anchorElement && anchorElement.closest(`#${this.elementId}`)) {
+//         if (anchorElement.id === this.elementId) {
+//             // if (this._isCeilingElement(anchorElement)) {
+//             // In case selection is the wysiwyg element itself
+//             let lastChild = this.element.lastChild;
+//             if (!lastChild) {
+//                 // Wysiwyg is empty
+//                 lastChild = this._createEmptyParagraph();
+//                 this.element.appendChild(lastChild);
+
+//                 // Adjust selection
+//                 this.range = this._adjustSelection({ node: lastChild, position: true });
+//             }
+
+//         } else
+//             this.range = this._adjustSelection(null);
+
+//         if (typeof run === 'function') run();
+//         return;
+//     }
+// }
+
+// this.range = null;
+// this.commandTracker = {};
+
+// this._modifySelection(() => {
+//     let isForward = !(this.lastKey === 'DELETE' || this.lastKey === 'BACKSPACE') || this.isRangeDirectionForward;
+
+//     let rangeHeader = isForward ? this.range.endContainer : this.range.startContainer;
+//     this.lastKey = null;
+
+//     //  nudge range in-case carat is within non selectables
+//     let unSel = this._isUnSelectableElement(rangeHeader);
+//     if (unSel) {
+//         let selNext = isForward ? unSel.nextSibling : unSel.previousSibling;
+
+//         if (!selNext && !isForward) {
+//             selNext = document.createTextNode('\u200B');
+//             unSel.parentNode.insertBefore(selNext, isForward ? unSel.nextSibling : unSel);
+//         }
+//         if (selNext)
+//             this.range = this._adjustSelection({
+//                 node: this.range.collapsed ? selNext : isForward ? [null, selNext] : [selNext, null],
+//                 position: this.range.collapsed ? isForward ? 0 : selNext.textContent.length : isForward ? [null, 0] : [0, null],
+//             });
+//     }
+
+//     //  track commandTracker
+//     let commandTracker = {};
+//     for (let style in this.styleTagOfCommand) {
+//         commandTracker[style] = false;
+//     }
+
+//     if (this._isSelectionWithinRestrictedRange()) {
+//         this.commandTracker = commandTracker;
+//         return;
+//     }
+
+//     let skipTrack = this.restrictedElement_queryArray.concat(this.specialTextElement_queryArray);
+//     let crawlResult = this._nodeCrawler((node) => {
+//         if (node.nodeType === 1 && node.closest('blockquote') || node.nodeType === 3 && node.parentNode.closest('blockquote'))
+//             commandTracker.quote = true;
+
+//         let styleRestrictedParents = (c) => {
+//             return node.nodeType === 3 ? node.parentNode.closest(c) : node.nodeType === 1 ? node.closest(c) : !(node instanceof Node);
+//         };
+
+//         for (let p of skipTrack) {
+//             let chk = styleRestrictedParents(p);
+//             if (chk)
+//                 return node;
+//         }
+
+//         if (
+//             node.nodeType === 3 ||
+//             node.nodeName === 'BR' ||
+//             node.nodeType === 1 &&
+//             node.childNodes.length === 1 &&
+//             (
+//                 node.childNodes[0].nodeName === 'BR' ||
+//                 node.childNodes[0].nodeType === 3
+//             )
+//         ) {
+
+//             let n = node.nodeType === 3 || node.nodeName === 'BR' ? node.parentNode : node;
+
+//             let comm = this._trackStyle(n);
+//             for (let c in comm)
+//                 commandTracker[c] = comm[c];
+
+//         }
+//         return node;
+//     }, { node: this.range, parentNode: this.element });
+
+//     if (!crawlResult.node.length) {
+//         let comm = this._trackStyle(this.range.startContainer);
+//         for (let c in comm)
+//             commandTracker[c] = comm[c];
+//     }
+
+//     this.commandTracker = commandTracker;
+//     let caratPosition;
+//     let caratEl = this.isRangeDirectionForward ? this.range.endContainer : this.range.startContainer;
+
+//     if (caratEl.nodeType === 3)
+//         caratPosition = this.range.getBoundingClientRect();
+//     else if (caratEl.nodeType === 1)
+//         caratPosition = caratEl.getBoundingClientRect();
+
+//     this._callback({ commandTracker, range: this.range, caratPosition }).catch(err => err);
+//     this._lastLineBlank();
+// });
