@@ -1,23 +1,37 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.8",
+  "description": "Free minimal WYSIWYG editor for web developers",
   "main": "wysiwyg4all.js",
-  "scripts": {
-    "prod": "webpack -- --env mode=production"
+  "browser": "dist/wysiwyg4all.js",
+  "exports": {
+    ".": {
+      "require": "./dist/wysiwyg4all.cjs",
+      "import": "./wysiwyg4all.js"
+    },
+    "./css": "./wywiwyg4all.css"
   },
-  "keywords": [],
+  "files": [
+    "dist",
+    "wysiwyg4all.js",
+    "wysiwyg4all.css"
+  ],
+  "scripts": {
+    "dev": "npx bns 3300",
+    "build": "npx webpack --config webpack.config.js"
+  },
+  "keywords": [
+    "wysiwyg"
+  ],
   "author": "Baksa Gimm",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.13.8",
-    "@babel/preset-env": "^7.13.9",
-    "babel-loader": "^8.2.2",
-    "webpack": "^5.24.2",
-    "webpack-cli": "^4.5.0"
+    "webpack": "^5.74.0",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "babel-polyfill": "^6.26.0",
-    "colormangle": "^0.1.98"
+    "basic-node-server": "^1.0.11",
+    "colormangle": "^0.1.103"
   }
 }

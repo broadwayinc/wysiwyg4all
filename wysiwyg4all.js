@@ -1,4 +1,4 @@
-import ColorMangle from 'colormangle';
+import {ColorMangle} from 'colormangle';
 
 export class Wysiwyg4All {
     /**
