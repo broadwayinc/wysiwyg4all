@@ -960,9 +960,419 @@ class Wysiwyg4All {
             childList: true,
         });
 
-        this.observer = new MutationObserver((mutation_array) => {
+        // this.observer = new MutationObserver((mutation_array) => {
+        //     if (this.logMutation) {
+        //         let monitor = mutation_array.map((m) => {
+        //             return {
+        //                 target: m.target.cloneNode(true),
+        //                 type: m.type,
+        //                 name: m.attributeName,
+        //                 added: (() => {
+        //                     let clones = [];
+        //                     for (let a of m.addedNodes) {
+        //                         if (a.nodeType === 3) clones.push(a.textContent);
+        //                         else clones.push(a.cloneNode(true));
+        //                     }
+        //                     return clones;
+        //                 })(),
+        //                 removed: (() => {
+        //                     let clones = [];
+        //                     for (let r of m.removedNodes) {
+        //                         if (r.nodeType === 3) clones.push(r.textContent);
+        //                         else clones.push(r.cloneNode(true));
+        //                     }
+        //                     return clones;
+        //                 })(),
+        //             };
+        //         });
+
+        //         let mutate = [];
+        //         for (let m of monitor) {
+        //             if (m.type === "childList" || m.attributeName === "class")
+        //                 mutate.push(m);
+        //         }
+
+        //         if (mutate.length)
+        //             this._callback({ mutation: mutate }).catch((err) => err);
+        //     }
+
+        //     for (const mutation of mutation_array) {
+        //         /** changes in attributes */
+        //         if (mutation.type === "attributes") {
+        //             const { target, attributeName } = mutation;
+        //             if (attributeName === "class") {
+        //                 if (
+        //                     target.parentNode &&
+        //                     !target.classList.length &&
+        //                     !(
+        //                         this._isTextBlockElement(target) ||
+        //                         this._isBlockElement(target) ||
+        //                         target.nodeName === "P"
+        //                     )
+        //                 ) {
+        //                     // this._unwrapElement(target);
+        //                     this._wrapNode(target);
+        //                 }
+        //                 if (!target.classList.length) target.removeAttribute("class");
+        //             }
+        //             //  prevent style attributes
+        //             if (attributeName === "style" && !this._isStyleAllowedElement(target))
+        //                 target.removeAttribute("style");
+        //             continue;
+        //         }
+
+        //         /** changes in node */
+        //         if (mutation.type === "childList") {
+        //             let mutationTarget = mutation.target;
+
+        //             /** removed nodes */
+        //             if (mutation.removedNodes.length) {
+        //                 for (let m of mutation.removedNodes) {
+        //                     /**
+        //                      *  CAUTION!
+        //                      *  changing the order of if statements below can lead to critical flaw
+        //                      *  _custom_ class should always be checked after _urllink_ and _hashtag_
+        //                      */
+
+        //                     let callbackRemoved = (what, m) => {
+        //                         if (!m.id) return;
+
+        //                         let arrIdx = this[`${what}_array`].length;
+        //                         let removed;
+
+        //                         while (arrIdx--) {
+        //                             let got = this[`${what}_array`][arrIdx];
+        //                             if (got.elementId === m.id) {
+        //                                 removed = this[`${what}_array`].splice(arrIdx, 1);
+        //                                 break;
+        //                             }
+        //                         }
+
+        //                         if (removed) {
+        //                             this._callback({ removed: { [what]: removed } });
+        //                         }
+        //                     };
+
+        //                     if (m?.classList?.contains("_media_")) {
+        //                         // let child = m.childNodes;
+        //                         // let childIdx = child.length;
+        //                         // while (childIdx--) {
+        //                         // let c = child[childIdx];
+
+        //                         // switch (c.nodeName) {
+        //                         switch (m.nodeName) {
+        //                             case "IMG":
+        //                                 // callbackRemoved("image", c);
+        //                                 callbackRemoved("image", m);
+        //                                 break;
+        //                         }
+        //                         // }
+        //                         continue;
+        //                     }
+
+        //                     let toBreak = false;
+        //                     for (let t of ["hashtag", "urllink", "custom"]) {
+        //                         if (m?.id?.includes(t)) {
+        //                             callbackRemoved(t, m);
+        //                             toBreak = true;
+        //                             break;
+        //                         }
+        //                     }
+
+        //                     toBreak = false;
+
+        //                     if (
+        //                         this._isCeilingElement(mutationTarget) &&
+        //                         (() => {
+        //                             let idx = mutationTarget.childNodes.length;
+        //                             if (idx)
+        //                                 while (idx--) {
+        //                                     let node = mutationTarget.childNodes[idx];
+        //                                     if (node.nodeType === 1 || node.textContent) {
+        //                                         return false;
+        //                                     }
+        //                                 }
+        //                             return true;
+        //                         })()
+        //                     ) {
+        //                         mutationTarget.remove();
+        //                         continue;
+        //                     }
+
+        //                     if (
+        //                         this._isTextBlockElement(mutationTarget) &&
+        //                         mutationTarget.childNodes.length === 1 &&
+        //                         this._isUnSelectableElement(mutationTarget.childNodes[0])
+        //                     )
+        //                         mutationTarget.append(document.createTextNode(""));
+        //                 }
+        //             }
+
+        //             /** added nodes */
+        //             if (mutation.addedNodes.length)
+        //                 for (let i of mutation.addedNodes) {
+        //                     let getBr = (n) => {
+        //                         let idx = n?.childNodes?.length;
+        //                         let br = [];
+        //                         while (idx--) {
+        //                             let c = n.childNodes[idx];
+        //                             if (c.nodeName === "BR") br.push(c);
+        //                         }
+        //                         return br;
+        //                     };
+
+        //                     if (i.nodeType === 3) {
+        //                         // wrap all eldest text node
+        //                         if (this._isCeilingElement(mutationTarget))
+        //                             this._wrapNode(i, document.createElement("p"));
+        //                         // remove <br> when there is text
+        //                         else if (i.textContent && i.textContent !== "\u200B") {
+        //                             // prevent br added to line
+        //                             let br = getBr(mutationTarget);
+        //                             if (br.length) for (let b of br) b.remove();
+        //                         }
+
+        //                         continue;
+        //                     }
+
+        //                     if (i.nodeType === 1) {
+        //                         if (i.childNodes.length > 0 && i.firstChild.tagName !== "BR") {
+        //                             let br = getBr(mutationTarget);
+        //                             if (br.length) for (let b of br) b.remove();
+        //                         }
+
+        //                         let node = (() => {
+        //                             let isWysiwygChild =
+        //                                 i.closest(`#${this.elementId}`) && i.id !== this.elementId;
+        //                             let isWysiwygEldestChild = (() => {
+        //                                 if (!isWysiwygChild) return false;
+
+        //                                 return this._isCeilingElement(mutationTarget);
+        //                             })();
+
+        //                             let ceiling = (() => {
+        //                                 for (let c of this.ceilingElement_queryArray) {
+        //                                     let clo = i.closest(c);
+        //                                     if (clo) return clo;
+        //                                 }
+        //                                 return null;
+        //                             })();
+
+        //                             let line = isWysiwygEldestChild
+        //                                 ? i
+        //                                 : isWysiwygChild &&
+        //                                 (() => {
+        //                                     let m = i;
+        //                                     while (m && !this._isCeilingElement(m.parentNode)) {
+        //                                         m = m.parentNode;
+        //                                     }
+        //                                     return m;
+        //                                 })();
+
+        //                             return {
+        //                                 isWysiwygChild,
+        //                                 isWysiwygEldestChild,
+        //                                 isMediaElement: i.closest("._media_"),
+        //                                 isBlockQuoteElement: i.closest("blockquote"),
+        //                                 isCustomElement: i.closest("._custom_"),
+        //                                 isHashtagElement: i.closest("._hashtag_"),
+        //                                 isUrlLinkElement: i.closest("._urllink_"),
+        //                                 ceiling,
+        //                                 line,
+        //                             };
+        //                         })();
+
+        //                         if (!node.isWysiwygChild) continue; // bypass
+
+        //                         if (
+        //                             node.isCustomElement ||
+        //                             node.isMediaElement ||
+        //                             node.isHashtagElement ||
+        //                             node.isUrlLinkElement
+        //                         ) {
+        //                             // // make sure un-editable element is secure
+        //                             // let el =
+        //                             //   node.isCustomElement ||
+        //                             //   node.isMediaElement ||
+        //                             //   node.isHashtagElement ||
+        //                             //   node.isUrlLinkElement;
+
+        //                             // // check if el has a value of contenteditable
+        //                             // if (el.getAttribute("contenteditable") !== "true")
+        //                             //   el.setAttribute("contenteditable", "false");
+
+        //                             continue;
+        //                         }
+
+        //                         if (
+        //                             !(
+        //                                 node.isWysiwygEldestChild &&
+        //                                 (this._isBlockElement(i) || this._isTextBlockElement(i))
+        //                             ) &&
+        //                             i.nodeName !== "BR" &&
+        //                             !i.classList.length
+        //                         ) {
+        //                             // unwrap anything that does not have class and is not block level text
+        //                             this._wrapNode(i);
+        //                             continue;
+        //                         }
+
+        //                         if (
+        //                             (() => {
+        //                                 if (this._isStyleAllowedElement(i)) return false;
+
+        //                                 for (let sa of this.restrictedElement_queryArray) {
+        //                                     if (i.closest(sa)) return false;
+        //                                 }
+
+        //                                 return true;
+        //                             })()
+        //                         )
+        //                             //  remove style attribute if not allowed
+        //                             i.removeAttribute("style");
+
+        //                         if (
+        //                             node.isWysiwygEldestChild &&
+        //                             !(this._isBlockElement(i) || this._isTextBlockElement(i))
+        //                         ) {
+        //                             //  wrap eldest non text block element to p
+        //                             if (i.nodeName === "BR") i.remove();
+        //                             else this._wrapNode(i, document.createElement("p"), true);
+        //                             continue;
+        //                         }
+
+        //                         if (
+        //                             mutationTarget.textContent &&
+        //                             mutationTarget.textContent !== "\u200B"
+        //                         ) {
+        //                             // prevent br added to line
+        //                             let br = getBr(mutationTarget);
+        //                             let doContinue = false;
+        //                             if (br.length)
+        //                                 for (let b of br) {
+        //                                     if (b === i) doContinue = true;
+        //                                     b.remove();
+        //                                 }
+        //                             if (doContinue) continue;
+        //                         }
+
+        //                         if (node.isWysiwygEldestChild && !this._isCeilingElement(i)) {
+        //                             // add tab on new line created by pressing enter
+        //                             if (this.insertTabPending_tabString) {
+        //                                 let tab = document.createTextNode(
+        //                                     this.insertTabPending_tabString
+        //                                 );
+        //                                 node.line.insertBefore(tab, node.line.childNodes[0]);
+        //                                 this.insertTabPending_tabString = "";
+        //                                 adjustSelection({ node: tab, position: false }, this.ceilingElement_queryArray);
+        //                             }
+
+        //                             // if empty text block is added add br
+        //                             if (
+        //                                 !node.line.textContent ||
+        //                                 node.line.textContent === "\u200B"
+        //                             ) {
+        //                                 let addBr = true;
+        //                                 nodeCrawler(
+        //                                     (n) => {
+        //                                         if (n.nodeName === "BR") {
+        //                                             addBr = false;
+        //                                             return "BREAK";
+        //                                         }
+        //                                         return n;
+        //                                     },
+        //                                     { node: node.line }
+        //                                 );
+
+        //                                 if (addBr) node.line.append(document.createElement("br"));
+        //                             }
+
+        //                             continue;
+        //                         }
+
+        //                         let classSet = (c) => {
+        //                             let counter = this.counterTagOf[c] || [];
+
+        //                             if (counter.length)
+        //                                 counter = counter.concat(
+        //                                     counter.map((m) => {
+        //                                         return m + "_stop";
+        //                                     })
+        //                                 );
+
+        //                             return [
+        //                                 c,
+        //                                 c.includes("_stop") ? c.replace("_stop", "") : c + "_stop",
+        //                             ].concat(counter);
+        //                         };
+
+        //                         let toUnwrap = [];
+
+        //                         if (i.classList.length) {
+        //                             climbUpToEldestParent(i, node.ceiling, true, (n) => {
+        //                                 let cIdx = i.classList.length;
+        //                                 while (cIdx--) {
+        //                                     if (
+        //                                         (() => {
+        //                                             let set = classSet(i.classList[cIdx]);
+        //                                             for (let s of set) {
+        //                                                 if (n.classList.contains(s)) return true;
+        //                                             }
+        //                                             return false;
+        //                                         })()
+        //                                     )
+        //                                         toUnwrap.push(n);
+        //                                 }
+
+        //                                 return n;
+        //                             });
+        //                         }
+
+        //                         let idx = toUnwrap.length;
+
+        //                         while (idx--) {
+        //                             // unwrap unnecessary counter parents
+        //                             this._wrapNode(toUnwrap[idx]);
+        //                         }
+
+        //                         let class_idx = i.classList.length;
+        //                         while (class_idx--) {
+        //                             let className = i.classList[class_idx];
+        //                             let curSt = this._trackStyle(
+        //                                 i,
+        //                                 className.replace("_stop", "")
+        //                             );
+        //                             let parSt = this._trackStyle(
+        //                                 i.parentNode,
+        //                                 className.replace("_stop", "")
+        //                             );
+
+        //                             if (curSt === parSt)
+        //                                 // remove style class if parent shares the same style
+        //                                 i.classList.remove(className);
+        //                         }
+
+        //                         if (!i.classList.length) {
+        //                             // remove style attribute if there is no class
+        //                             i.removeAttribute("class");
+        //                         }
+
+        //                         if (
+        //                             this._isTextBlockElement(mutationTarget) &&
+        //                             mutationTarget.childNodes.length === 1 &&
+        //                             this._isUnSelectableElement(mutationTarget.childNodes[0])
+        //                         )
+        //                             mutationTarget.append(document.createTextNode(""));
+        //                     }
+        //                 }
+        //         }
+        //     }
+        // });
+
+        this.observer = new MutationObserver(mutation_array => {
+
             if (this.logMutation) {
-                let monitor = mutation_array.map((m) => {
+                let monitor = mutation_array.map(m => {
                     return {
                         target: m.target.cloneNode(true),
                         type: m.type,
@@ -970,64 +1380,64 @@ class Wysiwyg4All {
                         added: (() => {
                             let clones = [];
                             for (let a of m.addedNodes) {
-                                if (a.nodeType === 3) clones.push(a.textContent);
-                                else clones.push(a.cloneNode(true));
+                                if (a.nodeType === 3)
+                                    clones.push(a.textContent);
+                                else
+                                    clones.push(a.cloneNode(true));
                             }
                             return clones;
                         })(),
                         removed: (() => {
                             let clones = [];
                             for (let r of m.removedNodes) {
-                                if (r.nodeType === 3) clones.push(r.textContent);
-                                else clones.push(r.cloneNode(true));
+                                if (r.nodeType === 3)
+                                    clones.push(r.textContent);
+                                else
+                                    clones.push(r.cloneNode(true));
                             }
                             return clones;
-                        })(),
+                        })()
                     };
                 });
 
                 let mutate = [];
                 for (let m of monitor) {
-                    if (m.type === "childList" || m.attributeName === "class")
+                    if (m.type === 'childList' || m.attributeName === 'class')
                         mutate.push(m);
                 }
 
                 if (mutate.length)
-                    this._callback({ mutation: mutate }).catch((err) => err);
+                    this._callback({ mutation: mutate }).catch(_ => {
+                    });
             }
 
             for (const mutation of mutation_array) {
+
                 /** changes in attributes */
-                if (mutation.type === "attributes") {
+                if (mutation.type === 'attributes') {
                     const { target, attributeName } = mutation;
-                    if (attributeName === "class") {
-                        if (
-                            target.parentNode &&
-                            !target.classList.length &&
-                            !(
-                                this._isTextBlockElement(target) ||
-                                this._isBlockElement(target) ||
-                                target.nodeName === "P"
-                            )
-                        ) {
+                    if (attributeName === 'class') {
+                        if (target.parentNode && !target.classList.length && !(this._isTextBlockElement(target) || this._isBlockElement(target) || target.nodeName === 'P')) {
                             // this._unwrapElement(target);
                             this._wrapNode(target);
                         }
-                        if (!target.classList.length) target.removeAttribute("class");
+                        if (!target.classList.length)
+                            target.removeAttribute('class');
                     }
                     //  prevent style attributes
-                    if (attributeName === "style" && !this._isStyleAllowedElement(target))
-                        target.removeAttribute("style");
+                    if (attributeName === 'style' && !this._isStyleAllowedElement(target))
+                        target.removeAttribute('style');
                     continue;
                 }
 
                 /** changes in node */
-                if (mutation.type === "childList") {
+                if (mutation.type === 'childList') {
                     let mutationTarget = mutation.target;
 
                     /** removed nodes */
                     if (mutation.removedNodes.length) {
                         for (let m of mutation.removedNodes) {
+
                             /**
                              *  CAUTION!
                              *  changing the order of if statements below can lead to critical flaw
@@ -1035,7 +1445,8 @@ class Wysiwyg4All {
                              */
 
                             let callbackRemoved = (what, m) => {
-                                if (!m.id) return;
+                                if (!m.id)
+                                    return;
 
                                 let arrIdx = this[`${what}_array`].length;
                                 let removed;
@@ -1049,29 +1460,28 @@ class Wysiwyg4All {
                                 }
 
                                 if (removed) {
-                                    this._callback({ removed: { [what]: removed } });
+                                    this._callback({ removed: { [what]: removed } }).catch(err => {
+                                        throw err;
+                                    });
                                 }
                             };
 
-                            if (m?.classList?.contains("_media_")) {
-                                // let child = m.childNodes;
-                                // let childIdx = child.length;
-                                // while (childIdx--) {
-                                // let c = child[childIdx];
-
-                                // switch (c.nodeName) {
-                                switch (m.nodeName) {
-                                    case "IMG":
-                                        // callbackRemoved("image", c);
-                                        callbackRemoved("image", m);
-                                        break;
+                            if (m?.classList?.contains('_media_')) {
+                                let child = m.childNodes;
+                                let childIdx = child.length;
+                                while (childIdx--) {
+                                    let c = child[childIdx];
+                                    switch (c.nodeName) {
+                                        case 'IMG':
+                                            callbackRemoved('image', c);
+                                            break;
+                                    }
                                 }
-                                // }
                                 continue;
                             }
 
                             let toBreak = false;
-                            for (let t of ["hashtag", "urllink", "custom"]) {
+                            for (let t of ['hashtag', 'urllink', 'custom']) {
                                 if (m?.id?.includes(t)) {
                                     callbackRemoved(t, m);
                                     toBreak = true;
@@ -1081,42 +1491,39 @@ class Wysiwyg4All {
 
                             toBreak = false;
 
-                            if (
-                                this._isCeilingElement(mutationTarget) &&
-                                (() => {
-                                    let idx = mutationTarget.childNodes.length;
-                                    if (idx)
-                                        while (idx--) {
-                                            let node = mutationTarget.childNodes[idx];
-                                            if (node.nodeType === 1 || node.textContent) {
-                                                return false;
-                                            }
+                            //this._isCeilingElement(mutationTarget) &&
+                            if ((() => {
+                                let idx = mutationTarget.childNodes.length;
+                                if (idx)
+                                    while (idx--) {
+                                        let node = mutationTarget.childNodes[idx];
+                                        if (node.nodeType === 1 || node.textContent) {
+                                            return false;
                                         }
-                                    return true;
-                                })()
-                            ) {
+                                    }
+                                return true;
+                            })()) {
                                 mutationTarget.remove();
                                 continue;
                             }
 
-                            if (
-                                this._isTextBlockElement(mutationTarget) &&
-                                mutationTarget.childNodes.length === 1 &&
-                                this._isUnSelectableElement(mutationTarget.childNodes[0])
-                            )
-                                mutationTarget.append(document.createTextNode(""));
+                            if (this._isTextBlockElement(mutationTarget) && mutationTarget.childNodes.length === 1
+                                && this._isUnSelectableElement(mutationTarget.childNodes[0]))
+                                mutationTarget.append(document.createTextNode(''));
                         }
                     }
 
                     /** added nodes */
                     if (mutation.addedNodes.length)
                         for (let i of mutation.addedNodes) {
+
                             let getBr = (n) => {
                                 let idx = n?.childNodes?.length;
                                 let br = [];
                                 while (idx--) {
                                     let c = n.childNodes[idx];
-                                    if (c.nodeName === "BR") br.push(c);
+                                    if (c.nodeName === 'BR')
+                                        br.push(c);
                                 }
                                 return br;
                             };
@@ -1124,28 +1531,27 @@ class Wysiwyg4All {
                             if (i.nodeType === 3) {
                                 // wrap all eldest text node
                                 if (this._isCeilingElement(mutationTarget))
-                                    this._wrapNode(i, document.createElement("p"));
+                                    this._wrapNode(i, document.createElement('p'));
+
                                 // remove <br> when there is text
-                                else if (i.textContent && i.textContent !== "\u200B") {
+                                else if (i.textContent && i.textContent !== '\u200B') {
                                     // prevent br added to line
                                     let br = getBr(mutationTarget);
-                                    if (br.length) for (let b of br) b.remove();
+                                    if (br.length)
+                                        for (let b of br)
+                                            b.remove();
                                 }
 
                                 continue;
                             }
 
                             if (i.nodeType === 1) {
-                                if (i.childNodes.length > 0 && i.firstChild.tagName !== "BR") {
-                                    let br = getBr(mutationTarget);
-                                    if (br.length) for (let b of br) b.remove();
-                                }
 
                                 let node = (() => {
-                                    let isWysiwygChild =
-                                        i.closest(`#${this.elementId}`) && i.id !== this.elementId;
+                                    let isWysiwygChild = i.closest(`#${this.elementId}`) && i.id !== this.elementId;
                                     let isWysiwygEldestChild = (() => {
-                                        if (!isWysiwygChild) return false;
+                                        if (!isWysiwygChild)
+                                            return false;
 
                                         return this._isCeilingElement(mutationTarget);
                                     })();
@@ -1153,36 +1559,35 @@ class Wysiwyg4All {
                                     let ceiling = (() => {
                                         for (let c of this.ceilingElement_queryArray) {
                                             let clo = i.closest(c);
-                                            if (clo) return clo;
+                                            if (clo)
+                                                return clo;
                                         }
                                         return null;
                                     })();
 
-                                    let line = isWysiwygEldestChild
-                                        ? i
-                                        : isWysiwygChild &&
-                                        (() => {
-                                            let m = i;
-                                            while (m && !this._isCeilingElement(m.parentNode)) {
-                                                m = m.parentNode;
-                                            }
-                                            return m;
-                                        })();
+                                    let line = isWysiwygEldestChild ? i : isWysiwygChild && (() => {
+                                        let m = i;
+                                        while (m && !this._isCeilingElement(m.parentNode)) {
+                                            m = m.parentNode;
+                                        }
+                                        return m;
+                                    })();
 
                                     return {
                                         isWysiwygChild,
                                         isWysiwygEldestChild,
-                                        isMediaElement: i.closest("._media_"),
-                                        isBlockQuoteElement: i.closest("blockquote"),
-                                        isCustomElement: i.closest("._custom_"),
-                                        isHashtagElement: i.closest("._hashtag_"),
-                                        isUrlLinkElement: i.closest("._urllink_"),
+                                        isMediaElement: i.closest('._media_'),
+                                        isBlockQuoteElement: i.closest('blockquote'),
+                                        isCustomElement: i.closest('._custom_'),
+                                        isHashtagElement: i.closest('._hashtag_'),
+                                        isUrlLinkElement: i.closest('._urllink_'),
                                         ceiling,
-                                        line,
+                                        line
                                     };
                                 })();
 
-                                if (!node.isWysiwygChild) continue; // bypass
+                                if (!node.isWysiwygChild)
+                                    continue; // bypass
 
                                 if (
                                     node.isCustomElement ||
@@ -1190,101 +1595,81 @@ class Wysiwyg4All {
                                     node.isHashtagElement ||
                                     node.isUrlLinkElement
                                 ) {
-                                    // // make sure un-editable element is secure
-                                    // let el =
-                                    //   node.isCustomElement ||
-                                    //   node.isMediaElement ||
-                                    //   node.isHashtagElement ||
-                                    //   node.isUrlLinkElement;
-
-                                    // // check if el has a value of contenteditable
-                                    // if (el.getAttribute("contenteditable") !== "true")
-                                    //   el.setAttribute("contenteditable", "false");
-
+                                    // make sure un-editable element is secure
+                                    (node.isCustomElement ||
+                                        node.isMediaElement ||
+                                        node.isHashtagElement ||
+                                        node.isUrlLinkElement).setAttribute('contenteditable', 'false');
                                     continue;
                                 }
 
-                                if (
-                                    !(
-                                        node.isWysiwygEldestChild &&
-                                        (this._isBlockElement(i) || this._isTextBlockElement(i))
-                                    ) &&
-                                    i.nodeName !== "BR" &&
-                                    !i.classList.length
-                                ) {
+                                if (!(node.isWysiwygEldestChild && (this._isBlockElement(i) || this._isTextBlockElement(i))) &&
+                                    i.nodeName !== 'BR' &&
+                                    !i.classList.length) {
                                     // unwrap anything that does not have class and is not block level text
                                     this._wrapNode(i);
                                     continue;
                                 }
 
-                                if (
-                                    (() => {
-                                        if (this._isStyleAllowedElement(i)) return false;
+                                if ((() => {
+                                    if (this._isStyleAllowedElement(i))
+                                        return false;
 
-                                        for (let sa of this.restrictedElement_queryArray) {
-                                            if (i.closest(sa)) return false;
-                                        }
+                                    for (let sa of this.restrictedElement_queryArray) {
+                                        if (i.closest(sa))
+                                            return false;
+                                    }
 
-                                        return true;
-                                    })()
-                                )
+                                    return true;
+                                })())
                                     //  remove style attribute if not allowed
-                                    i.removeAttribute("style");
+                                    i.removeAttribute('style');
 
-                                if (
-                                    node.isWysiwygEldestChild &&
-                                    !(this._isBlockElement(i) || this._isTextBlockElement(i))
-                                ) {
+                                if (node.isWysiwygEldestChild && !(this._isBlockElement(i) || this._isTextBlockElement(i))) {
                                     //  wrap eldest non text block element to p
-                                    if (i.nodeName === "BR") i.remove();
-                                    else this._wrapNode(i, document.createElement("p"), true);
+                                    if (i.nodeName === 'BR')
+                                        i.remove();
+                                    else
+                                        this._wrapNode(i, document.createElement('p'), true);
                                     continue;
                                 }
 
-                                if (
-                                    mutationTarget.textContent &&
-                                    mutationTarget.textContent !== "\u200B"
-                                ) {
+                                if (mutationTarget.textContent && mutationTarget.textContent !== '\u200B') {
                                     // prevent br added to line
                                     let br = getBr(mutationTarget);
                                     let doContinue = false;
                                     if (br.length)
                                         for (let b of br) {
-                                            if (b === i) doContinue = true;
+                                            if (b === i)
+                                                doContinue = true;
                                             b.remove();
                                         }
-                                    if (doContinue) continue;
+                                    if (doContinue)
+                                        continue;
                                 }
 
                                 if (node.isWysiwygEldestChild && !this._isCeilingElement(i)) {
                                     // add tab on new line created by pressing enter
                                     if (this.insertTabPending_tabString) {
-                                        let tab = document.createTextNode(
-                                            this.insertTabPending_tabString
-                                        );
+                                        let tab = document.createTextNode(this.insertTabPending_tabString);
                                         node.line.insertBefore(tab, node.line.childNodes[0]);
-                                        this.insertTabPending_tabString = "";
-                                        adjustSelection({ node: tab, position: false }, this.ceilingElement_queryArray);
+                                        this.insertTabPending_tabString = '';
+                                        this._adjustSelection({ node: tab, position: false });
                                     }
 
                                     // if empty text block is added add br
-                                    if (
-                                        !node.line.textContent ||
-                                        node.line.textContent === "\u200B"
-                                    ) {
+                                    if (!node.line.textContent || node.line.textContent === '\u200B') {
                                         let addBr = true;
-                                        nodeCrawler(
-                                            (n) => {
-                                                if (n.nodeName === "BR") {
-                                                    addBr = false;
-                                                    return "BREAK";
-                                                }
-                                                return n;
-                                            },
-                                            { node: node.line }
-                                        );
+                                        nodeCrawler(n => {
+                                            if (n.nodeName === 'BR') {
+                                                addBr = false;
+                                                return 'BREAK';
+                                            }
+                                            return n;
+                                        }, { node: node.line });
 
-                                        if (addBr) node.line.append(document.createElement("br"));
+                                        if (addBr)
+                                            node.line.append(document.createElement('br'));
                                     }
 
                                     continue;
@@ -1294,29 +1679,30 @@ class Wysiwyg4All {
                                     let counter = this.counterTagOf[c] || [];
 
                                     if (counter.length)
-                                        counter = counter.concat(
-                                            counter.map((m) => {
-                                                return m + "_stop";
-                                            })
-                                        );
+                                        counter = counter.concat(counter.map(m => {
+                                            return m + '_stop';
+                                        }));
 
                                     return [
                                         c,
-                                        c.includes("_stop") ? c.replace("_stop", "") : c + "_stop",
+                                        c.includes('_stop') ? c.replace('_stop', '') : c + '_stop'
                                     ].concat(counter);
                                 };
 
                                 let toUnwrap = [];
 
                                 if (i.classList.length) {
-                                    climbUpToEldestParent(i, node.ceiling, true, (n) => {
+
+                                    climbUpToEldestParent(i, node.ceiling, true, n => {
+
                                         let cIdx = i.classList.length;
                                         while (cIdx--) {
                                             if (
                                                 (() => {
                                                     let set = classSet(i.classList[cIdx]);
                                                     for (let s of set) {
-                                                        if (n.classList.contains(s)) return true;
+                                                        if (n.classList.contains(s))
+                                                            return true;
                                                     }
                                                     return false;
                                                 })()
@@ -1326,6 +1712,7 @@ class Wysiwyg4All {
 
                                         return n;
                                     });
+
                                 }
 
                                 let idx = toUnwrap.length;
@@ -1338,14 +1725,8 @@ class Wysiwyg4All {
                                 let class_idx = i.classList.length;
                                 while (class_idx--) {
                                     let className = i.classList[class_idx];
-                                    let curSt = this._trackStyle(
-                                        i,
-                                        className.replace("_stop", "")
-                                    );
-                                    let parSt = this._trackStyle(
-                                        i.parentNode,
-                                        className.replace("_stop", "")
-                                    );
+                                    let curSt = this._trackStyle(i, className.replace('_stop', ''));
+                                    let parSt = this._trackStyle(i.parentNode, className.replace('_stop', ''));
 
                                     if (curSt === parSt)
                                         // remove style class if parent shares the same style
@@ -1354,15 +1735,12 @@ class Wysiwyg4All {
 
                                 if (!i.classList.length) {
                                     // remove style attribute if there is no class
-                                    i.removeAttribute("class");
+                                    i.removeAttribute('class');
                                 }
 
-                                if (
-                                    this._isTextBlockElement(mutationTarget) &&
-                                    mutationTarget.childNodes.length === 1 &&
-                                    this._isUnSelectableElement(mutationTarget.childNodes[0])
-                                )
-                                    mutationTarget.append(document.createTextNode(""));
+                                if (this._isTextBlockElement(mutationTarget) && mutationTarget.childNodes.length === 1
+                                    && this._isUnSelectableElement(mutationTarget.childNodes[0]))
+                                    mutationTarget.append(document.createTextNode(''));
                             }
                         }
                 }
