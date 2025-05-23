@@ -23,7 +23,7 @@
     "url": "https://github.com/broadwayinc/wysiwyg4all"
   },
   "scripts": {
-    "dev": "npx bns 3300",
+    "dev": "npx bns 5173",
     "build": "npx lessc wysiwyg4all.less wysiwyg4all.css; npx webpack --config webpack.config.js"
   },
   "keywords": [

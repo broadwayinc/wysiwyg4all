@@ -743,7 +743,7 @@ class Wysiwyg4All {
     //         }
     //     }
     // }
-    
+
     if (id) commonContainer.removeAttribute("id");
 
     return { node: outputNodes, commonContainer };
@@ -1569,22 +1569,30 @@ class Wysiwyg4All {
     this._paste = function (e) {
       e.preventDefault();
       if (this._isSelectionWithinRestrictedRange()) return;
-      this._modifySelection(() => {
+      this._modifySelection(async () => {
         if (this.range) {
           if (this._isSelectionWithinRestrictedRange()) return;
-          let doc = document.createDocumentFragment();
-          doc.textContent = e.clipboardData
-            .getData("text/plain")
-            .replace(/\n\n/g, "\n");
 
-          if (doc.textContent.includes("#")) {
-            this.hashtag_flag = true;
+          let doc = await this._callback({ paste: e });
+          if (!doc) {
+            doc = document.createDocumentFragment();
+            doc.textContent = e.clipboardData
+              .getData("text/plain")
+              .replace(/\n\n/g, "\n");
+
+            if (doc.textContent.includes("#")) {
+              this.hashtag_flag = true;
+            }
+
+            //  url flag
+            for (let u of [":", "/", "."]) {
+              doc.textContent.includes(u);
+              this.urllink_flag = true;
+            }
           }
 
-          //  url flag
-          for (let u of [":", "/", "."]) {
-            doc.textContent.includes(u);
-            this.urllink_flag = true;
+          if(doc && !(doc instanceof DocumentFragment)) {
+            throw new Error("invalid document fragment");
           }
 
           if (!this.range.collapsed) this.range.extractContents();
@@ -2729,11 +2737,11 @@ class Wysiwyg4All {
   _modifySelection(run, lineByLine) {
     if (this.logExecution) console.log("_modifySelection", { run });
     let sel = window.getSelection();
-    if(!sel) {
-      
-    this.range = null;
-    this.commandTracker = {};
-    return;
+    if (!sel) {
+
+      this.range = null;
+      this.commandTracker = {};
+      return;
     }
     let doSingleLine = (sel) => {
       let anchorElement =
@@ -2760,9 +2768,9 @@ class Wysiwyg4All {
         if (typeof run === "function") run();
         return;
       }
-      
-    this.range = null;
-    this.commandTracker = {};
+
+      this.range = null;
+      this.commandTracker = {};
     };
 
     // if (lineByLine) { // TODO: line by line
