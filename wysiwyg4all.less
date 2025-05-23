@@ -44,7 +44,7 @@
     min-height: 1.6em;
     letter-spacing: 0.025em;
     display: block;
-    overflow: hidden;
+    // overflow: hidden;
     user-select: text;
 
     #_wysiwyg_fontSize_normal();
@@ -101,9 +101,9 @@
             &:empty {
                 display: inline-block;
 
-                &::after {
-                    content: '\200B'
-                }
+                // &::after {
+                //     content: '\200B'
+                // }
             }
         }
 
@@ -127,30 +127,30 @@
 
         //  colored font
         ._color {
-            min-width: 1px; //  min-width for caret space
+            // min-width: 1px; //  min-width for caret space
             text-decoration: inherit;
             color: var(--content-focus);
         }
 
         ._color_stop {
-            min-width: 1px;
+            // min-width: 1px;
             color: var(--content-text);
         }
 
         //  bold
         ._b {
-            min-width: 1px;
+            // min-width: 1px;
             font-weight: bold;
         }
 
         ._b_stop {
-            min-width: 1px;
+            // min-width: 1px;
             font-weight: normal;
         }
 
         //  underline
         ._u {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: underline;
 
             ._del, ._del_stop, ._u_stop {
@@ -163,13 +163,13 @@
         }
 
         ._u_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: none;
         }
 
         //  strike
         ._del {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: line-through;
 
             ._u, ._u_stop, ._del_stop {
@@ -182,13 +182,13 @@
         }
 
         ._del_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: none;
         }
 
         //  strike
         ._i {
-            min-width: 1px;
+            // min-width: 1px;
             font-style: italic;
 
             * {
@@ -197,13 +197,13 @@
         }
 
         ._i_stop {
-            min-width: 1px;
+            // min-width: 1px;
             font-style: normal;
         }
 
         //  font size
         ._small {
-            min-width: 1px;
+            // min-width: 1px;
             font-weight: normal;
             // text-decoration: inherit;
             text-decoration: none;
@@ -211,7 +211,7 @@
         }
 
         ._small_stop {
-            min-width: 1px;
+            // min-width: 1px;
             font-weight: inherit;
             // text-decoration: inherit;
             text-decoration: none;
@@ -220,85 +220,86 @@
 
         ._h1 {
             font-weight: inherit;
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             font-size: var(--wysiwyg-h1)
         }
 
         ._h1_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             // #_wysiwyg_fontSize_normal;
         }
 
         ._h2 {
             font-weight: inherit;
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             font-size: var(--wysiwyg-h2);
         }
 
         ._h2_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             // #_wysiwyg_fontSize_normal;
         }
 
         ._h3 {
             font-weight: inherit;
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             font-size: var(--wysiwyg-h3);
         }
 
         ._h3_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             // #_wysiwyg_fontSize_normal;
         }
 
         ._h4 {
             font-weight: inherit;
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             font-size: var(--wysiwyg-h4);
         }
 
         ._h4_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             // #_wysiwyg_fontSize_normal;
         }
 
         ._h5 {
             font-weight: inherit;
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             font-size: var(--wysiwyg-h5);
         }
 
         ._h5_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             // #_wysiwyg_fontSize_normal;
         }
 
         ._h6 {
             font-weight: inherit;
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             font-size: var(--wysiwyg-h6)
         }
 
         ._h6_stop {
-            min-width: 1px;
+            // min-width: 1px;
             text-decoration: inherit;
             // #_wysiwyg_fontSize_normal;
         }
     }
 
     //  image, media, custom components
-    ._media_, ._custom_ {
+    // ._media_, ._custom_ {
+    ._media_ {
         width: 100%;
         margin: auto;
 

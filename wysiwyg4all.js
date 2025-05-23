@@ -1,14 +1,5 @@
 import { ColorMangle } from "colormangle";
 
-// Add debouncing for frequent operations like selection changes
-const debounce = (fn, delay) => {
-  let timeout;
-  return function () {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn.apply(this, arguments), delay);
-  };
-};
-
 class Wysiwyg4All {
   /**
    * Wysiwyg4All is a simple framework for building a text editor for your website.
@@ -136,6 +127,16 @@ class Wysiwyg4All {
       "._hashtag_",
       "._urllink_",
       "HR",
+    ];
+    this.needSafeGuard = [
+      "._media_",
+      "._custom_",
+      "._hashtag_",
+      "._urllink_",
+      "HR",
+      "BLOCKQUOTE",
+      "UL",
+      "OL",
     ];
     this.styleAllowedElement_queryArray = [
       "._color",
@@ -533,6 +534,24 @@ class Wysiwyg4All {
 
     const numb = new Date().getTime().toString().substring(7, 13); // SECOND, MILLISECOND
 
+    // const shuffleArray = (array) => {
+    //     let currentIndex = array.length;
+    //     let temporaryValue, randomIndex;
+    //     while (0 !== currentIndex) {
+    //         randomIndex = Math.floor(Math.random() * currentIndex);
+    //         currentIndex -= 1;
+    //         temporaryValue = array[currentIndex];
+    //         array[currentIndex] = array[randomIndex];
+    //         array[randomIndex] = temporaryValue;
+    //     }
+    //     return array;
+    // };
+
+    // const letter_array = shuffleArray((text + numb).split(''));
+
+    // let output = '';
+    // for (let i = 0; i < limit; i++) output += letter_array[i];
+
     return prefix + numb + text;
   }
 
@@ -669,6 +688,61 @@ class Wysiwyg4All {
         crawl = crawl.nextSibling;
       }
     }
+    // let withInRange = (cwl) => {
+    //     if (!cwl || !(cwl instanceof Node)) return false;
+    //     if (cwl.nodeType === 1)
+    //         return cwl.id !== uniqueId && cwl.parentNode?.closest("#" + uniqueId);
+    //     else if (cwl.nodeType === 3)
+    //         return cwl.parentNode && cwl.parentNode?.closest("#" + uniqueId);
+    //     else if(nextnext) {
+    //       crawl = nextnext;
+    //       return true;
+    //     } else return false;
+    // };
+    // let diving = false;
+    // let nextnext = null;
+    // while (withInRange(crawl)) {
+    //     if (!diving && crawl.nodeType === 1 && crawl.childNodes.length) {
+    //         // dive down to deepest child's first crawl
+    //         crawl = crawl.childNodes[0];
+    //     } else if (crawl) {
+    //         diving = true;
+    //         // entering the deepest elements first child.
+
+    //         if (crawl.nodeType === 3) {
+    //             crawl = crawl.nextSibling || crawl.parentNode;
+    //             continue;
+    //         }
+
+    //         if (typeof run === "function") crawl = run(crawl);
+    //         if (crawl === "BREAK") break;
+
+    //         if (withInRange(crawl))
+    //             outputNodes.push(crawl);
+
+    //         nextnext = crawl.nextSibling?.nextSibling || crawl.parentNode;
+    //         /**
+    //          * Climb up the node if the node doesn't have any next siblings
+    //          * Stop when it hits the commonContainer
+    //          */
+    //         if (
+    //             crawl.nextSibling
+    //         ) {
+    //             crawl = crawl.nextSibling;
+    //         } else if (crawl.parentNode) {
+    //             if (crawl.parentNode === commonContainer) {
+    //                 crawl = crawl.nextSibling;
+    //                 diving = false;
+    //             }
+    //             else {
+    //                 crawl = crawl.parentNode;
+    //             }
+    //         }
+    //         else {
+    //             break;
+    //         }
+    //     }
+    // }
 
     if (id) commonContainer.removeAttribute("id");
 
@@ -874,25 +948,6 @@ class Wysiwyg4All {
     return false;
   }
 
-  // Add browser-specific normalization
-  _normalizeBrowserQuirks() {
-    // Handle Firefox's extra <br> tags
-    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-      this._nodeCrawler((node) => {
-        if (node.nodeName === 'BR' &&
-          (!node.nextSibling || node.nextSibling.nodeName === 'BR')) {
-          node.remove();
-        }
-        return node;
-      }, { node: this.element });
-    }
-
-    // Handle Safari's selection quirks
-    if (navigator.userAgent.toLowerCase().indexOf('safari') > -1) {
-      // Safari-specific fixes
-    }
-  }
-
   _isSelectionWithinRestrictedRange(
     range = this.range,
     element = this.element
@@ -1060,13 +1115,13 @@ class Wysiwyg4All {
 
     document.removeEventListener("selectionchange", this._selectionchange);
     this.imgInput = null;
-    if (this.element) {
-      this.element.removeEventListener("keydown", this._keydown);
-      this.element.removeEventListener("mousedown", this._normalize);
-      window.removeEventListener("mousedown", this._normalize);
-      this.element.removeEventListener("paste", this._paste);
-      this.element.removeEventListener("keyup", this._keyup);
-    }
+    // if (this.element) {
+    //   this.element.removeEventListener("keydown", this._keydown);
+    //   this.element.removeEventListener("mousedown", this._normalize);
+    //   window.removeEventListener("mousedown", this._normalize);
+    //   this.element.removeEventListener("paste", this._paste);
+    //   this.element.removeEventListener("keyup", this._keyup);
+    // }
 
     if (!listen) return;
 
@@ -1089,29 +1144,10 @@ class Wysiwyg4All {
       });
     });
 
-    this._selectionchange = debounce(function () {
-
-      // find the range direction
-      let isRangeDirectionForward = true;
-      if (this.range) {
-        let { startContainer, endContainer } = this.range;
-        if (startContainer === endContainer) {
-          isRangeDirectionForward =
-            this.range.startOffset <= this.range.endOffset;
-        } else {
-          let startLine = this.range.startLine;
-          let endLine = this.range.endLine;
-          isRangeDirectionForward =
-            startLine.compareDocumentPosition(endLine) ===
-            Node.DOCUMENT_POSITION_FOLLOWING;
-        }
-      }
-      this.isRangeDirectionForward = isRangeDirectionForward;
-      if (this.logExecution) console.log("isRangeDirectionForward", { isRangeDirectionForward, range: this.range });
-
+    this._selectionchange = function () {
       this._modifySelection(() => {
         let isForward =
-          // !(this.lastKey === "DELETE" || this.lastKey === "BACKSPACE") ||
+          !(this.lastKey === "DELETE" || this.lastKey === "BACKSPACE") ||
           this.isRangeDirectionForward;
 
         let rangeHeader = isForward
@@ -1119,11 +1155,9 @@ class Wysiwyg4All {
           : this.range.startContainer;
         this.lastKey = null;
 
-        if (this.logExecution)
-          console.log("isForward", { isForward });
         //  nudge range in-case carat is within non selectables
         let unSel = this._isUnSelectableElement(rangeHeader);
-        if (unSel && this.range.endContainer !== this.range.startContainer) {
+        if (unSel) {
           let selNext = isForward ? unSel.nextSibling : unSel.previousSibling;
 
           if (this.logExecution)
@@ -1140,14 +1174,14 @@ class Wysiwyg4All {
             this.range = this._adjustSelection({
               node: this.range.collapsed
                 ? selNext
-                : !isForward
+                : isForward
                   ? [null, selNext]
                   : [selNext, null],
               position: this.range.collapsed
-                ? !isForward
+                ? isForward
                   ? 0
                   : selNext.textContent.length
-                : !isForward
+                : isForward
                   ? [null, 0]
                   : [0, null],
             });
@@ -1232,7 +1266,7 @@ class Wysiwyg4All {
         }).catch((err) => console.error(err));
         this._lastLineBlank();
       });
-    }.bind(this), 8);
+    }.bind(this);
 
     this._keydown = function (e) {
       if (this._isSelectionWithinRestrictedRange()) return;
@@ -1255,7 +1289,7 @@ class Wysiwyg4All {
 
         // delete key
         if (["BACKSPACE", "DELETE"].includes(key)) {
-          // this.isRangeDirectionForward = true;
+          this.isRangeDirectionForward = true;
 
           // if (
           //     this.element.childNodes.length === 1 &&
@@ -1284,7 +1318,6 @@ class Wysiwyg4All {
 
           let stc = this.range.startContainer;
           if (this.range.collapsed) {
-            if (this.logExecution) console.log('range is collapsed');
             let block = (stc.nodeType === 3 ? stc.parentNode : stc).closest(
               "blockquote"
             );
@@ -1303,8 +1336,7 @@ class Wysiwyg4All {
               e.preventDefault();
               this.command("quote");
               return;
-            }
-            else if (this.range.startOffset === 0) {
+            } else if (this.range.startOffset === 0) {
               let ceil = this._climbUpToEldestParent(
                 stc,
                 this.element
@@ -1321,27 +1353,13 @@ class Wysiwyg4All {
                 }
               }
             }
-            else {
-              let ceil = this.isRangeDirectionForward ? this.range.startLine.previousSibling : this.range.endLine;
-              if (ceil)
-                this.restrictedElement_queryArray.forEach((cl) => {
-                  if (ceil.closest(cl)) {
-                    if (this.isRangeDirectionForward ? this.range.startOffset <= 1 : this.range.endOffset <= 1) {
-                      // remove the element
-                      this.element.removeChild(ceil);
-
-                      if (this.logExecution)
-                        console.log("removing element", { ceil });
-                      e.preventDefault();
-                    }
-                  }
-                });
-            }
             return;
           }
 
           let commonAncestorContainer = this.range.commonAncestorContainer;
           // check if commonAncestorContainer is the only element in this.element
+
+          // e.preventDefault();
           if (
             !this.range.startOffset &&
             ((this.element.childNodes.length === 1 &&
@@ -1349,7 +1367,6 @@ class Wysiwyg4All {
               (commonAncestorContainer === this.element &&
                 this.element.childNodes.length === 0))
           ) {
-            if (this.logExecution) console.log('element is empty and the cursor is on the first offset position within the block');
             // if the element is empty and the cursor is on the first offset position within the block
             // let t = document.createTextNode("\u200B");
             // let stcEl = stc.nodeType === 3 ? stc.parentNode : stc;
@@ -1357,25 +1374,7 @@ class Wysiwyg4All {
             e.preventDefault();
             return;
           }
-          // else {
-          //   console.log({ isRangeDirectionForward: this.isRangeDirectionForward });
-          //   let ceil = this.isRangeDirectionForward ? this.range.startLine : this.range.endLine;
-          //   console.log({ range: this.range, ceil });
-          //   if (ceil)
-          //     this.restrictedElement_queryArray.forEach((cl) => {
-          //       if (ceil.closest(cl)) {
-          //         console.log('removed')
-          //         // remove the element
-          //         if (this.isRangeDirectionForward ? this.range.startOffset <= 1 : this.range.endOffset <= 1) {
-          //           this.element.removeChild(ceil);
 
-          //           if (this.logExecution)
-          //             console.log("removing element", { ceil });
-          //           e.preventDefault();
-          //         }
-          //       }
-          //     });
-          // }
           // // Not sure what this is meant to do...
           // if (stc.nodeType === 1 && this._isTextBlockElement(stc) && !this.range.startOffset) {
           //     let t = document.createTextNode('\u200B');
@@ -1413,17 +1412,17 @@ class Wysiwyg4All {
         // when user press shift + arrows to expand the selection range,
         // this.isRangeDirectionForward is responsible of setting direction to expand
         // when set to true, the endOffset will change when using shift + arrow
-        // if (shift) {
-        //   if (key === "PAGEUP" || key === "HOME") {
-        //     this.isRangeDirectionForward = false;
-        //     return;
-        //   }
+        if (shift) {
+          if (key === "PAGEUP" || key === "HOME") {
+            this.isRangeDirectionForward = false;
+            return;
+          }
 
-        //   if (key === "PAGEDOWN" || key === "END") {
-        //     this.isRangeDirectionForward = true;
-        //     return;
-        //   }
-        // }
+          if (key === "PAGEDOWN" || key === "END") {
+            this.isRangeDirectionForward = true;
+            return;
+          }
+        }
 
         if (key.includes("ARROW")) {
           this._setArrow(e);
@@ -1431,7 +1430,7 @@ class Wysiwyg4All {
         }
 
         if (key === "TAB") {
-          // this.isRangeDirectionForward = true;
+          this.isRangeDirectionForward = true;
 
           e.preventDefault();
           let sweep_array = [];
@@ -1554,14 +1553,14 @@ class Wysiwyg4All {
           }
         }
 
-        // this.isRangeDirectionForward = true;
+        this.isRangeDirectionForward = true;
       });
     }.bind(this);
 
     this._normalize = function (e) {
-      e.stopPropagation();
+      // e.stopPropagation();
       this._modifySelection(() => {
-        if (this._isSelectionWithinRestrictedRange()) return;
+        // if (this._isSelectionWithinRestrictedRange()) return;
         this._normalizeDocument(true);
         this.range_backup = this.range.cloneRange();
         this._replaceText(true);
@@ -1570,22 +1569,30 @@ class Wysiwyg4All {
     this._paste = function (e) {
       e.preventDefault();
       if (this._isSelectionWithinRestrictedRange()) return;
-      this._modifySelection(() => {
+      this._modifySelection(async () => {
         if (this.range) {
           if (this._isSelectionWithinRestrictedRange()) return;
-          let doc = document.createDocumentFragment();
-          doc.textContent = e.clipboardData
-            .getData("text/plain")
-            .replace(/\n\n/g, "\n");
 
-          if (doc.textContent.includes("#")) {
-            this.hashtag_flag = true;
+          let doc = await this._callback({ paste: e });
+          if (!doc) {
+            doc = document.createDocumentFragment();
+            doc.textContent = e.clipboardData
+              .getData("text/plain")
+              .replace(/\n\n/g, "\n");
+
+            if (doc.textContent.includes("#")) {
+              this.hashtag_flag = true;
+            }
+
+            //  url flag
+            for (let u of [":", "/", "."]) {
+              doc.textContent.includes(u);
+              this.urllink_flag = true;
+            }
           }
 
-          //  url flag
-          for (let u of [":", "/", "."]) {
-            doc.textContent.includes(u);
-            this.urllink_flag = true;
+          if(doc && !(doc instanceof DocumentFragment)) {
+            throw new Error("invalid document fragment");
           }
 
           if (!this.range.collapsed) this.range.extractContents();
@@ -1601,23 +1608,12 @@ class Wysiwyg4All {
 
     document.addEventListener("selectionchange", this._selectionchange);
     this.element.addEventListener("keydown", this._keydown);
-    this.element.addEventListener("mousedown", this._normalize);
+    // this.element.addEventListener("mousedown", this._normalize);
     // this.element.addEventListener('blur', this._normalize);
     // fuck safari, firefox
     window.addEventListener("mousedown", this._normalize);
     this.element.addEventListener("paste", this._paste);
     this.element.addEventListener("keyup", this._keyup);
-  }
-
-  // Current code doesn't properly clean up event listeners
-  destroy() {
-    this.observer.disconnect();
-    document.removeEventListener("selectionchange", this._selectionchange);
-    this.element.removeEventListener("keydown", this._keydown);
-    this.element.removeEventListener("mousedown", this._normalize);
-    window.removeEventListener("mousedown", this._normalize);
-    this.element.removeEventListener("paste", this._paste);
-    this.element.removeEventListener("keyup", this._keyup);
   }
 
   _observeMutation(track) {
@@ -2035,342 +2031,348 @@ class Wysiwyg4All {
   }
 
   _setArrow(e) {
-    if (this.logExecution) console.log("_setArrow", { e });
-    if (!this.range || !e?.key) return;
+    // if (this.logExecution) console.log("_setArrow", { e });
+    // if (!this.range || !e?.key) return;
 
-    let endContainer,
-      endOffset,
-      startContainer,
-      startOffset,
-      collapsed,
-      startLine,
-      endLine,
-      isAllRangeOnSameLine,
-      currentLine,
-      caratElement,
-      arrowDirection;
+    // let endContainer,
+    //   endOffset,
+    //   startContainer,
+    //   startOffset,
+    //   collapsed,
+    //   startLine,
+    //   endLine,
+    //   isAllRangeOnSameLine,
+    //   currentLine,
+    //   caratElement,
+    //   arrowDirection;
 
-    let key = e.key.toUpperCase();
-    let shift = e?.shiftKey || false;
-    let metaKey = e?.ctrlKey || e?.metaKey || false;
-    let rangeSetup = () => {
-      endContainer = this.range?.endContainer;
-      endOffset = this.range?.endOffset;
-      startContainer = this.range?.startContainer;
-      startOffset = this.range?.startOffset;
-      collapsed = this.range?.collapsed;
-      startLine = this.range?.startLine;
-      endLine = this.range?.endLine;
-      isAllRangeOnSameLine = startLine === endLine;
-      currentLine = this.isRangeDirectionForward ? endLine : startLine;
-      caratElement = this.isRangeDirectionForward
-        ? endContainer
-        : startContainer;
-      caratElement =
-        caratElement?.nodeType === 3 ? caratElement?.parentNode : caratElement;
-    };
+    // let key = e.key.toUpperCase();
+    // let shift = e?.shiftKey || false;
+    // let metaKey = e?.ctrlKey || e?.metaKey || false;
+    // let rangeSetup = () => {
+    //   endContainer = this.range?.endContainer;
+    //   endOffset = this.range?.endOffset;
+    //   startContainer = this.range?.startContainer;
+    //   startOffset = this.range?.startOffset;
+    //   collapsed = this.range?.collapsed;
+    //   startLine = this.range?.startLine;
+    //   endLine = this.range?.endLine;
+    //   isAllRangeOnSameLine = startLine === endLine;
+    //   currentLine = this.isRangeDirectionForward ? endLine : startLine;
+    //   caratElement = this.isRangeDirectionForward
+    //     ? endContainer
+    //     : startContainer;
+    //   caratElement =
+    //     caratElement?.nodeType === 3 ? caratElement?.parentNode : caratElement;
+    // };
 
-    let removeZeroSpace = () => {
-      let targetContainer = this.isRangeDirectionForward
-        ? endContainer
-        : startContainer;
-      let nudged = false;
+    // let preventDefault = () => {
+    //   try {
+    //     e.preventDefault();
+    //   } catch (err) {}
+    // };
 
-      if (
-        collapsed &&
-        (targetContainer.textContent.includes("\u200B") ||
-          !targetContainer.textContent)
-      ) {
-        this._nodeCrawler(
-          (n) => {
-            if (
-              n.nodeType === 3 &&
-              (n.textContent === "\u200B" || !n.textContent)
-            ) {
-              let r = n.nextSibling || n.parentNode;
-              let siblingDirection = this.isRangeDirectionForward
-                ? "nextSibling"
-                : "previousSibling";
+    // let removeZeroSpace = () => {
+    //   let targetContainer = this.isRangeDirectionForward
+    //     ? endContainer
+    //     : startContainer;
+    //   let nudged = false;
 
-              if (
-                n === targetContainer ||
-                (() => {
-                  // fuck safari
-                  if (targetContainer.nodeType === 1) {
-                    let idx = targetContainer.childNodes.length;
-                    while (idx--) {
-                      if (targetContainer.childNodes[idx] === n) return true;
-                    }
-                    return false;
-                  }
-                })()
-              ) {
-                let run = r;
-                if (run.nodeType === 1 && n.parentNode === run) {
-                  if (run[siblingDirection]) nudged = run[siblingDirection];
-                } else nudged = r;
+    //   if (
+    //     collapsed &&
+    //     (targetContainer.textContent.includes("\u200B") ||
+    //       !targetContainer.textContent)
+    //   ) {
+    //     this._nodeCrawler(
+    //       (n) => {
+    //         if (
+    //           n.nodeType === 3 &&
+    //           (n.textContent === "\u200B" || !n.textContent)
+    //         ) {
+    //           let r = n.nextSibling || n.parentNode;
+    //           let siblingDirection = this.isRangeDirectionForward
+    //             ? "nextSibling"
+    //             : "previousSibling";
 
-                n.remove();
+    //           if (
+    //             n === targetContainer ||
+    //             (() => {
+    //               // fuck safari
+    //               if (targetContainer.nodeType === 1) {
+    //                 let idx = targetContainer.childNodes.length;
+    //                 while (idx--) {
+    //                   if (targetContainer.childNodes[idx] === n) return true;
+    //                 }
+    //                 return false;
+    //               }
+    //             })()
+    //           ) {
+    //             let run = r;
+    //             if (run.nodeType === 1 && n.parentNode === run) {
+    //               if (run[siblingDirection]) nudged = run[siblingDirection];
+    //             } else nudged = r;
 
-                this.range = this._adjustSelection({
-                  node: !collapsed
-                    ? this.isRangeDirectionForward
-                      ? [null, nudged || r]
-                      : [nudged || r, null]
-                    : nudged,
-                  position: !collapsed
-                    ? this.isRangeDirectionForward
-                      ? [null, nudged]
-                      : [!nudged, null]
-                    : this.isRangeDirectionForward,
-                });
+    //             n.remove();
 
-                rangeSetup();
-                e.preventDefault();
-                return "BREAK";
-              }
-            }
-            return n;
-          },
-          { node: targetContainer }
-        );
-      }
-      return !!nudged;
-    };
+    //             this.range = this._adjustSelection({
+    //               node: !collapsed
+    //                 ? this.isRangeDirectionForward
+    //                   ? [null, nudged || r]
+    //                   : [nudged || r, null]
+    //                 : nudged,
+    //               position: !collapsed
+    //                 ? this.isRangeDirectionForward
+    //                   ? [null, nudged]
+    //                   : [!nudged, null]
+    //                 : this.isRangeDirectionForward,
+    //             });
 
-    let isCaratOnMultiLine = (el) => {
-      // check if carat is on the first / last line of multi wrapped line
+    //             rangeSetup();
+    //             preventDefault();
+    //             return "BREAK";
+    //           }
+    //         }
+    //         return n;
+    //       },
+    //       { node: targetContainer }
+    //     );
+    //   }
+    //   return !!nudged;
+    // };
 
-      let posTarget = arrowDirection === "DOWN" ? "bottom" : "top";
-      let caratViewPortPosition = this.range.getBoundingClientRect();
-      let elPosition = el.getBoundingClientRect()[posTarget];
-      let phoneTextSize = parseInt(
-        this.fontSizeCssVariable["--wysiwyg-font-phone"]
-      );
+    // let isCaratOnMultiLine = (el) => {
+    //   // check if carat is on the first / last line of multi wrapped line
 
-      if (caratViewPortPosition.height) {
-        let isLastLine =
-          (posTarget === "bottom"
-            ? elPosition - caratViewPortPosition[posTarget]
-            : caratViewPortPosition[posTarget] - elPosition) < phoneTextSize;
-        return !isLastLine;
-      }
+    //   let posTarget = arrowDirection === "DOWN" ? "bottom" : "top";
+    //   let caratViewPortPosition = this.range.getBoundingClientRect();
+    //   let elPosition = el.getBoundingClientRect()[posTarget];
+    //   let phoneTextSize = parseInt(
+    //     this.fontSizeCssVariable["--wysiwyg-font-phone"]
+    //   );
 
-      return false;
-    };
+    //   if (caratViewPortPosition.height) {
+    //     let isLastLine =
+    //       (posTarget === "bottom"
+    //         ? elPosition - caratViewPortPosition[posTarget]
+    //         : caratViewPortPosition[posTarget] - elPosition) < phoneTextSize;
+    //     return !isLastLine;
+    //   }
 
-    let nudgeRangeToInlineElement = () => {
-      let rem = removeZeroSpace();
+    //   return false;
+    // };
 
-      if (
-        !rem &&
-        window.getComputedStyle(caratElement).display === "inline-block"
-      ) {
-        let _caratElement =
-          caratElement.nodeType === 3 ? caratElement.parentNode : caratElement;
-        while (
-          window.getComputedStyle(_caratElement).display === "inline-block"
-        ) {
-          _caratElement = _caratElement.parentNode;
-        }
+    // let nudgeRangeToInlineElement = () => {
+    //   let rem = removeZeroSpace();
 
-        let siblingDirection =
-          arrowDirection === "UP" ? "previousSibling" : "nextSibling";
-        let nextEl = _caratElement[siblingDirection];
+    //   if (
+    //     !rem &&
+    //     window.getComputedStyle(caratElement).display === "inline-block"
+    //   ) {
+    //     let _caratElement =
+    //       caratElement.nodeType === 3 ? caratElement.parentNode : caratElement;
+    //     while (
+    //       window.getComputedStyle(_caratElement).display === "inline-block"
+    //     ) {
+    //       _caratElement = _caratElement.parentNode;
+    //     }
 
-        if (!nextEl) {
-          let t = document.createTextNode("");
-          _caratElement.parentNode.insertBefore(
-            t,
-            siblingDirection === "previousSibling" ? _caratElement : nextEl
-          );
-        }
+    //     let siblingDirection =
+    //       arrowDirection === "UP" ? "previousSibling" : "nextSibling";
+    //     let nextEl = _caratElement[siblingDirection];
 
-        _caratElement = _caratElement[siblingDirection];
+    //     if (!nextEl) {
+    //       let t = document.createTextNode("");
+    //       _caratElement.parentNode.insertBefore(
+    //         t,
+    //         siblingDirection === "previousSibling" ? _caratElement : nextEl
+    //       );
+    //     }
 
-        if (_caratElement) {
-          let setDirection = (() => {
-            return arrowDirection === "DOWN";
-          })();
+    //     _caratElement = _caratElement[siblingDirection];
 
-          this.range = this._adjustSelection({
-            node: shift
-              ? this.isRangeDirectionForward
-                ? [null, _caratElement]
-                : [_caratElement, null]
-              : _caratElement,
-            position: shift
-              ? this.isRangeDirectionForward
-                ? [null, setDirection]
-                : [setDirection, null]
-              : setDirection,
-          });
+    //     if (_caratElement) {
+    //       let setDirection = (() => {
+    //         return arrowDirection === "DOWN";
+    //       })();
 
-          rangeSetup();
+    //       this.range = this._adjustSelection({
+    //         node: shift
+    //           ? this.isRangeDirectionForward
+    //             ? [null, _caratElement]
+    //             : [_caratElement, null]
+    //           : _caratElement,
+    //         position: shift
+    //           ? this.isRangeDirectionForward
+    //             ? [null, setDirection]
+    //             : [setDirection, null]
+    //           : setDirection,
+    //       });
 
-          return true;
-        }
-      }
-      return false;
-    };
+    //       rangeSetup();
 
-    rangeSetup();
+    //       return true;
+    //     }
+    //   }
+    //   return false;
+    // };
 
-    switch (key) {
-      case "ARROWLEFT":
-        arrowDirection = "LEFT";
-      case "ARROWRIGHT":
-        arrowDirection = arrowDirection || "RIGHT";
+    // rangeSetup();
 
-        if (metaKey || (collapsed && shift)) {
-          // this.isRangeDirectionForward = arrowDirection === "RIGHT";
-          rangeSetup();
-        }
+    // switch (key) {
+    //   case "ARROWLEFT":
+    //     arrowDirection = "LEFT";
+    //   case "ARROWRIGHT":
+    //     arrowDirection = arrowDirection || "RIGHT";
 
-        let caratOnSingleLine = !isCaratOnMultiLine(caratElement);
+    //     if (metaKey || (collapsed && shift)) {
+    //       this.isRangeDirectionForward = arrowDirection === "RIGHT";
+    //       rangeSetup();
+    //     }
 
-        let nudged;
-        if (caratOnSingleLine) {
-          if (metaKey && arrowDirection === "RIGHT")
-            nudged = nudgeRangeToInlineElement();
-        }
+    //     let caratOnSingleLine = !isCaratOnMultiLine(caratElement);
 
-        if (!nudged) removeZeroSpace();
+    //     let nudged;
+    //     if (caratOnSingleLine) {
+    //       if (metaKey && arrowDirection === "RIGHT")
+    //         nudged = nudgeRangeToInlineElement();
+    //     }
 
-        break;
+    //     if (!nudged) removeZeroSpace();
 
-      case "ARROWUP":
-        arrowDirection = "UP";
-      case "ARROWDOWN":
-        arrowDirection = arrowDirection || "DOWN";
+    //     break;
 
-        if (!collapsed && !shift) {
-          e.preventDefault();
-          let adj =
-            arrowDirection === "UP"
-              ? [startContainer, startOffset]
-              : [endContainer, endOffset];
-          this.range = this._adjustSelection({
-            node: adj[0],
-            position: adj[1],
-          });
-          break;
-        }
+    //   case "ARROWUP":
+    //     arrowDirection = "UP";
+    //   case "ARROWDOWN":
+    //     arrowDirection = arrowDirection || "DOWN";
 
-        if (collapsed || isAllRangeOnSameLine) {
-          // this.isRangeDirectionForward = arrowDirection === "DOWN";
-          rangeSetup();
-        }
+    //     if (!collapsed && !shift) {
+    //       preventDefault();
+    //       let adj =
+    //         arrowDirection === "UP"
+    //           ? [startContainer, startOffset]
+    //           : [endContainer, endOffset];
+    //       this.range = this._adjustSelection({
+    //         node: adj[0],
+    //         position: adj[1],
+    //       });
+    //       break;
+    //     }
 
-        if (isCaratOnMultiLine(caratElement)) break;
+    //     if (collapsed || isAllRangeOnSameLine) {
+    //       this.isRangeDirectionForward = arrowDirection === "DOWN";
+    //       rangeSetup();
+    //     }
 
-        let iNudged = nudgeRangeToInlineElement();
+    //     if (isCaratOnMultiLine(caratElement)) break;
 
-        if (iNudged) break;
-        else removeZeroSpace();
+    //     let iNudged = nudgeRangeToInlineElement();
 
-        let isMultiLine = isCaratOnMultiLine(currentLine);
-        if (isMultiLine) break;
+    //     if (iNudged) break;
+    //     else removeZeroSpace();
 
-        let eldestParentOfCurrentLine = this._climbUpToEldestParent(
-          currentLine,
-          this.element
-        );
+    //     let isMultiLine = isCaratOnMultiLine(currentLine);
+    //     if (isMultiLine) break;
 
-        let isCurrentLineInsideSubCeiling =
-          eldestParentOfCurrentLine.id !== this.elementId &&
-          this._isCeilingElement(eldestParentOfCurrentLine);
+    //     let eldestParentOfCurrentLine = this._climbUpToEldestParent(
+    //       currentLine,
+    //       this.element
+    //     );
 
-        // break out if current line is inside the sub ceiling and it's not on the last line
-        if (
-          isCurrentLineInsideSubCeiling &&
-          ((arrowDirection === "UP" &&
-            eldestParentOfCurrentLine.firstChild !== currentLine) ||
-            (arrowDirection === "DOWN" &&
-              eldestParentOfCurrentLine.lastChild !== currentLine))
-        )
-          break;
+    //     let isCurrentLineInsideSubCeiling =
+    //       eldestParentOfCurrentLine.id !== this.elementId &&
+    //       this._isCeilingElement(eldestParentOfCurrentLine);
 
-        let siblingSet = [
-          isCurrentLineInsideSubCeiling
-            ? eldestParentOfCurrentLine.previousSibling
-            : currentLine.previousSibling,
-          isCurrentLineInsideSubCeiling
-            ? eldestParentOfCurrentLine.nextSibling
-            : currentLine.nextSibling,
-        ];
+    //     // break out if current line is inside the sub ceiling and it's not on the last line
+    //     if (
+    //       isCurrentLineInsideSubCeiling &&
+    //       ((arrowDirection === "UP" &&
+    //         eldestParentOfCurrentLine.firstChild !== currentLine) ||
+    //         (arrowDirection === "DOWN" &&
+    //           eldestParentOfCurrentLine.lastChild !== currentLine))
+    //     )
+    //       break;
 
-        if (arrowDirection === "UP") siblingSet.reverse();
+    //     let siblingSet = [
+    //       isCurrentLineInsideSubCeiling
+    //         ? eldestParentOfCurrentLine.previousSibling
+    //         : currentLine.previousSibling,
+    //       isCurrentLineInsideSubCeiling
+    //         ? eldestParentOfCurrentLine.nextSibling
+    //         : currentLine.nextSibling,
+    //     ];
 
-        let [backwardNode, forwardNode] = siblingSet;
+    //     if (arrowDirection === "UP") siblingSet.reverse();
 
-        // if current line is on last line of sub ceiling set forward node to sub ceiling
-        let _forwardNode = isCurrentLineInsideSubCeiling
-          ? eldestParentOfCurrentLine
-          : forwardNode;
-        if (_forwardNode) {
-          if (this._isBlockElement(_forwardNode) && !shift) {
-            e.preventDefault();
+    //     let [backwardNode, forwardNode] = siblingSet;
 
-            let leap =
-              arrowDirection === "UP"
-                ? _forwardNode.previousSibling
-                : _forwardNode.nextSibling;
+    //     // if current line is on last line of sub ceiling set forward node to sub ceiling
+    //     let _forwardNode = isCurrentLineInsideSubCeiling
+    //       ? eldestParentOfCurrentLine
+    //       : forwardNode;
+    //     if (_forwardNode) {
+    //       if (this._isBlockElement(_forwardNode) && !shift) {
+    //         preventDefault();
 
-            if (!leap || this._isBlockElement(leap)) {
-              let p = this._createEmptyParagraph();
-              _forwardNode.parentNode.insertBefore(
-                p,
-                arrowDirection === "UP" ? _forwardNode : leap
-              );
-              _forwardNode = p;
-            } else _forwardNode = leap;
+    //         let leap =
+    //           arrowDirection === "UP"
+    //             ? _forwardNode.previousSibling
+    //             : _forwardNode.nextSibling;
 
-            this.range = this._adjustSelection({
-              node: _forwardNode,
-              position: arrowDirection === "DOWN",
-            });
+    //         if (!leap || this._isBlockElement(leap)) {
+    //           let p = this._createEmptyParagraph();
+    //           _forwardNode.parentNode.insertBefore(
+    //             p,
+    //             arrowDirection === "UP" ? _forwardNode : leap
+    //           );
+    //           _forwardNode = p;
+    //         } else _forwardNode = leap;
 
-            if (
-              !shift &&
-              !currentLine.textContent &&
-              (this._isBlockElement(backwardNode) ||
-                (!backwardNode && currentLine === this.element.firstChild))
-            )
-              this.removeSandwichedLine_array.push(currentLine);
-          } else if (!isMultiLine && arrowDirection === "DOWN") {
-            e.preventDefault();
-            let collectOffset = 0;
-            let currentOffset = this.isRangeDirectionForward
-              ? endOffset
-              : startOffset;
-            this._nodeCrawler(
-              (n) => {
-                if (n === endContainer) return "BREAK";
-                else if (n.nodeType === 3 && n.textContent)
-                  collectOffset += n.textContent.length;
-                return n;
-              },
-              {
-                node: currentLine,
-              }
-            );
-            collectOffset += currentOffset;
-            this.range = this._adjustSelection({
-              node: collapsed
-                ? forwardNode
-                : this.isRangeDirectionForward
-                  ? [null, forwardNode]
-                  : [forwardNode, null],
-              position: collapsed
-                ? collectOffset
-                : this.isRangeDirectionForward
-                  ? [null, collectOffset]
-                  : [collectOffset, null],
-            });
-          }
-        } // else e.preventDefault();
-    }
+    //         this.range = this._adjustSelection({
+    //           node: _forwardNode,
+    //           position: arrowDirection === "DOWN",
+    //         });
+
+    //         if (
+    //           !shift &&
+    //           !currentLine.textContent &&
+    //           (this._isBlockElement(backwardNode) ||
+    //             (!backwardNode && currentLine === this.element.firstChild))
+    //         )
+    //           this.removeSandwichedLine_array.push(currentLine);
+    //       } else if (!isMultiLine && arrowDirection === "DOWN") {
+    //         preventDefault();
+    //         let collectOffset = 0;
+    //         let currentOffset = this.isRangeDirectionForward
+    //           ? endOffset
+    //           : startOffset;
+    //         this._nodeCrawler(
+    //           (n) => {
+    //             if (n === endContainer) return "BREAK";
+    //             else if (n.nodeType === 3 && n.textContent)
+    //               collectOffset += n.textContent.length;
+    //             return n;
+    //           },
+    //           {
+    //             node: currentLine,
+    //           }
+    //         );
+    //         collectOffset += currentOffset;
+    //         this.range = this._adjustSelection({
+    //           node: collapsed
+    //             ? forwardNode
+    //             : this.isRangeDirectionForward
+    //             ? [null, forwardNode]
+    //             : [forwardNode, null],
+    //           position: collapsed
+    //             ? collectOffset
+    //             : this.isRangeDirectionForward
+    //             ? [null, collectOffset]
+    //             : [collectOffset, null],
+    //         });
+    //       }
+    //     } else preventDefault();
+    // }
   }
 
   _append(i, insertAfter, wrap = false, focusElement) {
@@ -2735,6 +2737,12 @@ class Wysiwyg4All {
   _modifySelection(run, lineByLine) {
     if (this.logExecution) console.log("_modifySelection", { run });
     let sel = window.getSelection();
+    if (!sel) {
+
+      this.range = null;
+      this.commandTracker = {};
+      return;
+    }
     let doSingleLine = (sel) => {
       let anchorElement =
         sel.anchorNode?.nodeType === 3
@@ -2760,6 +2768,9 @@ class Wysiwyg4All {
         if (typeof run === "function") run();
         return;
       }
+
+      this.range = null;
+      this.commandTracker = {};
     };
 
     // if (lineByLine) { // TODO: line by line
@@ -2816,33 +2827,33 @@ class Wysiwyg4All {
 
     this._nodeCrawler(
       (n) => {
-        if (n.nodeType === 3 && n.textContent.includes("\u200B")) {
+        if (n.nodeType === 3 && (n.textContent.includes("\u200B") || !n.textContent)) {
           //!n.textContent ||
-          n.textContent = n.textContent.replace("\u200B", "");
-
-          if (!n.textContent) {
-            let cel;
-            for (let c of this.ceilingElement_queryArray)
-              if (n.parentNode.closest(c)) {
-                cel = n.parentNode.closest(c);
-                break;
-              }
-
-            let el = this._climbUpToEldestParent(n, cel, true);
-
-            let par = el.parentNode;
-            if (
-              !this._isCeilingElement(par) &&
-              !el.textContent &&
-              this.element.lastChild !== el
-            ) {
-              par.removeChild(el);
-              n = par;
-            }
-            return n;
-          }
+          n.textContent = n.textContent.replaceAll("\u200B", "");
+          n.normalize();
         } else if (n.nodeType === 1) n.normalize();
 
+        if (!n.textContent) {
+          n.remove();
+          // let cel;
+          // for (let c of this.ceilingElement_queryArray)
+          //   if (n.parentNode.closest(c)) {
+          //     cel = n.parentNode.closest(c);
+          //     break;
+          //   }
+
+          // let el = this._climbUpToEldestParent(n, cel, true);
+
+          // let par = el.parentNode;
+          // if (
+          //   !this._isCeilingElement(par) &&
+          //   !el.textContent &&
+          //   this.element.lastChild !== el
+          // ) {
+          //   par.removeChild(el);
+          //   n = par;
+          // }
+        }
         return n;
       },
       { node: this.element }
@@ -3104,14 +3115,14 @@ class Wysiwyg4All {
   _isUnSelectableElement(node) {
     if (this.logExecution) console.log("_isUnSelectableElement", { node });
     node = node?.nodeType === 3 ? node.parentNode : node;
-    // let exceptions = {
-    //   "._custom_": { attr: "contenteditable", value: "true" },
-    // };
+    let exceptions = {
+      "._custom_": { attr: "contenteditable", value: "true" },
+    };
     return this._checkElement(
       node,
       this.unSelectable_queryArray,
       true,
-      // exceptions
+      exceptions
     );
   }
 
@@ -3202,9 +3213,10 @@ class Wysiwyg4All {
           this.element.focus();
 
         this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            bq = document.createElement("blockquote");
-          this._append(bq, p, true);
+          // let p = this._createEmptyParagraph(),
+          let bq = document.createElement("blockquote");
+          this._append(bq, null, true);
+          this.setSafeLine();
         });
         return;
       case "unorderedList":
@@ -3219,11 +3231,13 @@ class Wysiwyg4All {
           this.element.focus();
 
         this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            li = document.createElement("li"),
+          // let p = this._createEmptyParagraph(),
+          let li = document.createElement("li"),
             ul = document.createElement("ul");
           ul.append(li);
-          this._append(ul, p, false, li);
+          // this._append(ul, p, false, li);
+          this._append(ul, null, false, li);
+          this.setSafeLine();
         });
 
         return;
@@ -3239,11 +3253,13 @@ class Wysiwyg4All {
           this.element.focus();
 
         this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            li = document.createElement("li"),
+          // let p = this._createEmptyParagraph(),
+          let li = document.createElement("li"),
             ul = document.createElement("ol");
           ul.append(li);
-          this._append(ul, p, false, li);
+          // this._append(ul, p, false, li);
+          this._append(ul, null, false, li);
+          this.setSafeLine();
         });
 
         return;
@@ -3259,10 +3275,12 @@ class Wysiwyg4All {
           this.element.focus();
 
         this._modifySelection(() => {
-          let p = this._createEmptyParagraph(),
-            hr = document.createElement("hr");
+          // let p = this._createEmptyParagraph(),
+          let hr = document.createElement("hr");
           hr.setAttribute("contenteditable", "false");
-          this._append(hr, p, false);
+          // this._append(hr, p, false);
+          this._append(hr, null, false);
+          this.setSafeLine();
         });
         return;
       case "image":
@@ -3367,7 +3385,7 @@ class Wysiwyg4All {
               isColor === this.commandTracker[action] ||
               (isColor === undefined &&
                 this.commandTracker[action] ===
-                this.cssVariable["--content-text_focus"]);
+                this.cssVariable["--content-focus"]);
           } else pass = true;
 
           if (pass) {
@@ -3388,8 +3406,8 @@ class Wysiwyg4All {
         if (this.range.collapsed) {
           if (restrictedClass) return;
 
-          let text = document.createTextNode("");
-          // let text = document.createTextNode("\u200B");
+          // let text = document.createTextNode("");
+          let text = document.createTextNode("\u200B");
           wrapper.append(text);
 
           if (this.range.startContainer.nodeName === "BR")
@@ -3569,45 +3587,105 @@ class Wysiwyg4All {
 
       this._modifySelection(() => {
         //  setup wrapper
-        let custom = document.createElement("div");
-        custom.classList.add("_custom_");
-        custom.setAttribute(
-          "contenteditable",
-          (!!action?.contenteditable).toString()
-        );
+        // let custom = document.createElement("div");
+        // custom.classList.add("_custom_");
+        // custom.setAttribute(
+        //   "contenteditable",
+        //   (!!action?.contenteditable).toString()
+        // );
+
+        // if (action.style)
+        //   for (let s in action.style) custom.style[s] = action.style[s];
+
+        // action.elementId = action.elementId || this._generateId("custom");
+        // custom.id = action.elementId;
+
+        // if (typeof action.element === "string")
+        //   custom.innerHTML = action.element;
+        // else if (action.element instanceof HTMLElement)
+        //   custom.append(action.element);
+
+        // if (!custom.children.length) action.insert = true; // insert if only text node
+
+        // if (!this.range) this.element.focus();
+
+        // this.custom_array.push(action);
+
+        // this._callback({ custom: action }).then((_) => {
+        //   if (action.insert) {
+        //     let txt = document.createTextNode("");
+        //     this.range.insertNode(txt); // when inserted in range, it will push the next el back
+        //     this.range.insertNode(custom);
+        //     this.range = this._adjustSelection({
+        //       node: txt,
+        //       position: false,
+        //     });
+        //   } else this._append(custom, this._createEmptyParagraph(), false);
+        // });
+        let custom = null;
 
         if (action.style)
           for (let s in action.style) custom.style[s] = action.style[s];
 
         action.elementId = action.elementId || this._generateId("custom");
-        custom.id = action.elementId;
 
-        if (typeof action.element === "string")
-          custom.innerHTML = action.element;
-        else if (action.element instanceof HTMLElement)
-          custom.append(action.element);
-
-        if (!custom.children.length) action.insert = true; // insert if only text node
-
+        if (typeof action.element === "string") {
+          custom = document.createTextNode(action.element);
+          action.insert = true;
+        }
+        else if (action.element instanceof HTMLElement) {
+          custom = action.element;
+          custom.id = action.elementId;
+          custom.classList.add("_custom_");
+        }
         if (!this.range) this.element.focus();
 
         this.custom_array.push(action);
 
         this._callback({ custom: action }).then((_) => {
+
+          let txt = document.createTextNode("");
           if (action.insert) {
-            let txt = document.createTextNode("");
             this.range.insertNode(txt); // when inserted in range, it will push the next el back
             this.range.insertNode(custom);
-            this.range = this._adjustSelection({
-              node: txt,
-              position: false,
-            });
-          } else this._append(custom, this._createEmptyParagraph(), false);
+          } else {
+            this._append(custom, txt, false);
+          }
+          this.range = this._adjustSelection({
+            node: txt,
+            position: false,
+          });
+
+          this.setSafeLine();
         });
       });
     }
   }
-
+  setSafeLine() {
+    let firstChild = this.element.firstChild;
+    let lastChild = this.element.lastChild;
+    this.needSafeGuard.forEach((cl) => {
+      if (cl[0] === ".") {
+        cl = cl.substring(1);
+        if (firstChild && firstChild.nodeType === 1 && firstChild.classList.contains(cl))
+          this.element.insertBefore(
+            this._createEmptyParagraph(),
+            firstChild
+          );
+        if (lastChild && lastChild.nodeType === 1 && lastChild.classList.contains(cl))
+          this.element.appendChild(this._createEmptyParagraph());
+      }
+      else {
+        if (firstChild && firstChild?.tagName === cl)
+          this.element.insertBefore(
+            this._createEmptyParagraph(),
+            firstChild
+          );
+        if (lastChild && lastChild?.tagName === cl)
+          this.element.appendChild(this._createEmptyParagraph());
+      }
+    });
+  }
   /**
    * Restores the last selection range
    */
