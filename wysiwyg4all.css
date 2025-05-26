@@ -203,6 +203,35 @@
 ._wysiwyg4all th ._color_stop {
   color: var(--content-text);
 }
+._wysiwyg4all p ._backgroundColor,
+._wysiwyg4all h1 ._backgroundColor,
+._wysiwyg4all h2 ._backgroundColor,
+._wysiwyg4all h3 ._backgroundColor,
+._wysiwyg4all h4 ._backgroundColor,
+._wysiwyg4all h5 ._backgroundColor,
+._wysiwyg4all h6 ._backgroundColor,
+._wysiwyg4all small ._backgroundColor,
+._wysiwyg4all i ._backgroundColor,
+._wysiwyg4all li ._backgroundColor,
+._wysiwyg4all td ._backgroundColor,
+._wysiwyg4all th ._backgroundColor {
+  text-decoration: inherit;
+  background-color: var(--focus);
+}
+._wysiwyg4all p ._backgroundColor_stop,
+._wysiwyg4all h1 ._backgroundColor_stop,
+._wysiwyg4all h2 ._backgroundColor_stop,
+._wysiwyg4all h3 ._backgroundColor_stop,
+._wysiwyg4all h4 ._backgroundColor_stop,
+._wysiwyg4all h5 ._backgroundColor_stop,
+._wysiwyg4all h6 ._backgroundColor_stop,
+._wysiwyg4all small ._backgroundColor_stop,
+._wysiwyg4all i ._backgroundColor_stop,
+._wysiwyg4all li ._backgroundColor_stop,
+._wysiwyg4all td ._backgroundColor_stop,
+._wysiwyg4all th ._backgroundColor_stop {
+  background-color: var(--content);
+}
 ._wysiwyg4all p ._b,
 ._wysiwyg4all h1 ._b,
 ._wysiwyg4all h2 ._b,

@@ -9,7 +9,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <h1>Wysiwyg4All</h1>
 <hr>
+<div class="wysiwyg-wrap">
 <div id="myeditor" style="padding:1rem; border: solid 1px teal"></div>
+</div>
 <!-- command examples below -->
 <button onclick="wysiwyg.command('bold')">
     Bold
@@ -46,9 +48,10 @@
 </button>
 
 <!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
-<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)"
-    onblur="wysiwyg.restoreLastSelection()" />
+<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)" onblur="wysiwyg.restoreLastSelection()"/> 
+    <!-- onblur="wysiwyg.restoreLastSelection()"  -->
 <!-- .command('color') changes text to highlight color set on constructor -->
+<input id='backgroundColorInput' type='color' onchange="wysiwyg.command({backgroundColor: event.target.value})" onblur="wysiwyg.restoreLastSelection()"/> 
 <button onclick="wysiwyg.command('color')">
     Color
 </button>
@@ -98,6 +101,7 @@
         urllink: true,
         placeholder: "Build your custom wysiwyg",
         highlightColor: 'limegreen',
+        // backgroundColor: 'white',
         // spellcheck: true,
         // lastLineBlank: true,
         // fontSize: {
@@ -113,7 +117,7 @@
         //     h6: 1.15,
         //     small: 0.8,
         // },
-        logMutation: true,
+        // logMutation: true,
         logExecution: true,
         callback: c => {
             if (c.caratPosition) {
@@ -138,13 +142,20 @@
 
             if (c.commandTracker) {
                 let ct = c.commandTracker;
-                
+                console.log({ ct });
                 if (typeof ct.color === 'string')
                     // change the color wheel input value based on the position of the caret
                     document.getElementById('colorInput').value = ct.color;
                 else
                     // If color output is true(boolean), the current color is the highlight color
                     document.getElementById('colorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
+
+                if (typeof ct.backgroundColor === 'string')
+                    // change the color wheel input value based on the position of the caret
+                    document.getElementById('backgroundColorInput').value = ct.backgroundColor;
+                else
+                    // If color output is true(boolean), the current color is the highlight color
+                    document.getElementById('backgroundColorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultBackgroundColor;
             }
 
             if (c.image) {
