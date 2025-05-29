@@ -14,9 +14,7 @@
   "files": [
     "dist",
     "wysiwyg4all.js",
-    "wysiwyg4all.css",
-    "selectors.js",
-    "util.js"
+    "wysiwyg4all.css"
   ], 
   "repository": {
     "type": "git",
