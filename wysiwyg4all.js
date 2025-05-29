@@ -2886,7 +2886,7 @@ class Wysiwyg4All {
     this._nodeCrawler(
       (n) => {
         let fol = this._isFirstOrLastChild(n);
-        if (fol) {
+        if (fol && !fol.classList.contains("_media_") && !fol.classList.contains("_custom_")) {
           if (n.nodeType === 3) {
             let np = n.parentNode;
             if (np === this.element.firstChild || np === this.element.lastChild) {
@@ -2900,23 +2900,26 @@ class Wysiwyg4All {
               n.normalize();
               if (!n.textContent)
                 n.textContent = "\u200B";
+                // n.appendChild(
+                //   document.createElement("br")
+                // );
               return n;
             }
           }
         }
 
-        if (n.textContent.includes("\u200B")) {
+        if (n.tagName !== "BR" && n.nodeType === 1 && !n.classList.contains("_media_") && !n.classList.contains("_custom_") && n.textContent.includes("\u200B")) {
           n.textContent = n.textContent.replaceAll("\u200B", "");
+          n.normalize();
         }
-
-        n.normalize();
 
         if (
           n.nodeType === 1 &&
+          !n.classList.contains("_media_") && !n.classList.contains("_custom_") &&
           !n.textContent &&
           !n.childNodes.length &&
-          n.tagName !== "BR" &&
-          n.tagName !== "P"
+          n.tagName !== "BR"
+          // && n.tagName !== "P"
         ) {
           to_remove.push(n);
         }
@@ -3753,8 +3756,8 @@ class Wysiwyg4All {
   setSafeLine() {
     let firstChild = this.element.firstChild;
     let lastChild = this.element.lastChild;
-    // let txt = document.createElement("br");
-    let txt = document.createTextNode("\u200B");
+    let txt = document.createElement("br");
+    // let txt = document.createTextNode("\u200B");
     this.needSafeGuard.forEach((cl) => {
       if (cl[0] === ".") {
         cl = cl.substring(1);
