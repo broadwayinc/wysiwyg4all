@@ -1,106 +1,108 @@
-// plugin example: create a table with editable cells
+let createTable = (cols, rows) => {
+    let table = document.createElement('table');
+    table.style.borderCollapse = 'collapse';
+    table.style.margin = '1rem 0';
+    table.style.width = '100%';
 
-function createTable(rows, cols) {
-  let tableState = {
-    tableWrap: null,
-    table: null,
-    tbody: null,
-    mergeBtn: null,
-    unmergeBtn: null,
-    isResizing: false,
-    isDragging: false,
-    isSelection: false,
-    isMouseDown: false,
-    selectionStart: null,
-    outlinePosition: {
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0
-    }
-  };
-
-  const wyswrap = document.querySelector('.wysiwyg-wrap');
-  const wyswrapWidth = wyswrap.offsetWidth;
-
-  // 전체 테이블 컨테이너 생성
-  const tableWrap = document.createElement('div');
-
-  tableWrap.className = 'wysiwyg-table-wrap';
-  //   tableWrap.setAttribute('contenteditable', 'false');
-  tableWrap.style.setProperty('--wysiwyg-table-max-width', `calc(${wyswrapWidth}px - 2rem + 30px)`);
-
-  // 테이블 요소 생성
-  const table = document.createElement('table');
-  table.className = 'wysiwyg-table';
-  //   table.setAttribute('contenteditable', 'false');
-
-  const tbody = document.createElement('tbody');
-
-  const style = document.createElement('style');
-  style.textContent = `
-    body {
-        --merge-btn-top: 0px;
-        --merge-btn-left: 0px;
-    }
-  `;
-
-  for (let r = 0; r < rows; r++) {
-    const row = document.createElement('tr');
-
-    for (let c = 0; c < cols; c++) {
-      const cell = document.createElement('td');
-      //   cell.contentEditable = 'true';
-      cell.innerHTML = '&nbsp;';
-      cell.dataset.row = r;
-      cell.dataset.col = c;
-      cell.setAttribute('contenteditable', 'true');
-
-      addResizer(tableState, cell);
-      bindCellEvents(tableState, cell);
-
-      row.appendChild(cell);
+    // prevent columns from being resized
+    table.style.tableLayout = 'fixed';
+    table.style.overflow = 'hidden';
+    table.style.wordBreak = 'break-word';
+    table.style.whiteSpace = 'normal';
+    
+    // Create initial table cells with default styling.
+    for (let r = 0; r < rows; r++) {
+        let tr = document.createElement('tr');
+        for (let c = 0; c < cols; c++) {
+            let td = document.createElement('td');
+            td.innerHTML = '&nbsp;';
+            td.style.minWidth = '50px';
+            td.style.minHeight = '30px';
+            td.style.padding = '5px';
+            td.style.border = '1px solid black';
+            td.style.backgroundColor = 'white';
+            td.style.margin = '0';
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
     }
 
-    tbody.appendChild(row);
-  }
+    // Utility methods:
+    table.getRowsCount = () => table.rows.length;
+    table.getColsCount = () => table.rows[0] ? table.rows[0].cells.length : 0;
 
-  table.appendChild(tbody);
-  tableWrap.appendChild(table);
+    // Add a new row. Copies the cell format of the first row.
+    table.addRow = () => {
+        let newRow = document.createElement('tr');
+        let cols = table.getColsCount();
+        for (let c = 0; c < cols; c++) {
+            let td = document.createElement('td');
+            td.innerHTML = '&nbsp;';
+            td.style.minWidth = '50px';
+            td.style.minHeight = '30px';
+            td.style.padding = '5px';
+            td.style.border = '1px solid black';
+            td.style.backgroundColor = 'white';
+            td.style.margin = '0';
+            newRow.appendChild(td);
+        }
+        table.appendChild(newRow);
+    };
 
-  tableState.tableWrap = tableWrap;
-  tableState.table = table;
-  tableState.tbody = tbody;
+    // Remove a row by index.
+    table.removeRow = (rowIndex) => {
+        if (rowIndex >= 0 && rowIndex < table.getRowsCount()) {
+            table.deleteRow(rowIndex);
+        }
+    };
 
-  document.addEventListener('mouseup', () => {
-    tableState.mergeBtn?.classList.remove('active');
+    // Add a new column to every row.
+    table.addColumn = () => {
+        let rows = table.getRowsCount();
+        for (let r = 0; r < rows; r++) {
+            let td = document.createElement('td');
+            td.innerHTML = '&nbsp;';
+            td.style.minWidth = '50px';
+            td.style.minHeight = '30px';
+            td.style.padding = '5px';
+            td.style.border = '1px solid black';
+            td.style.backgroundColor = 'white';
+            td.style.margin = '0';
+            table.rows[r].appendChild(td);
+        }
+    };
 
-    if (tableState.isDragging) {
-      const selected = tableState.table.querySelectorAll('td.dragged-cell');
-      if (selected.length >= 2) {
-        tableState.mergeBtn?.classList.add('active');
-      }
-    }
+    // Remove a column by index from every row.
+    table.removeColumn = (colIndex) => {
+        let rows = table.getRowsCount();
+        for (let r = 0; r < rows; r++) {
+            if (colIndex >= 0 && colIndex < table.rows[r].cells.length) {
+                table.rows[r].deleteCell(colIndex);
+            }
+        }
+    };
 
-    tableState.isMouseDown = false;
-    tableState.isDragging = false;
-    tableState.isSelection = false;
+    // Update a specific cell's style.
+    table.updateCellStyle = (rowIndex, colIndex, styleConfig) => {
+        if (rowIndex >= 0 && rowIndex < table.getRowsCount()) {
+            let row = table.rows[rowIndex];
+            if (colIndex >= 0 && colIndex < row.cells.length) {
+                let cell = row.cells[colIndex];
+                if (styleConfig.backgroundColor)
+                    cell.style.backgroundColor = styleConfig.backgroundColor;
+                if (styleConfig.borderColor || styleConfig.borderSize || styleConfig.borderStyle) {
+                    let borderSize = styleConfig.borderSize || '1px';
+                    let borderStyle = styleConfig.borderStyle || 'solid';
+                    let borderColor = styleConfig.borderColor || 'black';
+                    cell.style.border = `${borderSize} ${borderStyle} ${borderColor}`;
+                }
+                if (styleConfig.padding)
+                    cell.style.padding = styleConfig.padding;
+                if (styleConfig.margin)
+                    cell.style.margin = styleConfig.margin;
+            }
+        }
+    };
 
-    tableSelection(tableState); // dragging 클래스 제거
-  });
-
-  document.addEventListener('click', (e) => {
-    if (tableState.table && !tableState.table.contains(e.target)) {
-      if (e.target.closest('.btn-custom')) {
-        return;
-      }
-      tableState.isSelection = false;
-      clearSelection(tableState.table);
-      tableSelection(tableState);
-    }
-  });
-
-  initButtons(tableState);
-
-  return tableWrap;
-}
+    return table; // returns the table element with utility methods
+};
