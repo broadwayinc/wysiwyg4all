@@ -113,14 +113,15 @@ class Wysiwyg4All {
     this.specialTextElement_queryArray = ["._hashtag_", "._urllink_"];
     this.restrictedElement_queryArray = ["._media_", "._custom_"];
     this.textAreaElement_queryArray = ["BLOCKQUOTE", "LI"];
-    this.textBlockElement_queryArray = ["P", "LI", "TD", "TH"]; //, "TD", "TH", '._color', '._small', '._h1`', '._h2', '._h3', '._h4', '._h5', '._h6', '._b', '._i', '._u', '._del'
+    this.textBlockElement_queryArray = ["P", "LI"]; //, "TD", "TH", '._color', '._small', '._h1`', '._h2', '._h3', '._h4', '._h5', '._h6', '._b', '._i', '._u', '._del'
     this.ceilingElement_queryArray = [
       "UL",
       "OL",
+      "LI",
       "BLOCKQUOTE",
-      `#${elementId}`,
       "TD",
       "TH",
+      `#${elementId}`,
     ];
     this.unSelectable_queryArray = [
       "._media_",
@@ -135,18 +136,18 @@ class Wysiwyg4All {
       "._hashtag_",
       "._urllink_",
       "HR",
-      "BLOCKQUOTE",
       "UL",
       "OL",
+      "BLOCKQUOTE",
     ];
     this.styleAllowedElement_queryArray = [
       "._backgroundColor",
       "._color",
-      `#${elementId}`,
       "._hashtag_",
       "._urllink_",
       "TD",
       "TH",
+      `#${elementId}`,
     ]; // ALLOWED ELEMENTS FOR STYLE ATTRIBUTE <... style="...">
     this.alignClass = ["_alignCenter_", "_alignRight_"];
 
@@ -500,6 +501,8 @@ class Wysiwyg4All {
     if (ceilingElement_query && range) {
       let startLine, endLine;
       for (let q of ceilingElement_query) {
+        if(startLine && endLine) break;
+
         let e =
           range.endContainer.nodeType === 3
             ? range.endContainer.parentNode
@@ -948,12 +951,12 @@ class Wysiwyg4All {
     if (node && node !== this.element) {
       let flyup = node;
       while (flyup && this.element !== flyup) {
-        if (flyup.getAttribute("contenteditable") === "true") return true;
+        if (flyup.getAttribute("contenteditable") === "false") return false;
 
         flyup = flyup.parentNode;
       }
     }
-    return false;
+    return true;
   }
 
   _isSelectionWithinRestrictedRange(
@@ -1880,6 +1883,7 @@ class Wysiwyg4All {
 
                   let ceiling = (() => {
                     for (let c of this.ceilingElement_queryArray) {
+                      if (c === '#' + this.elementId) return this.element;
                       let clo = i.closest(c);
                       if (clo) return clo;
                     }
@@ -1913,14 +1917,14 @@ class Wysiwyg4All {
                 if (!node.isWysiwygChild) continue; // bypass
 
                 if (
-                  node.isCustomElement ||
+                  // node.isCustomElement ||
                   node.isMediaElement ||
                   node.isHashtagElement ||
                   node.isUrlLinkElement
                 ) {
                   // make sure un-editable element is secure
                   let el =
-                    node.isCustomElement ||
+                    // node.isCustomElement ||
                     node.isMediaElement ||
                     node.isHashtagElement ||
                     node.isUrlLinkElement;
@@ -2091,7 +2095,7 @@ class Wysiwyg4All {
                   mutationTarget.childNodes.length === 1 &&
                   this._isUnSelectableElement(mutationTarget.childNodes[0])
                 )
-                  mutationTarget.append(document.createTextNode(""));
+                  mutationTarget.append(document.createTextNode("\u200B"));
               }
             }
         }
@@ -2916,6 +2920,7 @@ class Wysiwyg4All {
         if (
           n.nodeType === 1 &&
           !n.classList.contains("_media_") && !n.classList.contains("_custom_") &&
+          !this._isCeilingElement(n) &&
           !n.textContent &&
           !n.childNodes.length &&
           n.tagName !== "BR"
@@ -3491,6 +3496,7 @@ class Wysiwyg4All {
         if (isBackgroundColor && !stopperMode) wrapper.style.backgroundColor = isBackgroundColor;
 
         let restrictedClass = this._isSelectionWithinRestrictedRange();
+        // console.log({ restrictedClass });
         if (this.range.collapsed) {
           if (restrictedClass) return;
 
