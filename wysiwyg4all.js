@@ -130,8 +130,10 @@ class Wysiwyg4All {
       "OL",
       "LI",
       "BLOCKQUOTE",
-      "TD",
-      "TH",
+      // "TD",
+      // "TH",
+      // "._media_",
+      // "._custom_",
       `#${elementId}`,
     ];
     this.unSelectable_queryArray = [
@@ -1942,8 +1944,8 @@ class Wysiwyg4All {
                     node.isUrlLinkElement;
 
                   // check if el has a value of contenteditable
-                  if (el.getAttribute("contenteditable") !== "true")
-                    el.setAttribute("contenteditable", "false");
+                  // if (el.getAttribute("contenteditable") !== "true")
+                  //   el.setAttribute("contenteditable", "false");
 
                   continue;
                 }
@@ -2107,7 +2109,8 @@ class Wysiwyg4All {
                   mutationTarget.childNodes.length === 1 &&
                   this._isUnSelectableElement(mutationTarget.childNodes[0])
                 )
-                  mutationTarget.append(document.createTextNode("\u200B"));
+                  // mutationTarget.append(document.createTextNode("\u200B"));
+                  mutationTarget.append(document.createTextNode(""));
               }
             }
         }
