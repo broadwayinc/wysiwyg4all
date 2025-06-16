@@ -3181,15 +3181,8 @@ class Wysiwyg4All {
                 let gotTheMatch = false;
                 if (node !== this.element) {
                   while (flyup && this.element !== flyup) {
-                    try {
                     gotTheMatch =
                       flyup.getAttribute(exp[c].attr) === exp[c].value;
-                    }
-                    catch(err) {
-                      console.error(err);
-                      console.log("flyup", flyup);
-                      throw err;
-                    }
                     if (gotTheMatch) return false;
 
                     flyup = flyup.parentNode;
