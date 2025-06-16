@@ -138,7 +138,7 @@ class Wysiwyg4All {
     ];
     this.unSelectable_queryArray = [
       "._media_",
-      "._custom_",
+      // "._custom_",
       "._hashtag_",
       "._urllink_",
       "HR",
@@ -965,6 +965,7 @@ class Wysiwyg4All {
     if (node && node !== this.element) {
       let flyup = node;
       while (flyup && this.element !== flyup) {
+        if (flyup.getAttribute("contenteditable") === "true") return true;
         if (flyup.getAttribute("contenteditable") === "false") return false;
 
         flyup = flyup.parentNode;
@@ -3179,9 +3180,16 @@ class Wysiwyg4All {
                 let flyup = node;
                 let gotTheMatch = false;
                 if (node !== this.element) {
-                  while ((flyup && this.element !== flyup) || !gotTheMatch) {
+                  while (flyup && this.element !== flyup) {
+                    try {
                     gotTheMatch =
                       flyup.getAttribute(exp[c].attr) === exp[c].value;
+                    }
+                    catch(err) {
+                      console.error(err);
+                      console.log("flyup", flyup);
+                      throw err;
+                    }
                     if (gotTheMatch) return false;
 
                     flyup = flyup.parentNode;
@@ -3210,14 +3218,14 @@ class Wysiwyg4All {
   _isUnSelectableElement(node) {
     if (this.logExecution) console.log("_isUnSelectableElement", { node });
     node = node?.nodeType === 3 ? node.parentNode : node;
-    let exceptions = {
-      "._custom_": { attr: "contenteditable", value: "true" },
-    };
+    // let exceptions = {
+    //   "._custom_": { attr: "contenteditable", value: "true" },
+    // };
     return this._checkElement(
       node,
       this.unSelectable_queryArray,
       true,
-      exceptions
+      // exceptions
     );
   }
 
