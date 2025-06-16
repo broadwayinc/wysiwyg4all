@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" /> -->
 <script src="dist/wysiwyg4all.js"></script>
 <script src="plugins.js"></script>
-
+<link rel="stylesheet" href="table.css">
 <link rel="stylesheet" href="wysiwyg4all.css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <h1>Wysiwyg4All</h1>
@@ -103,7 +103,7 @@
         highlightColor: 'limegreen',
         // backgroundColor: 'white',
         // spellcheck: true,
-        lastLineBlank: true,
+        // lastLineBlank: true,
         // fontSize: {
         //     desktop: "18px",
         //     tablet: "16px",
@@ -118,7 +118,7 @@
         //     small: 0.8,
         // },
         // logMutation: true,
-        // logExecution: true,
+        logExecution: true,
         callback: c => {
             if (c.caratPosition) {
                 // Tracks carat position
