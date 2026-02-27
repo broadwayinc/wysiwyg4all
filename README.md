@@ -19,7 +19,7 @@ These following steps show basic demonstration of how to install **Wysiwyg4All**
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" />
     ```
 
-    If you are working on webpack based projects:
+    If you are working on module/bundler based projects:
 
     ```bash
     npm i wysiwyg4all
