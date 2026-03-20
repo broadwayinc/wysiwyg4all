@@ -15,9 +15,16 @@ These following steps show basic demonstration of how to install **Wysiwyg4All**
 1. Inside HTML **&lt;head>** add below:
     ```html
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- Browser/global bundle -->
     <script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" />
     ```
+
+    The package entry points are split by runtime:
+
+    - Browser/CDN: `dist/wysiwyg4all.js`
+    - Node ESM: `dist/wysiwyg4all.module.js`
+    - Node CJS: `dist/wysiwyg4all.module.cjs`
 
     If you are working on module/bundler based projects:
 
@@ -361,15 +368,14 @@ To prevent this, it might be a good idea to prevent default on command buttons:
 
 <br />
 
-Other color choice can be provided to user by creating HTML color picker. It is important to restore the last selected text on 'onblur' action (whenever losing focus in the input field) by using `wysiwyg.restoreLastSelection()` to change the text color in color picker.
+Other color choice can be provided to user by creating HTML color picker.
 
 <br />
 
 <u>**_Example 13_**</u>
 
 ```html
-<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)"
-       onblur="wysiwyg.restoreLastSelection()"/>
+<input id='colorInput' type='color' oninput="wysiwyg.command({color: event.target.value})"/>
 ```
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txtcolor.gif" width="500">

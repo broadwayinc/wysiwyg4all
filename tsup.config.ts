@@ -12,7 +12,7 @@ export default defineConfig([
     minify: true,
     outExtension({ format }) {
       return {
-        js: format === "esm" ? ".js" : ".cjs",
+        js: format === "esm" ? ".module.js" : ".module.cjs",
       };
     },
   },
@@ -29,7 +29,7 @@ export default defineConfig([
     globalName: "Wysiwyg4AllBundle",
     outExtension() {
       return {
-        js: ".global.js",
+        js: ".js",
       };
     },
   },

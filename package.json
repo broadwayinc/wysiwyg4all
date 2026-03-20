@@ -1,16 +1,20 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Free opensource minimal WYSIWYG editor for web developers",
-  "main": "dist/wysiwyg4all.cjs",
-  "module": "dist/wysiwyg4all.js",
+  "main": "dist/wysiwyg4all.module.cjs",
+  "module": "dist/wysiwyg4all.module.js",
   "types": "dist/wysiwyg4all.d.ts",
   "browser": "dist/wysiwyg4all.js",
+  "unpkg": "dist/wysiwyg4all.js",
+  "jsdelivr": "dist/wysiwyg4all.js",
   "exports": {
     ".": {
       "types": "./dist/wysiwyg4all.d.ts",
-      "require": "./dist/wysiwyg4all.cjs",
-      "import": "./dist/wysiwyg4all.js"
+      "browser": "./dist/wysiwyg4all.js",
+      "require": "./dist/wysiwyg4all.module.cjs",
+      "import": "./dist/wysiwyg4all.module.js",
+      "default": "./dist/wysiwyg4all.module.js"
     },
     "./css": "./dist/wysiwyg4all.css"
   },
@@ -22,13 +26,10 @@
     "url": "https://github.com/broadwayinc/wysiwyg4all"
   },
   "scripts": {
-    "dev": "npx bns 5173",
+    "dev": "npx bns port=5173",
     "build": "npm run build:js && npm run build:css",
     "build:js": "tsup",
-    "build:ts": "tsc -p tsconfig.build.json",
-    "build:css": "npx lessc wysiwyg4all.less dist/wysiwyg4all.css",
-    "typecheck": "tsc --noEmit",
-    "build:wp": "npx lessc wysiwyg4all.less dist/wysiwyg4all.css; npx webpack --config webpack.config.js"
+    "build:css": "npx lessc wysiwyg4all.less dist/wysiwyg4all.css"
   },
   "keywords": [
     "wysiwyg",
@@ -42,15 +43,10 @@
   "author": "Baksa Gimm",
   "license": "MIT",
   "devDependencies": {
-    "less": "^4.3.0",
-    "tsup": "^8.3.5",
-    "typescript": "^5.9.3",
-    "webpack": "^5.74.0",
-    "webpack-bundle-analyzer": "^4.10.2",
-    "webpack-cli": "^4.10.0"
+    "less": "^4.6.4",
+    "tsup": "^8.3.5"
   },
   "dependencies": {
-    "basic-node-server": "^1.0.13",
-    "colormangle": "^0.1.103"
+    "basic-node-server": "^1.1.0"
   }
 }
