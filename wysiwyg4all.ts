@@ -471,8 +471,9 @@ export class Wysiwyg4All {
 		if (isNode(ev.target) && this.isUnSelectableElement(ev.target)) {
 			return;
 		}
-		else
+		else {
 			this.normalizeDocument();
+		}
 		
 		this.backupCurrentRange();
 	};
@@ -859,7 +860,38 @@ export class Wysiwyg4All {
 		return ["UL", "OL", "LI", "BLOCKQUOTE"].includes(el.tagName);
 	}
 
+	private cleanupZeroWidthSpaces(): void {
+		const textNodes: Text[] = [];
+		const walker = document.createTreeWalker(this.element, NodeFilter.SHOW_TEXT, {
+			acceptNode: (node) => {
+				const parent = node.parentElement;
+				if (!parent) return NodeFilter.FILTER_REJECT;
+				if (parent.closest("._media_, ._custom_")) return NodeFilter.FILTER_REJECT;
+				return (node.textContent || "").includes("\u200B")
+					? NodeFilter.FILTER_ACCEPT
+					: NodeFilter.FILTER_REJECT;
+			},
+		});
+
+		while (walker.nextNode()) {
+			textNodes.push(walker.currentNode as Text);
+		}
+
+		for (const textNode of textNodes) {
+			const nextText = (textNode.textContent || "").split("\u200B").join("");
+			if (nextText === textNode.textContent) continue;
+			if (nextText.length === 0) {
+				textNode.remove();
+				continue;
+			}
+			textNode.textContent = nextText;
+		}
+
+		this.element.normalize();
+	}
+
 	private normalizeDocument(): void {
+		this.cleanupZeroWidthSpaces();
 		const toRemove: HTMLElement[] = [];
 		const walker = document.createTreeWalker(this.element, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
 		while (walker.nextNode()) {
@@ -868,18 +900,6 @@ export class Wysiwyg4All {
 			if (node.nodeType === Node.ELEMENT_NODE) {
 				const el = node as HTMLElement;
 				if (el.classList.contains("_static_")) continue;
-
-				if (
-					el.tagName !== "BR" &&
-					!el.classList.contains("_media_") &&
-					!el.classList.contains("_custom_") &&
-					!el.closest("._media_") &&
-					!el.closest("._custom_") &&
-					el.textContent?.includes("\u200B")
-				) {
-					el.textContent = (el.textContent || "").split("\u200B").join("");
-					el.normalize();
-				}
 
 				if (
 					!el.classList.contains("_media_") &&

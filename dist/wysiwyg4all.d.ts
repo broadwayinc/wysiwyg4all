@@ -172,6 +172,7 @@ declare class Wysiwyg4All {
     private isUnSelectableElement;
     private isTextBlockElement;
     private isCeilingElement;
+    private cleanupZeroWidthSpaces;
     private normalizeDocument;
     private isLineBlockElement;
     private cloneInlineStyleSpan;
