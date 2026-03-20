@@ -270,6 +270,9 @@ export class Wysiwyg4All {
 	private readonly logNormalizeRemoval: boolean;
 	private lastKey: string | null = null;
 	private suspendSelectionCaptureForColorPicker = false;
+	private colorCommandDebounceTimer: number | null = null;
+	private pendingColorCommand: { color?: string; backgroundColor?: string } | null = null;
+	private pendingColorSelectionSnapshot: { start: number; end: number } | null = null;
 
 	public highlightColor: string;
 	public defaultFontColor = "#111827";
@@ -873,6 +876,10 @@ export class Wysiwyg4All {
 	public destroy(): void {
 		this.unbindCoreEvents();
 		this.observeMutation(false);
+		if (this.colorCommandDebounceTimer !== null) {
+			window.clearTimeout(this.colorCommandDebounceTimer);
+			this.colorCommandDebounceTimer = null;
+		}
 		this.imageInput.remove();
 		this.eventBus.clear();
 		this.customCommandHandlers.clear();
@@ -2058,35 +2065,64 @@ export class Wysiwyg4All {
 					? this.snapshotRangeToTextOffsets(this.range)
 					: null;
 
-				if (action.backgroundColor) {
-					const color = tryNormalizeColor(action.backgroundColor) || action.backgroundColor;
-					this.wrapSelectionWithClass(CLASS_BY_COMMAND.backgroundColor, "backgroundColor", color);
-					// this.updateCommandTracker();
-					// return;
-				}
-				else if (action.color) {
-					const color = tryNormalizeColor(action.color) || action.color;
-					this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", color);
-					// this.updateCommandTracker();
-					// return;
-				}
+				const applyColorCommand = (
+					nextAction: { color?: string; backgroundColor?: string },
+					nextSnapshot: { start: number; end: number } | null
+				): void => {
+					if (nextAction.backgroundColor) {
+						const color = tryNormalizeColor(nextAction.backgroundColor) || nextAction.backgroundColor;
+						this.wrapSelectionWithClass(CLASS_BY_COMMAND.backgroundColor, "backgroundColor", color);
+					}
+					else if (nextAction.color) {
+						const color = tryNormalizeColor(nextAction.color) || nextAction.color;
+						this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", color);
+					}
 
-				if (selectionSnapshot) {
-					const rebased = this.restoreRangeFromTextOffsets(selectionSnapshot);
-					if (rebased) {
-						this.restoreLastSelection(rebased);
-						this.backupCurrentRange(rebased, { bypassNormalize: true });
+					if (nextSnapshot) {
+						const rebased = this.restoreRangeFromTextOffsets(nextSnapshot);
+						if (rebased) {
+							this.restoreLastSelection(rebased);
+							this.backupCurrentRange(rebased, { bypassNormalize: true });
+						} else {
+							this.restoreLastSelection();
+						}
 					} else {
 						this.restoreLastSelection();
 					}
-				} else {
-					this.restoreLastSelection();
+
+					this.updateCommandTracker();
+					this.suspendSelectionCaptureForColorPicker =
+						document.activeElement instanceof HTMLInputElement &&
+						document.activeElement.type === "color";
+				};
+
+				if (activeColorInput) {
+					this.pendingColorCommand = {
+						color: action.color,
+						backgroundColor: action.backgroundColor,
+					};
+					this.pendingColorSelectionSnapshot = selectionSnapshot;
+
+					if (this.colorCommandDebounceTimer !== null) {
+						window.clearTimeout(this.colorCommandDebounceTimer);
+					}
+
+					this.colorCommandDebounceTimer = window.setTimeout(() => {
+						const pending = this.pendingColorCommand;
+						const pendingSnapshot = this.pendingColorSelectionSnapshot;
+						this.pendingColorCommand = null;
+						this.pendingColorSelectionSnapshot = null;
+						this.colorCommandDebounceTimer = null;
+						if (!pending) return;
+						applyColorCommand(pending, pendingSnapshot);
+					}, 16);
+					return;
 				}
 
-				this.updateCommandTracker();
-				this.suspendSelectionCaptureForColorPicker =
-					document.activeElement instanceof HTMLInputElement &&
-					document.activeElement.type === "color";
+				applyColorCommand(
+					{ color: action.color, backgroundColor: action.backgroundColor },
+					selectionSnapshot
+				);
 				return;
 			}
 
