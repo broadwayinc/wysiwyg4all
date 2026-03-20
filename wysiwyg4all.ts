@@ -477,12 +477,33 @@ export class Wysiwyg4All {
 			return;
 		}
 
+		const target = ev.target;
+		if (target instanceof HTMLInputElement && target.type === "color") {
+			const sel = window.getSelection();
+			if (sel && sel.rangeCount > 0 && this.element.contains(sel.anchorNode) && this.element.contains(sel.focusNode)) {
+				const normalized = this.normalizeEditorRange(sel.getRangeAt(0));
+				if (normalized) {
+					this.range = normalized;
+					this.backupCurrentRange(normalized, { bypassNormalize: true });
+				}
+			}
+		}
+
 		const active = document.activeElement;
 		const colorPickerActive = active instanceof HTMLInputElement && active.type === "color";
 		if (colorPickerActive && isNode(ev.target) && this.element.contains(ev.target)) {
 			// Clicking inside editor to close color picker can collapse the live
-			// selection before color command runs. Keep current backup selection.
+			// selection before color command runs. Keep backup during picker interaction,
+			// then re-capture once the picker closes so commands use the new caret.
 			this.suspendSelectionCaptureForColorPicker = true;
+			window.setTimeout(() => {
+				const nextActive = document.activeElement;
+				const stillOnColorInput = nextActive instanceof HTMLInputElement && nextActive.type === "color";
+				if (stillOnColorInput) return;
+				this.suspendSelectionCaptureForColorPicker = false;
+				this.captureRange();
+				this.updateCommandTracker();
+			}, 0);
 			return;
 		}
 
@@ -692,13 +713,117 @@ export class Wysiwyg4All {
 			this.range = null;
 			return;
 		}
-		const normalized = this.normalizeEditorRange(sel.getRangeAt(0));
+		const normalizedRange = this.normalizeEditorRange(sel.getRangeAt(0));
+		let normalized = normalizedRange;
 		if (!normalized) {
 			this.range = null;
 			return;
 		}
+
+		const reanchored = this.reanchorCollapsedRangeToAdjacentStylePlaceholder(normalized);
+		if (reanchored) {
+			normalized = reanchored;
+			if (
+				normalizedRange &&
+				(
+					normalized.startContainer !== normalizedRange.startContainer ||
+					normalized.startOffset !== normalizedRange.startOffset
+				)
+			) {
+				sel.removeAllRanges();
+				sel.addRange(normalized);
+			}
+		}
 		this.range = normalized;
 		this.backupCurrentRange(normalized, { bypassNormalize: true });
+	}
+
+	private isCollapsedStyleAnchorSpan(el: HTMLElement): boolean {
+		if (el.tagName !== "SPAN") return false;
+		if (this.isProtectedSpan(el)) return false;
+		if (!this.isTextStyleWrapper(el, this.getKnownInlineStyleClassSet())) return false;
+		if (el.querySelector("br,hr,img,video,audio,table,ul,ol,li,blockquote,div,._media_,._custom_")) return false;
+		const textWithoutMarker = (el.textContent || "").split("\u200B").join("").trim();
+		return textWithoutMarker.length === 0;
+	}
+
+	private reanchorCollapsedRangeToAdjacentStylePlaceholder(range: Range): Range | null {
+		if (!range.collapsed) return null;
+
+		const buildRangeInsidePlaceholder = (node: Node | null): Range | null => {
+			if (!(node instanceof HTMLElement)) return null;
+			if (!this.isCollapsedStyleAnchorSpan(node)) return null;
+			const firstChild = node.firstChild;
+			const anchor: Text = firstChild instanceof Text
+				? firstChild
+				: document.createTextNode("\u200B");
+			if (!(firstChild instanceof Text)) node.append(anchor);
+			const next = document.createRange();
+			next.setStart(anchor, anchor.length);
+			next.collapse(true);
+			return next;
+		};
+
+		const tryFromContainer = (container: Node, offset: number): Range | null => {
+			if (!(container instanceof Element)) return null;
+			const before = offset > 0 ? container.childNodes[offset - 1] : null;
+			const after = offset < container.childNodes.length ? container.childNodes[offset] : null;
+			const candidates = [before, after];
+
+			for (const node of candidates) {
+				const next = buildRangeInsidePlaceholder(node);
+				if (next) return next;
+			}
+
+			return null;
+		};
+
+		const tryFromAncestorBoundary = (startNode: Node, preferNext: boolean): Range | null => {
+			let node: Node | null = startNode;
+			while (node && node !== this.element) {
+				const parent = node.parentNode;
+				if (!parent || parent === this.element.parentNode) break;
+				const sibling = preferNext ? node.nextSibling : node.previousSibling;
+				const next = buildRangeInsidePlaceholder(sibling);
+				if (next) return next;
+				node = parent;
+			}
+			return null;
+		};
+
+		if (range.startContainer instanceof Element) {
+			const direct = tryFromContainer(range.startContainer, range.startOffset);
+			if (direct) return direct;
+			if (range.startOffset >= range.startContainer.childNodes.length) {
+				return tryFromAncestorBoundary(range.startContainer, true);
+			}
+			if (range.startOffset === 0) {
+				return tryFromAncestorBoundary(range.startContainer, false);
+			}
+			return null;
+		}
+
+		const textNode = range.startContainer;
+		const parent = textNode.parentElement;
+		if (!parent) return null;
+		const siblings: Node[] = Array.from(parent.childNodes);
+		const idx = siblings.indexOf(textNode);
+		if (idx < 0) return null;
+
+		const preferOffset = idx + (range.startOffset > 0 ? 1 : 0);
+		const direct = tryFromContainer(parent, preferOffset);
+		if (direct) return direct;
+
+		if (textNode instanceof Text) {
+			if (range.startOffset >= textNode.length) {
+				return tryFromAncestorBoundary(parent, true);
+			}
+			if (range.startOffset === 0) {
+				return tryFromAncestorBoundary(parent, false);
+			}
+		}
+
+		return null;
 	}
 
 	private backupCurrentRange(
@@ -830,6 +955,21 @@ export class Wysiwyg4All {
 	}
 
 	private normalizeEditorRange(range: Range): Range | null {
+		if (range.collapsed) {
+			const point = this.resolveRangeBoundaryPoint(range.startContainer, range.startOffset, true);
+			if (!point) return null;
+
+			const normalizedCollapsed = range.cloneRange();
+			try {
+				normalizedCollapsed.setStart(point.container, point.offset);
+				normalizedCollapsed.setEnd(point.container, point.offset);
+			} catch {
+				return null;
+			}
+
+			return normalizedCollapsed;
+		}
+
 		const start = this.resolveRangeBoundaryPoint(range.startContainer, range.startOffset, true);
 		const end = this.resolveRangeBoundaryPoint(range.endContainer, range.endOffset, false);
 		if (!start || !end) return null;
@@ -894,9 +1034,9 @@ export class Wysiwyg4All {
 		if (!track) return;
 
 		this.observer = new MutationObserver((mutations) => {
-			if (this.logMutation) {
-				void this.safeCallback({ mutation: mutations as unknown[] });
-			}
+			// if (this.logMutation) {
+			// 	void this.safeCallback({ mutation: mutations as unknown[] });
+			// }
 
 			for (const mutation of mutations) {
 				if (mutation.type !== "childList") continue;
@@ -971,13 +1111,18 @@ export class Wysiwyg4All {
 		}
 
 		for (const textNode of textNodes) {
-			const nextText = (textNode.textContent || "").split("\u200B").join("");
-			if (nextText === textNode.textContent) continue;
-			if (nextText.length === 0) {
-				textNode.remove();
-				continue;
+			// Use deleteData() so the browser Selection tracks the mutation
+			// and keeps the caret at the correct position (textContent= assignment loses it).
+			let i = textNode.length - 1;
+			while (i >= 0) {
+				if (textNode.data[i] === "\u200B") {
+					textNode.deleteData(i, 1);
+				}
+				i--;
 			}
-			textNode.textContent = nextText;
+			if (textNode.length === 0) {
+				textNode.remove();
+			}
 		}
 
 		this.element.normalize();
@@ -1536,15 +1681,18 @@ export class Wysiwyg4All {
 			if (command === "backgroundColor" && cssValue) {
 				span.style.setProperty("background-color", cssValue);
 			}
-			span.append(document.createTextNode("\u200B"));
+			const anchor = document.createTextNode("\u200B");
+			span.append(anchor);
 			range.insertNode(span);
 			if (breakoutAncestor) {
 				this.breakOutFromAncestor(span, breakoutAncestor);
 			}
 			const after = document.createRange();
-			after.setStart(span.firstChild as Node, 1);
+			after.setStart(anchor, 1);
 			after.collapse(true);
 			this.restoreLastSelection(after);
+			this.backupCurrentRange(after, { bypassNormalize: true });
+			this.element.focus({ preventScroll: true });
 			return;
 		}
 
@@ -2013,13 +2161,25 @@ export class Wysiwyg4All {
 		const activeColorInput =
 			activeElement instanceof HTMLInputElement && activeElement.type === "color";
 
-		if (
-			isColorObjectAction &&
-			(this.suspendSelectionCaptureForColorPicker || activeColorInput) &&
-			this.rangeBackup
-		) {
-			this.restoreLastSelection(this.rangeBackup);
-			this.range = this.rangeBackup.cloneRange();
+		if (isColorObjectAction && (this.suspendSelectionCaptureForColorPicker || activeColorInput)) {
+			const sel = window.getSelection();
+			const liveRange =
+				sel &&
+				sel.rangeCount > 0 &&
+				this.element.contains(sel.anchorNode) &&
+				this.element.contains(sel.focusNode)
+					? this.normalizeEditorRange(sel.getRangeAt(0))
+					: null;
+
+			if (liveRange) {
+				this.range = liveRange;
+				this.backupCurrentRange(liveRange, { bypassNormalize: true });
+			} else if (this.rangeBackup) {
+				this.restoreLastSelection(this.rangeBackup);
+				this.range = this.rangeBackup.cloneRange();
+			} else {
+				this.captureRange();
+			}
 		} else {
 			this.captureRange();
 		}
@@ -2029,6 +2189,8 @@ export class Wysiwyg4All {
 		}
 
 		if (typeof action === "string") {
+			const stringCmdRangeWasCollapsed = !!(this.range && this.range.collapsed);
+
 			if (this.customCommandHandlers.has(action)) {
 				await this.customCommandHandlers.get(action)?.(this, action);
 				// return;
@@ -2106,7 +2268,13 @@ export class Wysiwyg4All {
 				}
 			}
 
-			this.restoreLastSelection();
+			// For collapsed ranges, wrapSelectionWithClass already placed the caret inside the
+			// new styled span — don't overwrite it with the stale backup.
+			const isInlineStyleCommand = (Object.keys(CLASS_BY_COMMAND) as string[]).includes(action) ||
+				!!tryNormalizeColor(action);
+			if (!stringCmdRangeWasCollapsed || !isInlineStyleCommand) {
+				this.restoreLastSelection();
+			}
 			this.updateCommandTracker();
 			return;
 		}
@@ -2117,6 +2285,8 @@ export class Wysiwyg4All {
 				const selectionSnapshot = this.range
 					? this.snapshotRangeToTextOffsets(this.range)
 					: null;
+
+				const rangeWasCollapsed = !!(this.range && this.range.collapsed);
 
 				const applyColorCommand = (
 					nextAction: { color?: string; backgroundColor?: string },
@@ -2131,16 +2301,20 @@ export class Wysiwyg4All {
 						this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", color);
 					}
 
-					if (nextSnapshot) {
-						const rebased = this.restoreRangeFromTextOffsets(nextSnapshot);
-						if (rebased) {
-							this.restoreLastSelection(rebased);
-							this.backupCurrentRange(rebased, { bypassNormalize: true });
+					// For collapsed ranges wrapSelectionWithClass already placed the caret
+					// inside the new styled span — don't overwrite that with the pre-wrap offset.
+					if (!rangeWasCollapsed) {
+						if (nextSnapshot) {
+							const rebased = this.restoreRangeFromTextOffsets(nextSnapshot);
+							if (rebased) {
+								this.restoreLastSelection(rebased);
+								this.backupCurrentRange(rebased, { bypassNormalize: true });
+							} else {
+								this.restoreLastSelection();
+							}
 						} else {
 							this.restoreLastSelection();
 						}
-					} else {
-						this.restoreLastSelection();
 					}
 
 					this.updateCommandTracker();
