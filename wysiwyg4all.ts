@@ -269,6 +269,7 @@ export class Wysiwyg4All {
 	private readonly logMutation: boolean;
 	private readonly logNormalizeRemoval: boolean;
 	private lastKey: string | null = null;
+	private suspendSelectionCaptureForColorPicker = false;
 
 	public highlightColor: string;
 	public defaultFontColor = "#111827";
@@ -471,14 +472,28 @@ export class Wysiwyg4All {
 		if (isNode(ev.target) && this.isUnSelectableElement(ev.target)) {
 			return;
 		}
-		else {
-			this.normalizeDocument();
+
+		const active = document.activeElement;
+		const colorPickerActive = active instanceof HTMLInputElement && active.type === "color";
+		if (colorPickerActive && isNode(ev.target) && this.element.contains(ev.target)) {
+			// Clicking inside editor to close color picker can collapse the live
+			// selection before color command runs. Keep current backup selection.
+			this.suspendSelectionCaptureForColorPicker = true;
+			return;
 		}
-		
-		this.backupCurrentRange();
+
+		this.suspendSelectionCaptureForColorPicker = false;
 	};
 
 	private onSelectionChange = (): void => {
+		if (this.suspendSelectionCaptureForColorPicker) {
+			const active = document.activeElement;
+			if (!(active instanceof HTMLInputElement && active.type === "color")) {
+				this.suspendSelectionCaptureForColorPicker = false;
+			} else {
+			return;
+			}
+		}
 		this.captureRange();
 		this.updateCommandTracker();
 		// this.ensureLastLineBlank();
@@ -682,20 +697,93 @@ export class Wysiwyg4All {
 		this.backupCurrentRange(normalized, { bypassNormalize: true });
 	}
 
-	private backupCurrentRange(sel?: any, params?: {
-		bypassNormalize: boolean;
-	}): Range | null {
+	private backupCurrentRange(
+		source?: Selection | Range | null,
+		params?: { bypassNormalize?: boolean }
+	): Range | null {
 		const bypassNormalize = params?.bypassNormalize ?? false;
-		sel = sel || window.getSelection();
-		if (!sel || sel.rangeCount === 0) return null;
-		if (!sel || !this.element.contains(sel.anchorNode)) {
-			// this.range = null;
+		let candidate: Range | null = null;
+
+		if (source instanceof Range) {
+			candidate = source.cloneRange();
+		} else {
+			const sel = source ?? window.getSelection();
+			if (!sel || sel.rangeCount === 0) return null;
+			if (!this.element.contains(sel.anchorNode)) return null;
+			candidate = sel.getRangeAt(0).cloneRange();
+		}
+
+		const rangeBackup = bypassNormalize ? candidate : this.normalizeEditorRange(candidate);
+		if (!rangeBackup) return null;
+		this.rangeBackup = rangeBackup.cloneRange();
+		return this.rangeBackup;
+	}
+
+	private getTextOffsetWithinEditor(container: Node, offset: number): number | null {
+		if (container !== this.element && !this.element.contains(container)) return null;
+
+		const probe = document.createRange();
+		try {
+			probe.setStart(this.element, 0);
+			probe.setEnd(container, offset);
+		} catch {
 			return null;
 		}
-		let rangeBackup = bypassNormalize ? sel : this.normalizeEditorRange(sel.getRangeAt(0));
-		if (!rangeBackup) return null;
-		this.rangeBackup = rangeBackup;
-		return this.rangeBackup;
+
+		return probe.toString().length;
+	}
+
+	private resolveBoundaryFromTextOffset(charOffset: number): { container: Node; offset: number } | null {
+		let remaining = Math.max(0, charOffset);
+		const walker = document.createTreeWalker(this.element, NodeFilter.SHOW_TEXT);
+		let lastText: Text | null = null;
+
+		while (walker.nextNode()) {
+			const textNode = walker.currentNode as Text;
+			const len = textNode.length;
+			lastText = textNode;
+
+			if (remaining <= len) {
+				return { container: textNode, offset: remaining };
+			}
+
+			remaining -= len;
+		}
+
+		if (lastText) {
+			return { container: lastText, offset: lastText.length };
+		}
+
+		const last = this.element.lastChild;
+		if (!last) return null;
+		return this.getDeepBoundaryPoint(last, false);
+	}
+
+	private snapshotRangeToTextOffsets(range: Range): { start: number; end: number } | null {
+		const normalized = this.normalizeEditorRange(range);
+		if (!normalized) return null;
+
+		const start = this.getTextOffsetWithinEditor(normalized.startContainer, normalized.startOffset);
+		const end = this.getTextOffsetWithinEditor(normalized.endContainer, normalized.endOffset);
+		if (start === null || end === null) return null;
+
+		return { start, end };
+	}
+
+	private restoreRangeFromTextOffsets(snapshot: { start: number; end: number }): Range | null {
+		const start = this.resolveBoundaryFromTextOffset(snapshot.start);
+		const end = this.resolveBoundaryFromTextOffset(snapshot.end);
+		if (!start || !end) return null;
+
+		const range = document.createRange();
+		try {
+			range.setStart(start.container, start.offset);
+			range.setEnd(end.container, end.offset);
+		} catch {
+			return null;
+		}
+
+		return this.normalizeEditorRange(range);
 	}
 
 	private getDeepBoundaryPoint(node: Node, atStart: boolean): { container: Node; offset: number } {
@@ -888,6 +976,20 @@ export class Wysiwyg4All {
 	}
 
 	private normalizeDocument(): void {
+		const sel = window.getSelection();
+		const hasLiveSelectionInEditor = !!(
+			sel &&
+			sel.rangeCount > 0 &&
+			this.element.contains(sel.anchorNode) &&
+			this.element.contains(sel.focusNode)
+		);
+		const rangeSource = hasLiveSelectionInEditor
+			? (this.range ?? this.rangeBackup)
+			: (this.range ?? this.rangeBackup);
+		const rangeSnapshot = rangeSource
+			? this.snapshotRangeToTextOffsets(rangeSource)
+			: null;
+
 		this.cleanupZeroWidthSpaces();
 		const toRemove: HTMLElement[] = [];
 		const walker = document.createTreeWalker(this.element, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
@@ -928,6 +1030,21 @@ export class Wysiwyg4All {
 		this.cleanupRedundantTextWrappers();
 		this.cleanupEmptyTextStyleElements();
 		this.ensureRootHasSafeLine();
+
+		if (hasLiveSelectionInEditor) {
+			// For live in-editor selection, browser already tracks caret through DOM
+			// mutations more accurately than text-offset mapping in empty blocks.
+			this.captureRange();
+			return;
+		}
+
+		if (rangeSnapshot) {
+			const rebased = this.restoreRangeFromTextOffsets(rangeSnapshot);
+			if (rebased) {
+				this.range = rebased;
+				this.rangeBackup = rebased.cloneRange();
+			}
+		}
 	}
 
 	private isLineBlockElement(el: HTMLElement): boolean {
@@ -1828,7 +1945,22 @@ export class Wysiwyg4All {
 	}
 
 	public async command(action: CommandInput): Promise<void> {
-		this.captureRange();
+		const isColorObjectAction =
+			typeof action === "object" &&
+			!!action &&
+			["color", "backgroundColor"].some((cmd) => cmd in action);
+
+		if (isColorObjectAction && this.suspendSelectionCaptureForColorPicker && this.rangeBackup) {
+			this.restoreLastSelection(this.rangeBackup);
+			this.range = this.rangeBackup.cloneRange();
+		} else {
+			this.captureRange();
+		}
+
+		if (!isColorObjectAction) {
+			this.suspendSelectionCaptureForColorPicker = false;
+		}
+
 		if (typeof action === "string") {
 			if (this.customCommandHandlers.has(action)) {
 				await this.customCommandHandlers.get(action)?.(this, action);
@@ -1929,6 +2061,7 @@ export class Wysiwyg4All {
 				}
 				this.restoreLastSelection();
 				this.updateCommandTracker();
+				this.suspendSelectionCaptureForColorPicker = false;
 				return;
 			}
 
@@ -1964,6 +2097,8 @@ export class Wysiwyg4All {
 			}
 			return;
 		}
+
+		this.suspendSelectionCaptureForColorPicker = false;
 	}
 
 	public async loadHTML(html: string, editable = false): Promise<void> {

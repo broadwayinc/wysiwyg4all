@@ -126,6 +126,7 @@ declare class Wysiwyg4All {
     private readonly logMutation;
     private readonly logNormalizeRemoval;
     private lastKey;
+    private suspendSelectionCaptureForColorPicker;
     highlightColor: string;
     defaultFontColor: string;
     defaultBackgroundColor: string;
@@ -159,6 +160,10 @@ declare class Wysiwyg4All {
     private handleDeleteFromTrailingEmptyLine;
     private captureRange;
     private backupCurrentRange;
+    private getTextOffsetWithinEditor;
+    private resolveBoundaryFromTextOffset;
+    private snapshotRangeToTextOffsets;
+    private restoreRangeFromTextOffsets;
     private getDeepBoundaryPoint;
     private resolveRangeBoundaryPoint;
     private normalizeEditorRange;
