@@ -162,8 +162,7 @@ declare class Wysiwyg4All {
     private getDeepBoundaryPoint;
     private resolveRangeBoundaryPoint;
     private normalizeEditorRange;
-    private restoreRange;
-    restoreLastSelection(): void;
+    private restoreLastSelection;
     setPlaceholder(placeholder: string): void;
     setSpellcheck(enabled: boolean): void;
     setEditable(enabled: boolean): void;

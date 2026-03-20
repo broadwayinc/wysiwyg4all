@@ -566,7 +566,7 @@ export class Wysiwyg4All {
 		const range = document.createRange();
 		range.selectNodeContents(node);
 		range.collapse(true);
-		this.restoreRange(range);
+		this.restoreLastSelection(range);
 	}
 
 	private isLineVisuallyEmpty(line: HTMLElement): boolean {
@@ -753,19 +753,16 @@ export class Wysiwyg4All {
 		return normalized;
 	}
 
-	private restoreRange(range: Range | null): void {
+	private restoreLastSelection(range: Range | null=this.rangeBackup): void {
 		if (!range) return;
 		const normalized = this.normalizeEditorRange(range);
 		if (!normalized) return;
 		const sel = window.getSelection();
 		if (!sel) return;
+		
+		this.range = normalized;
 		sel.removeAllRanges();
 		sel.addRange(normalized);
-		this.range = normalized;
-	}
-
-	public restoreLastSelection(): void {
-		this.restoreRange(this.rangeBackup);
 	}
 
 	public setPlaceholder(placeholder: string): void {
@@ -1262,7 +1259,7 @@ export class Wysiwyg4All {
 		const range = document.createRange();
 		range.selectNodeContents(node);
 		range.collapse(false);
-		this.restoreRange(range);
+		this.restoreLastSelection(range);
 	}
 
 	private splitRangeBoundaries(range: Range): Range {
@@ -1422,7 +1419,7 @@ export class Wysiwyg4All {
 			const after = document.createRange();
 			after.setStart(span.firstChild as Node, 1);
 			after.collapse(true);
-			this.restoreRange(after);
+			this.restoreLastSelection(after);
 			return;
 		}
 
@@ -1494,7 +1491,7 @@ export class Wysiwyg4All {
 				const after = document.createRange();
 				after.setStartAfter(node);
 				after.collapse(true);
-				this.restoreRange(after);
+				this.restoreLastSelection(after);
 			}
 			return;
 		}
@@ -1569,7 +1566,7 @@ export class Wysiwyg4All {
 			const next = document.createRange();
 			next.setStart(node, node.length);
 			next.collapse(true);
-			this.restoreRange(next);
+			this.restoreLastSelection(next);
 			return;
 		}
 
