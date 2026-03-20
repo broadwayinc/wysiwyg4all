@@ -18,6 +18,7 @@ type CommandObject = {
     style?: Partial<CSSStyleDeclaration> & Record<string, string>;
     insert?: boolean;
     backgroundColor?: string;
+    color?: string;
 };
 type CommandInput = BuiltInCommand | CommandObject | string;
 type TrackerValue = boolean | string;
@@ -157,7 +158,10 @@ declare class Wysiwyg4All {
     private handleEnterFromQuoteTail;
     private handleDeleteFromTrailingEmptyLine;
     private captureRange;
-    private cloneCurrentRange;
+    private backupCurrentRange;
+    private getDeepBoundaryPoint;
+    private resolveRangeBoundaryPoint;
+    private normalizeEditorRange;
     private restoreRange;
     restoreLastSelection(): void;
     setPlaceholder(placeholder: string): void;
@@ -184,6 +188,7 @@ declare class Wysiwyg4All {
     private findOutermostFontSizeAncestor;
     private cleanupNestedFontSizeWrappers;
     private hasMeaningfulAttributes;
+    private hasNonClassStyleAttributes;
     private isProtectedSpan;
     private cleanupRedundantTextWrappers;
     private isTextStyleWrapper;

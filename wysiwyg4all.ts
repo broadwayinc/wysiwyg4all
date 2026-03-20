@@ -58,6 +58,7 @@ type CommandObject = {
 	style?: Partial<CSSStyleDeclaration> & Record<string, string>;
 	insert?: boolean;
 	backgroundColor?: string;
+	color?: string;
 };
 
 type CommandInput = BuiltInCommand | CommandObject | string;
@@ -470,8 +471,10 @@ export class Wysiwyg4All {
 		if (isNode(ev.target) && this.isUnSelectableElement(ev.target)) {
 			return;
 		}
-		this.normalizeDocument();
-		this.rangeBackup = this.cloneCurrentRange();
+		else
+			this.normalizeDocument();
+		
+		this.backupCurrentRange();
 	};
 
 	private onSelectionChange = (): void => {
@@ -658,34 +661,106 @@ export class Wysiwyg4All {
 
 	private captureRange(): void {
 		const sel = window.getSelection();
+
+		// check if sel is within our editor
+		if (!sel || !this.element.contains(sel.anchorNode)) {
+			// this.range = null;
+			return;
+		}
+
 		if (!sel || sel.rangeCount === 0) {
 			this.range = null;
 			return;
 		}
-		const r = sel.getRangeAt(0);
-		const container = r.commonAncestorContainer.nodeType === Node.TEXT_NODE
-			? r.commonAncestorContainer.parentNode
-			: r.commonAncestorContainer;
-		if (!container || !this.element.contains(container)) {
+		const normalized = this.normalizeEditorRange(sel.getRangeAt(0));
+		if (!normalized) {
 			this.range = null;
 			return;
 		}
-		this.range = r;
+		this.range = normalized;
+		this.backupCurrentRange(normalized, { bypassNormalize: true });
 	}
 
-	private cloneCurrentRange(): Range | null {
-		const sel = window.getSelection();
+	private backupCurrentRange(sel?: any, params?: {
+		bypassNormalize: boolean;
+	}): Range | null {
+		const bypassNormalize = params?.bypassNormalize ?? false;
+		sel = sel || window.getSelection();
 		if (!sel || sel.rangeCount === 0) return null;
-		return sel.getRangeAt(0).cloneRange();
+		if (!sel || !this.element.contains(sel.anchorNode)) {
+			// this.range = null;
+			return null;
+		}
+		let rangeBackup = bypassNormalize ? sel : this.normalizeEditorRange(sel.getRangeAt(0));
+		if (!rangeBackup) return null;
+		this.rangeBackup = rangeBackup;
+		return this.rangeBackup;
+	}
+
+	private getDeepBoundaryPoint(node: Node, atStart: boolean): { container: Node; offset: number } {
+		let current = node;
+		while (current.nodeType !== Node.TEXT_NODE && current.childNodes.length > 0) {
+			current = atStart ? current.firstChild as Node : current.lastChild as Node;
+		}
+
+		if (current.nodeType === Node.TEXT_NODE) {
+			const text = current as Text;
+			return { container: text, offset: atStart ? 0 : text.length };
+		}
+
+		return { container: current, offset: atStart ? 0 : current.childNodes.length };
+	}
+
+	private resolveRangeBoundaryPoint(
+		container: Node,
+		offset: number,
+		atStart: boolean
+	): { container: Node; offset: number } | null {
+		if (container === this.element) {
+			const { childNodes } = this.element;
+			if (childNodes.length === 0) return null;
+
+			if (atStart) {
+				const target = offset < childNodes.length ? childNodes[offset] : childNodes[childNodes.length - 1];
+				return this.getDeepBoundaryPoint(target, offset < childNodes.length);
+			}
+
+			const target = offset > 0 ? childNodes[offset - 1] : childNodes[0];
+			return this.getDeepBoundaryPoint(target, offset === 0);
+		}
+
+		if (!this.element.contains(container)) {
+			return null;
+		}
+
+		return { container, offset };
+	}
+
+	private normalizeEditorRange(range: Range): Range | null {
+		const start = this.resolveRangeBoundaryPoint(range.startContainer, range.startOffset, true);
+		const end = this.resolveRangeBoundaryPoint(range.endContainer, range.endOffset, false);
+		if (!start || !end) return null;
+
+		const normalized = range.cloneRange();
+		try {
+			normalized.setStart(start.container, start.offset);
+			normalized.setEnd(end.container, end.offset);
+		} catch {
+			return null;
+		}
+
+		return normalized;
 	}
 
 	private restoreRange(range: Range | null): void {
 		if (!range) return;
+		const normalized = this.normalizeEditorRange(range);
+		if (!normalized) return;
 		const sel = window.getSelection();
 		if (!sel) return;
 		sel.removeAllRanges();
-		sel.addRange(range);
-		this.range = range;
+		sel.addRange(normalized);
+		this.range = normalized;
 	}
 
 	public restoreLastSelection(): void {
@@ -802,7 +877,7 @@ export class Wysiwyg4All {
 					!el.closest("._custom_") &&
 					el.textContent?.includes("\u200B")
 				) {
-					  el.textContent = (el.textContent || "").split("\u200B").join("");
+					el.textContent = (el.textContent || "").split("\u200B").join("");
 					el.normalize();
 				}
 
@@ -1074,6 +1149,16 @@ export class Wysiwyg4All {
 		return false;
 	}
 
+	private hasNonClassStyleAttributes(el: HTMLElement): boolean {
+		for (const attr of Array.from(el.attributes)) {
+			const name = attr.name.toLowerCase();
+			if (name === "class" || name === "style") continue;
+			if (name.startsWith("data-")) return true;
+			if (attr.value.trim().length > 0) return true;
+		}
+		return false;
+	}
+
 	private isProtectedSpan(el: HTMLElement): boolean {
 		if (el.tagName !== "SPAN") return true;
 		if (el.classList.contains("_hashtag_") || el.classList.contains("_urllink_")) return true;
@@ -1082,12 +1167,14 @@ export class Wysiwyg4All {
 	}
 
 	private cleanupRedundantTextWrappers(): void {
+		const knownStyleClasses = this.getKnownInlineStyleClassSet();
 		let changed = true;
 		while (changed) {
 			changed = false;
 			const spans = Array.from(this.element.querySelectorAll<HTMLElement>("span")).reverse();
 
 			for (const span of spans) {
+				if (!span.isConnected) continue;
 				if (this.isProtectedSpan(span)) continue;
 
 				const children = Array.from(span.childNodes);
@@ -1100,8 +1187,8 @@ export class Wysiwyg4All {
 						!this.isProtectedSpan(child) &&
 						span.className.trim() === child.className.trim() &&
 						span.style.cssText.trim() === child.style.cssText.trim() &&
-						!this.hasMeaningfulAttributes(span) &&
-						!this.hasMeaningfulAttributes(child)
+						!this.hasNonClassStyleAttributes(span) &&
+						!this.hasNonClassStyleAttributes(child)
 					) {
 						while (child.firstChild) span.insertBefore(child.firstChild, child);
 						child.remove();
@@ -1109,7 +1196,7 @@ export class Wysiwyg4All {
 					}
 				}
 
-				if (!this.hasMeaningfulAttributes(span) && !this.isTextStyleWrapper(span, this.getKnownInlineStyleClassSet())) {
+				if (!this.hasMeaningfulAttributes(span) && !this.isTextStyleWrapper(span, knownStyleClasses)) {
 					const parent = span.parentNode;
 					if (!parent) continue;
 					while (span.firstChild) parent.insertBefore(span.firstChild, span);
@@ -1213,8 +1300,12 @@ export class Wysiwyg4All {
 	private liftNodeOneLevel(node: HTMLElement): void {
 		const parent = node.parentElement;
 		if (!parent) return;
+		if (parent === this.element) return;
 		const grand = parent.parentNode;
 		if (!grand) return;
+		if (grand !== this.element && !(grand instanceof HTMLElement && this.element.contains(grand))) {
+			return;
+		}
 
 		const rightClone = parent.cloneNode(false) as HTMLElement;
 		while (node.nextSibling) {
@@ -1232,11 +1323,13 @@ export class Wysiwyg4All {
 	}
 
 	private breakOutFromAncestor(node: HTMLElement, ancestor: HTMLElement): void {
+		if (!this.element.contains(node) || !this.element.contains(ancestor)) return;
+
 		while (node.parentElement && node.parentElement !== ancestor) {
 			this.liftNodeOneLevel(node);
 		}
 
-		if (node.parentElement === ancestor) {
+		if (node.parentElement === ancestor && ancestor.parentElement && this.element.contains(ancestor.parentElement)) {
 			this.liftNodeOneLevel(node);
 		}
 
@@ -1276,15 +1369,16 @@ export class Wysiwyg4All {
 		const breakoutStartAncestor = this.findClosestAncestorWithClass(range.startContainer, className);
 		const breakoutEndAncestor = this.findClosestAncestorWithClass(range.endContainer, className);
 		const shouldBreakout = !!breakoutStartAncestor && breakoutStartAncestor === breakoutEndAncestor;
+		const sameClassBreakoutAncestor = shouldBreakout ? breakoutStartAncestor : null;
 		const fontSizeStartAncestor = isFontSizeCommand ? this.findOutermostFontSizeAncestor(range.startContainer) : null;
 		const fontSizeEndAncestor = isFontSizeCommand ? this.findOutermostFontSizeAncestor(range.endContainer) : null;
 		const fontSizeBreakoutAncestor =
 			isFontSizeCommand && fontSizeStartAncestor && fontSizeStartAncestor === fontSizeEndAncestor
 				? fontSizeStartAncestor
 				: null;
-		const breakoutAncestor = breakoutStartAncestor ?? fontSizeBreakoutAncestor;
-		const inherited = shouldBreakout && breakoutStartAncestor
-			? this.collectPreservedInlineStyles(breakoutStartAncestor, className)
+		const breakoutAncestor = sameClassBreakoutAncestor ?? fontSizeBreakoutAncestor;
+		const inherited = sameClassBreakoutAncestor
+			? this.collectPreservedInlineStyles(sameClassBreakoutAncestor, className)
 			: { classes: [] as string[], color: undefined, backgroundColor: undefined };
 
 		if (range.collapsed) {
@@ -1374,7 +1468,14 @@ export class Wysiwyg4All {
 
 		if (!appendOnNextLine) {
 			this.range.insertNode(node);
-			this.setSelectionAtEnd(node);
+			if (node.nodeType === Node.TEXT_NODE) {
+				this.setSelectionAtEnd(node);
+			} else {
+				const after = document.createRange();
+				after.setStartAfter(node);
+				after.collapse(true);
+				this.restoreRange(after);
+			}
 			return;
 		}
 
@@ -1710,43 +1811,46 @@ export class Wysiwyg4All {
 	}
 
 	public async command(action: CommandInput): Promise<void> {
+		this.captureRange();
 		if (typeof action === "string") {
 			if (this.customCommandHandlers.has(action)) {
 				await this.customCommandHandlers.get(action)?.(this, action);
-				return;
+				// return;
 			}
 
-			if ((Object.keys(CLASS_BY_COMMAND) as InlineClassCommand[]).includes(action as InlineClassCommand)) {
+			else if ((Object.keys(CLASS_BY_COMMAND) as InlineClassCommand[]).includes(action as InlineClassCommand)) {
 				if (action === "color") {
 					this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", this.highlightColor);
 				} else {
 					this.wrapSelectionWithClass(CLASS_BY_COMMAND[action as InlineClassCommand], action as InlineClassCommand);
 				}
-				this.updateCommandTracker();
-				return;
+
+				// this.updateCommandTracker();
+				// return;
 			}
 
-			if (["alignLeft", "alignCenter", "alignRight"].includes(action)) {
+			else if (["alignLeft", "alignCenter", "alignRight"].includes(action)) {
 				this.applyAlignment(action as AlignCommand);
-				this.updateCommandTracker();
-				return;
+				// this.updateCommandTracker();
+				// return;
 			}
 
-			if (action === "divider") {
+			else if (action === "divider") {
 				const hr = document.createElement("hr");
 				this.insertNodeAtSelection(hr, true);
 				this.ensureCaretAfterNonTextElement(hr);
-				return;
+				this.backupCurrentRange();
+				// return;
 			}
 
-			if (action === "quote") {
-				this.captureRange();
+			else if (action === "quote") {
+				// this.captureRange();
 				if (this.range) {
 					const quoteParent = this.getContainingQuote(this.range.startContainer);
 					if (quoteParent) {
 						this.unwrapQuote(quoteParent);
 						this.normalizeDocument();
-						return;
+						// return;
 					}
 				}
 
@@ -1756,10 +1860,11 @@ export class Wysiwyg4All {
 				this.insertNodeAtSelection(quote, true);
 				this.ensureTrailingEditableLineAfter(quote);
 				this.setSelectionAtStart(quoteLine);
-				return;
+				this.backupCurrentRange();
+				// return;
 			}
 
-			if (action === "unorderedList" || action === "orderedList") {
+			else if (action === "unorderedList" || action === "orderedList") {
 				const list = document.createElement(action === "unorderedList" ? "ul" : "ol");
 				const li = document.createElement("li");
 				li.append(document.createElement("br"));
@@ -1767,41 +1872,58 @@ export class Wysiwyg4All {
 				this.insertNodeAtSelection(list, true);
 				this.ensureTrailingEditableLineAfter(list);
 				this.setSelectionAtStart(li);
-				return;
+				this.backupCurrentRange();
+				// return;
 			}
 
-			if (action === "image") {
-				this.captureRange();
-				this.rangeBackup = this.range ? this.range.cloneRange() : null;
+			else if (action === "image") {
+				// this.captureRange();
 				this.imageInput.click();
-				return;
+				// return;
 			}
 
-			const maybeColor = tryNormalizeColor(action);
-			if (maybeColor) {
-				this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", maybeColor);
-				this.updateCommandTracker();
+			else {
+				const maybeColor = tryNormalizeColor(action);
+				if (maybeColor) {
+					this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", maybeColor);
+					this.updateCommandTracker();
+				}
 			}
+
+			this.restoreLastSelection();
+			this.updateCommandTracker();
 			return;
 		}
 
 		if (typeof action === "object" && action) {
-			if (action.backgroundColor) {
-				const color = tryNormalizeColor(action.backgroundColor) || action.backgroundColor;
-				this.wrapSelectionWithClass(CLASS_BY_COMMAND.backgroundColor, "backgroundColor", color);
+			const trackIt = ["color", "backgroundColor"].some((cmd) => cmd in action);
+			if (trackIt) {
+				if (action.backgroundColor) {
+					const color = tryNormalizeColor(action.backgroundColor) || action.backgroundColor;
+					this.wrapSelectionWithClass(CLASS_BY_COMMAND.backgroundColor, "backgroundColor", color);
+					// this.updateCommandTracker();
+					// return;
+				}
+				else if (action.color) {
+					const color = tryNormalizeColor(action.color) || action.color;
+					this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", color);
+					// this.updateCommandTracker();
+					// return;
+				}
+				this.restoreLastSelection();
 				this.updateCommandTracker();
 				return;
 			}
 
-			if (action.element !== undefined) {
+			else if (action.element !== undefined) {
 				let node: Node | null = null;
 				let customElement: HTMLElement | null = null;
 				if (typeof action.element === "string") {
 					node = document.createTextNode(action.element);
 				} else if (isHTMLElement(action.element)) {
-					  node = action.element;
-					  customElement = action.element;
-					  if (action.elementId) (node as HTMLElement).id = action.elementId;
+					node = action.element;
+					customElement = action.element;
+					if (action.elementId) (node as HTMLElement).id = action.elementId;
 				}
 				if (!node) return;
 
@@ -1816,11 +1938,14 @@ export class Wysiwyg4All {
 					this.custom_array.push({ elementId: node.id || createUid("custom"), element: node });
 				}
 
-				this.insertNodeAtSelection(node, action.insert !== true);
-				if (customElement && action.insert !== true) {
+				const isTextNode = node.nodeType === Node.TEXT_NODE;
+				this.insertNodeAtSelection(node, !isTextNode);
+				// if (customElement && action.insert !== true) {
+				if (customElement) {
 					this.ensureCaretAfterNonTextElement(customElement);
 				}
 			}
+			return;
 		}
 	}
 
