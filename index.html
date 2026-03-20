@@ -2,10 +2,10 @@
 <html lang="en">
 <!-- <script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" /> -->
-<script src="dist/wysiwyg4all.js"></script>
+<script src="dist/wysiwyg4all.global.js"></script>
 <script src="plugins.js"></script>
 <!-- <link rel="stylesheet" href="table.css"> -->
-<link rel="stylesheet" href="wysiwyg4all.css">
+<link rel="stylesheet" href="dist/wysiwyg4all.css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <h1>Wysiwyg4All</h1>
 <hr>
@@ -48,10 +48,9 @@
 </button>
 
 <!-- Notice the wysiwyg.restoreLastSelection() method triggering at onblur event -->
-<input id='colorInput' type='color' onchange="wysiwyg.command(event.target.value)" onblur="wysiwyg.restoreLastSelection()"/> 
-    <!-- onblur="wysiwyg.restoreLastSelection()"  -->
+<input id='colorInput' type='color' oninput="wysiwyg.command({color: event.target.value})"/> 
 <!-- .command('color') changes text to highlight color set on constructor -->
-<input id='backgroundColorInput' type='color' onchange="wysiwyg.command({backgroundColor: event.target.value})" onblur="wysiwyg.restoreLastSelection()"/> 
+<input id='backgroundColorInput' type='color' oninput="wysiwyg.command({backgroundColor: event.target.value})"/> 
 <button onclick="wysiwyg.command('color')">
     Color
 </button>
@@ -91,6 +90,9 @@
 </button>
 <button onclick="exportData()">
     Export
+</button>
+<button onclick="deleteStressTest()">
+    Delete stress test
 </button>
 </div>
 
@@ -143,19 +145,26 @@
             if (c.commandTracker) {
                 let ct = c.commandTracker;
                 console.log({ ct });
-                if (typeof ct.color === 'string')
-                    // change the color wheel input value based on the position of the caret
-                    document.getElementById('colorInput').value = ct.color;
-                else
-                    // If color output is true(boolean), the current color is the highlight color
-                    document.getElementById('colorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
+				const colorInput = document.getElementById('colorInput');
+				const backgroundColorInput = document.getElementById('backgroundColorInput');
 
-                if (typeof ct.backgroundColor === 'string')
+				if (colorInput instanceof HTMLInputElement) {
+					if (typeof ct.color === 'string')
                     // change the color wheel input value based on the position of the caret
-                    document.getElementById('backgroundColorInput').value = ct.backgroundColor;
-                else
+                    		colorInput.value = ct.color;
+                	else
                     // If color output is true(boolean), the current color is the highlight color
-                    document.getElementById('backgroundColorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultBackgroundColor;
+                    		colorInput.value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
+				}
+
+				if (backgroundColorInput instanceof HTMLInputElement) {
+					if (typeof ct.backgroundColor === 'string')
+                    // change the color wheel input value based on the position of the caret
+                    		backgroundColorInput.value = ct.backgroundColor;
+                	else
+                    // If color output is true(boolean), the current color is the highlight color
+                    		backgroundColorInput.value = ct.backgroundColor ? wysiwyg.highlightColor : wysiwyg.defaultBackgroundColor;
+				}
             }
 
             if (c.image) {

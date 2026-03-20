@@ -12,7 +12,7 @@ module.exports = [
         target: 'web',
         entry: './wysiwyg4all.js',
         output: {
-            filename: 'wysiwyg4all.js',
+            filename: 'wysiwyg4all.global.js',
             libraryTarget: 'umd'
         },
         resolve: {

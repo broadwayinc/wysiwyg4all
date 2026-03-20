@@ -4,7 +4,7 @@
 @tablet: ~'only screen and (max-width: 899px)';
 @laptop: ~'only screen and (max-width: 1199px)';
 
-#_wysiwyg_fontSize_normal {
+.wysiwyg-fontSize-normal() {
     --wysiwyg-font: var(--wysiwyg-font-desktop);
     font-size: var(--wysiwyg-font-desktop);
 
@@ -20,7 +20,8 @@
 }
 
 //  placeholder
-._wysiwyg4all[contenteditable='true'][placeholder]:empty:before {
+._wysiwyg4all[contenteditable='true'][placeholder]:empty::before,
+._wysiwyg4all[contenteditable='true'][placeholder]:has(> br:only-child)::before {
     color: var(--placeholder);
     content: attr(placeholder);
     word-break: break-word;
@@ -47,7 +48,7 @@
     // overflow: hidden;
     user-select: text;
 
-    #_wysiwyg_fontSize_normal();
+    .wysiwyg-fontSize-normal();
 
     &:focus {
         outline: 0;
@@ -90,9 +91,9 @@
         font-weight: normal;
         white-space: pre-wrap;
 
-        * {
-            display: inline;
-        }
+        // * {
+        //     display: inline;
+        // }
 
         span {
             text-decoration: inherit;
