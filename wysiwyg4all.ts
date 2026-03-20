@@ -1949,8 +1949,15 @@ export class Wysiwyg4All {
 			typeof action === "object" &&
 			!!action &&
 			["color", "backgroundColor"].some((cmd) => cmd in action);
+		const activeElement = document.activeElement;
+		const activeColorInput =
+			activeElement instanceof HTMLInputElement && activeElement.type === "color";
 
-		if (isColorObjectAction && this.suspendSelectionCaptureForColorPicker && this.rangeBackup) {
+		if (
+			isColorObjectAction &&
+			(this.suspendSelectionCaptureForColorPicker || activeColorInput) &&
+			this.rangeBackup
+		) {
 			this.restoreLastSelection(this.rangeBackup);
 			this.range = this.rangeBackup.cloneRange();
 		} else {
@@ -2047,6 +2054,10 @@ export class Wysiwyg4All {
 		if (typeof action === "object" && action) {
 			const trackIt = ["color", "backgroundColor"].some((cmd) => cmd in action);
 			if (trackIt) {
+				const selectionSnapshot = this.range
+					? this.snapshotRangeToTextOffsets(this.range)
+					: null;
+
 				if (action.backgroundColor) {
 					const color = tryNormalizeColor(action.backgroundColor) || action.backgroundColor;
 					this.wrapSelectionWithClass(CLASS_BY_COMMAND.backgroundColor, "backgroundColor", color);
@@ -2059,9 +2070,23 @@ export class Wysiwyg4All {
 					// this.updateCommandTracker();
 					// return;
 				}
-				this.restoreLastSelection();
+
+				if (selectionSnapshot) {
+					const rebased = this.restoreRangeFromTextOffsets(selectionSnapshot);
+					if (rebased) {
+						this.restoreLastSelection(rebased);
+						this.backupCurrentRange(rebased, { bypassNormalize: true });
+					} else {
+						this.restoreLastSelection();
+					}
+				} else {
+					this.restoreLastSelection();
+				}
+
 				this.updateCommandTracker();
-				this.suspendSelectionCaptureForColorPicker = false;
+				this.suspendSelectionCaptureForColorPicker =
+					document.activeElement instanceof HTMLInputElement &&
+					document.activeElement.type === "color";
 				return;
 			}
 
