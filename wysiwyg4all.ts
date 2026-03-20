@@ -197,8 +197,9 @@ const FONT_SIZE_CLASS_SET = new Set<string>(FONT_SIZE_CLASSES);
 
 const BLOCK_TAGS = new Set(["P", "LI", "BLOCKQUOTE", "UL", "OL", "HR", "DIV"]);
 
-const HASHTAG_REGEX = /(^|\s)(#[\p{L}\p{N}_-]{1,80})/gu;
-const URL_REGEX = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+// Tokenize only after the user types a breakout whitespace.
+const HASHTAG_REGEX = /(^|\s)(#[\p{L}\p{N}_-]{1,80})(?=\s)/gu;
+const URL_REGEX = /(https?:\/\/[^\s]+|www\.[^\s]+)(?=\s)/gi;
 
 function clampNumber(value: number, min: number, max: number): number {
 	return Math.max(min, Math.min(max, value));
@@ -535,10 +536,10 @@ export class Wysiwyg4All {
 			queueMicrotask(() => this.ensureRootHasSafeLine());
 		}
 
-		queueMicrotask(() => {
+		window.setTimeout(() => {
 			this.normalizeDocument();
 			void this.scanSpecialTokens();
-		});
+		}, 0);
 	};
 
 	private onPaste = (ev: ClipboardEvent): void => {
@@ -1789,6 +1790,29 @@ export class Wysiwyg4All {
 		return result || payload;
 	}
 
+	private resolveSpanByData(data: { element?: HTMLSpanElement; elementId?: string }): HTMLSpanElement | null {
+		if (data.element instanceof HTMLSpanElement) return data.element;
+		if (!data.elementId) return null;
+		const el = document.getElementById(data.elementId);
+		return el instanceof HTMLSpanElement ? el : null;
+	}
+
+	private applySpanDecorators(
+		span: HTMLSpanElement,
+		decorators: { style?: Record<string, string>; onclick?: (ev: MouseEvent) => void }
+	): void {
+		if (decorators.style) {
+			for (const [k, v] of Object.entries(decorators.style)) {
+				span.style.setProperty(k, v);
+			}
+		}
+
+		if (decorators.onclick) {
+			span.addEventListener("click", decorators.onclick);
+			span.classList.add("_hover_");
+		}
+	}
+
 	private updateCommandTracker(): void {
 		this.captureRange();
 		const tracker: CommandTracker = {};
@@ -1844,6 +1868,16 @@ export class Wysiwyg4All {
 
 	private async scanSpecialTokens(): Promise<void> {
 		if (!this.hashtagEnabled && !this.urlEnabled) return;
+
+		const sel = window.getSelection();
+		const liveRange =
+			sel && sel.rangeCount > 0 && this.element.contains(sel.anchorNode)
+				? this.normalizeEditorRange(sel.getRangeAt(0))
+				: null;
+		const selectionSnapshot = liveRange
+			? this.snapshotRangeToTextOffsets(liveRange)
+			: null;
+		let didMutate = false;
 
 		const walker = document.createTreeWalker(this.element, NodeFilter.SHOW_TEXT, {
 			acceptNode: (node) => {
@@ -1939,15 +1973,34 @@ export class Wysiwyg4All {
 			}
 
 			parent.replaceChild(fragment, textNode);
+			didMutate = true;
 		}
 
 		if (hashtagItems.length > 0) {
 			const fb = await this.safeCallback({ hashtag: hashtagItems });
-			this.hashtag_array.push(...(fb.hashtag || hashtagItems));
+			for (const item of fb.hashtag || hashtagItems) {
+				const span = this.resolveSpanByData(item);
+				if (!span) continue;
+				this.applySpanDecorators(span, item);
+				this.hashtag_array.push({ ...item, element: span, elementId: span.id || item.elementId });
+			}
 		}
 		if (urlItems.length > 0) {
 			const fb = await this.safeCallback({ urllink: urlItems });
-			this.urllink_array.push(...(fb.urllink || urlItems));
+			for (const item of fb.urllink || urlItems) {
+				const span = this.resolveSpanByData(item);
+				if (!span) continue;
+				this.applySpanDecorators(span, item);
+				this.urllink_array.push({ ...item, element: span, elementId: span.id || item.elementId });
+			}
+		}
+
+		if (didMutate && selectionSnapshot) {
+			const rebased = this.restoreRangeFromTextOffsets(selectionSnapshot);
+			if (rebased) {
+				this.restoreLastSelection(rebased);
+				this.backupCurrentRange(rebased, { bypassNormalize: true });
+			}
 		}
 	}
 

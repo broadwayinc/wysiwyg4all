@@ -117,31 +117,20 @@
         //     small: 0.8,
         // },
         // logMutation: true,
-        logExecution: true,
+        // logExecution: true,
         callback: c => {
             if (c.caratPosition) {
                 // Tracks carat position
                 // Make carat to be always within the viewport
                 let viewPortHeight = Math.min(document.documentElement.clientHeight || 0, window.innerHeight || 0);
                 let minusWhenOutOfView = viewPortHeight - c.caratPosition.top;
-                if (minusWhenOutOfView < 0)
+                if (minusWhenOutOfView < 0) {
                     window.scrollBy(0, -minusWhenOutOfView);
-
-                console.log({ caratPosition: c.caratPosition });
-            }
-
-            // if (c.mutation) {
-            //     // outputs dom mutation information
-            //     console.log({ mutation: c.mutation });
-            // }
-
-            if (c.range) {
-                console.log({ range: c.range });
+                }
             }
 
             if (c.commandTracker) {
                 let ct = c.commandTracker;
-                console.log({ ct });
 				const colorInput = document.getElementById('colorInput');
 				const backgroundColorInput = document.getElementById('backgroundColorInput');
 
@@ -174,6 +163,7 @@
             }
 
             if (c.hashtag) {
+                console.log({ hashtag: c.hashtag });
                 for (let h of c.hashtag) {
 
                     h.style = {
@@ -187,6 +177,7 @@
             }
 
             if (c.urllink) {
+                console.log({ urllink: c.urllink });
                 for (let u of c.urllink) {
 
                     u.style = {
