@@ -229,36 +229,4 @@
             console.log({exported});
         });
     };
-
-    let deleteStressTest = async () => {
-        const editorId = 'myeditor';
-        const totalRound = 20;
-        let removedAtRound = 0;
-
-        for (let i = 1; i <= totalRound; i++) {
-            const editor = document.getElementById(editorId);
-            if (!editor) {
-                removedAtRound = i;
-                break;
-            }
-
-            editor.innerHTML = '';
-
-            await new Promise(res => setTimeout(res, 0));
-
-            if (!document.getElementById(editorId)) {
-                removedAtRound = i;
-                break;
-            }
-        }
-
-        if (removedAtRound) {
-            console.error(`Delete stress test failed: editor removed at round ${removedAtRound}`);
-            alert(`Delete stress test failed at round ${removedAtRound}. Check console.`);
-            return;
-        }
-
-        console.log(`Delete stress test passed: editor survived ${totalRound} rounds.`);
-        alert(`Delete stress test passed (${totalRound} rounds).`);
-    };
 </script>
