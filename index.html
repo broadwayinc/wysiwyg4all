@@ -49,17 +49,6 @@
 
 <input id='colorInput' type='color' oninput="wysiwyg.command({color: this.value})" />
 <input id='backgroundColorInput' type='color' oninput="wysiwyg.command({backgroundColor: this.value})" />
-<button onclick="wysiwyg.command('color')">
-    <!-- .command('color') changes text to highlight color set on constructor -->
-    Color
-</button>
-<button onclick="wysiwyg.command('divider')">
-    Divider
-</button>
-<!-- Highlight color is applied on quote -->
-<button onclick="wysiwyg.command('quote')" id="quote">
-    Quote
-</button>
 <button onclick="wysiwyg.command('unorderedList')" id="unorderedList">
     Unordered list
 </button>
@@ -75,12 +64,23 @@
 <button onclick="wysiwyg.command('alignRight')" id="alignRight">
     Align right
 </button>
+<button onclick="wysiwyg.command('color')">
+    <!-- .command('color') changes text to highlight color set on constructor -->
+    Color
+</button>
+<button onclick="wysiwyg.command('divider')">
+    Divider
+</button>
+<!-- Highlight color is applied on quote -->
+<button onclick="wysiwyg.command('quote')" id="quote">
+    Quote
+</button>
 <!-- check out the callback to pre process image element before load -->
 <button onclick="wysiwyg.command('image')">
     Image
 </button>
 <!-- You can add custom element -->
-<button onclick="customElement()">
+<button onclick="addSmile()">
     Smile
 </button>
 <!-- You can add custom element -->
@@ -122,7 +122,6 @@
         //     small: 0.8,
         // },
         callback: c => {
-            console.log(c)
             if (c.caratPosition) {
                 // Tracks carat position
                 // Make carat to be always within the viewport
@@ -135,7 +134,6 @@
 
             if (c.commandTracker) {
                 // {
-                //     "quote": boolean;
                 //     "unorderedList": boolean;
                 //     "orderedList": boolean;
                 //     "alignLeft": boolean;
@@ -160,7 +158,7 @@
                     let el = document.getElementById(k);
                     if (el) {
                         if (ct[k] === true) {
-                            el.style.backgroundColor = 'lightgray';
+                            el.style.backgroundColor = "lightblue";
                         } else if (ct[k] === false) {
                             el.style.backgroundColor = 'white';
                         }
@@ -186,9 +184,8 @@
             }
 
             if (c.hashtag) {
-                console.log({ hashtag: c.hashtag });
+                // you can modify hashtag element before it gets loaded
                 for (let h of c.hashtag) {
-
                     h.style = {
                         color: 'red'
                     };
@@ -200,9 +197,8 @@
             }
 
             if (c.urllink) {
-                console.log({ urllink: c.urllink });
+                // you can modify urllink element before it gets loaded
                 for (let u of c.urllink) {
-
                     u.style = {
                         color: 'red'
                     };
@@ -216,7 +212,7 @@
         }
     });
 
-    let customElement = () => {
+    let addSmile = () => {
         // add emoji
         wysiwyg.command({
             element: '😃' // can be html string (ex - <div>Hello</div>) or Node elements (ex - document.createElement('div'))
@@ -226,7 +222,6 @@
     let tablePlugin = (col, row) => {
         wysiwyg.command({
             element: createTable(col, row), // create custom table element, from plugins.js
-            // contenteditable: true
         });
     }
 

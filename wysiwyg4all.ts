@@ -64,7 +64,6 @@ type CommandObject = {
 type CommandInput = BuiltInCommand | CommandObject | string;
 
 type CommandTracker = {
-	"quote": boolean;
 	"unorderedList": boolean;
 	"orderedList": boolean;
 	"alignLeft": boolean;
@@ -282,6 +281,11 @@ export class Wysiwyg4All {
 	private colorCommandDebounceTimer: number | null = null;
 	private pendingColorCommand: { color?: string; backgroundColor?: string } | null = null;
 	private pendingColorSelectionSnapshot: { start: number; end: number } | null = null;
+	private trackerUpdateInFlight = false;
+	private trackerUpdateQueued = false;
+	private livePickerColor: string | null = null;
+	private livePickerBackgroundColor: string | null = null;
+	private colorPickerInteractionUntil = 0;
 
 	public highlightColor: string;
 	public defaultFontColor = "#111827";
@@ -341,8 +345,10 @@ export class Wysiwyg4All {
 		this.bindCoreEvents();
 		this.bootstrapExtensions(option.extensions || []);
 
-		void this.loadHTML(option.html || "", option.editable ?? true).catch((err) => {
-			console.error(err);
+		queueMicrotask(() => {
+			void this.loadHTML(option.html || "", option.editable ?? true).catch((err) => {
+				console.error(err);
+			});
 		});
 	}
 
@@ -1997,10 +2003,76 @@ export class Wysiwyg4All {
 		}
 	}
 
+	private isTransparentComputedColor(color: string): boolean {
+		const normalized = color.replace(/\s+/g, "").toLowerCase();
+		if (normalized === "transparent") return true;
+		const rgba = normalized.match(/^rgba\((\d+),(\d+),(\d+),([^\)]+)\)$/);
+		if (!rgba) return false;
+		return Number(rgba[4]) === 0;
+	}
+
+	private resolveTrackerTextColor(anchor: Element): string {
+		const color = tryNormalizeColor(window.getComputedStyle(anchor).color);
+		return color || this.defaultFontColor;
+	}
+
+	private resolveTrackerBackgroundColor(anchor: Element): string {
+		let current: Element | null = anchor;
+		while (current) {
+			const bg = window.getComputedStyle(current).backgroundColor;
+			if (!this.isTransparentComputedColor(bg)) {
+				const normalized = tryNormalizeColor(bg);
+				if (normalized) return normalized;
+			}
+
+			if (current === this.element) {
+				break;
+			}
+			current = current.parentElement;
+		}
+
+		return this.defaultBackgroundColor;
+	}
+
 	private updateCommandTracker(): void {
+		this.trackerUpdateQueued = true;
+		if (this.trackerUpdateInFlight) {
+			return;
+		}
+
+		this.trackerUpdateInFlight = true;
+		void this.flushCommandTrackerUpdates();
+	}
+
+	private async flushCommandTrackerUpdates(): Promise<void> {
+		try {
+			while (this.trackerUpdateQueued) {
+				this.trackerUpdateQueued = false;
+				await this.runCommandTrackerUpdate();
+			}
+		} finally {
+			this.trackerUpdateInFlight = false;
+			if (this.trackerUpdateQueued) {
+				this.trackerUpdateInFlight = true;
+				void this.flushCommandTrackerUpdates();
+			}
+		}
+	}
+
+	private async runCommandTrackerUpdate(): Promise<void> {
 		this.captureRange();
+		const currentRange = this.range;
+		const active = document.activeElement;
+		const isColorInputActive = active instanceof HTMLInputElement && active.type === "color";
+		const isColorPickerInteractionActive =
+			isColorInputActive || Date.now() < this.colorPickerInteractionUntil;
+		if (!isColorPickerInteractionActive) {
+			this.livePickerColor = null;
+			this.livePickerBackgroundColor = null;
+		}
+
 		const tracker = {
-			quote: false,
+			// quote: false,
 			unorderedList: false,
 			orderedList: false,
 			alignLeft: false,
@@ -2017,56 +2089,59 @@ export class Wysiwyg4All {
 			italic: false,
 			underline: false,
 			strike: false,
-			color: "",
-			backgroundColor: "",
+			color: this.defaultFontColor,
+			backgroundColor: this.defaultBackgroundColor,
 		} as CommandTracker;
-		if (!this.range) {
-			this.commandTracker = tracker;
-			return;
-		}
+		let line: HTMLElement | null = null;
+		if (currentRange) {
+			const focusNode = currentRange.collapsed ? currentRange.startContainer : currentRange.commonAncestorContainer;
+			const element = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentElement : (focusNode as Element);
+			if (element && this.element.contains(element)) {
+				tracker.color = this.resolveTrackerTextColor(element);
+				tracker.backgroundColor = this.resolveTrackerBackgroundColor(element);
 
-		const focusNode = this.range.collapsed ? this.range.startContainer : this.range.commonAncestorContainer;
-		const element = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentElement : (focusNode as Element);
-		if (!element || !this.element.contains(element)) {
-			this.commandTracker = tracker;
-			return;
-		}
+				for (const [command, cls] of Object.entries(this.styleTagOfCommand)) {
+					const owner = element.closest(`.${cls}`) as HTMLElement | null;
+					if (!owner) continue;
+					if (command === "color" || command === "backgroundColor") continue;
+					(tracker as any)[command] = true;
+				}
 
-		for (const [command, cls] of Object.entries(this.styleTagOfCommand)) {
-			const owner = element.closest(`.${cls}`) as HTMLElement | null;
-			if (!owner) continue;
-			if (command === "color") {
-				const color = owner.style.color ? tryNormalizeColor(owner.style.color) : null;
-				tracker.color = (color || "") as any;
-			} else if (command === "backgroundColor") {
-				const color = owner.style.backgroundColor ? tryNormalizeColor(owner.style.backgroundColor) : null;
-				tracker.backgroundColor = (color || "") as any;
-			} else {
-				(tracker as any)[command] = true;
+				line = this.getClosestLine(currentRange.startContainer);
 			}
 		}
 
-		const line = this.getClosestLine(this.range.startContainer);
+		if (isColorPickerInteractionActive) {
+			if (this.livePickerColor) tracker.color = this.livePickerColor;
+			if (this.livePickerBackgroundColor) tracker.backgroundColor = this.livePickerBackgroundColor;
+		}
+
 		if (line) {
 			tracker.alignLeft = !line.classList.contains("_alignCenter_") && !line.classList.contains("_alignRight_");
 			tracker.alignCenter = line.classList.contains("_alignCenter_");
 			tracker.alignRight = line.classList.contains("_alignRight_");
-			tracker.quote = !!line.closest("blockquote");
+			// tracker.quote = !!line.closest("blockquote");
 			tracker.unorderedList = !!line.closest("ul");
 			tracker.orderedList = !!line.closest("ol");
 		}
 
 		this.commandTracker = tracker;
-		const caretNode = this.range.collapsed ? this.range.startContainer : this.range.endContainer;
 		let caretRect: DOMRect | null = null;
-		if (caretNode.nodeType === Node.TEXT_NODE) caretRect = this.range.getBoundingClientRect();
-		else if (caretNode instanceof Element) caretRect = caretNode.getBoundingClientRect();
+		if (currentRange) {
+			const caretNode = currentRange.collapsed ? currentRange.startContainer : currentRange.endContainer;
+			if (caretNode.nodeType === Node.TEXT_NODE) caretRect = currentRange.getBoundingClientRect();
+			else if (caretNode instanceof Element) caretRect = caretNode.getBoundingClientRect();
+		}
 
-		void this.safeCallback({
-			commandTracker: tracker,
-			range: this.range,
-			caratPosition: caretRect,
-		}).catch((err) => console.error(err));
+		try {
+			await this.safeCallback({
+				commandTracker: tracker,
+				range: currentRange,
+				caratPosition: caretRect,
+			});
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
 	private async scanSpecialTokens(): Promise<void> {
@@ -2216,6 +2291,16 @@ export class Wysiwyg4All {
 		const activeColorInput =
 			activeElement instanceof HTMLInputElement && activeElement.type === "color";
 
+		if (isColorObjectAction && typeof action === "object" && action) {
+			this.colorPickerInteractionUntil = Date.now() + 500;
+			if (typeof action.color === "string") {
+				this.livePickerColor = tryNormalizeColor(action.color) || action.color;
+			}
+			if (typeof action.backgroundColor === "string") {
+				this.livePickerBackgroundColor = tryNormalizeColor(action.backgroundColor) || action.backgroundColor;
+			}
+		}
+
 		if (isColorObjectAction && (this.suspendSelectionCaptureForColorPicker || activeColorInput)) {
 			const sel = window.getSelection();
 			const liveRange =
@@ -2314,7 +2399,6 @@ export class Wysiwyg4All {
 				const maybeColor = tryNormalizeColor(action);
 				if (maybeColor) {
 					this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", maybeColor);
-					this.updateCommandTracker();
 				}
 			}
 
@@ -2374,25 +2458,10 @@ export class Wysiwyg4All {
 				};
 
 				if (activeColorInput) {
-					this.pendingColorCommand = {
-						color: action.color,
-						backgroundColor: action.backgroundColor,
-					};
-					this.pendingColorSelectionSnapshot = selectionSnapshot;
-
-					if (this.colorCommandDebounceTimer !== null) {
-						window.clearTimeout(this.colorCommandDebounceTimer);
-					}
-
-					this.colorCommandDebounceTimer = window.setTimeout(() => {
-						const pending = this.pendingColorCommand;
-						const pendingSnapshot = this.pendingColorSelectionSnapshot;
-						this.pendingColorCommand = null;
-						this.pendingColorSelectionSnapshot = null;
-						this.colorCommandDebounceTimer = null;
-						if (!pending) return;
-						applyColorCommand(pending, pendingSnapshot);
-					}, 16);
+					applyColorCommand(
+						{ color: action.color, backgroundColor: action.backgroundColor },
+						selectionSnapshot
+					);
 					return;
 				}
 

@@ -1,495 +1,284 @@
 # Wysiwyg4All
 
-[Getting started](#getting-started) | [Default settings](#default-settings) | [List of Wysiwyg4All commands](#list-of-wysiwyg4all-commands) | [License](#license) </br> 
+[Getting started](#getting-started) | [Configuration](#configuration) | [Callback payload](#callback-payload) | [Commands](#commands) | [License](#license)
 
-**Wysiwyg4All** is a free opensource minimal WYSIWYG editor for your website. It is highly expandable and customizable.
-
-You can easily build your own full fledged WYSIWYG application with your own css design with this library.
-
-<br />
+Wysiwyg4All is a lightweight, extensible WYSIWYG editor for web apps.
 
 ## Getting started
 
-These following steps show basic demonstration of how to install **Wysiwyg4All**.
+### CDN usage
 
-1. Inside HTML **&lt;head>** add below:
-    ```html
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <!-- Browser/global bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/wysiwyg4all.css" />
-    ```
-
-    The package entry points are split by runtime:
-
-    - Browser/CDN: `dist/wysiwyg4all.js`
-    - Node ESM: `dist/wysiwyg4all.module.js`
-    - Node CJS: `dist/wysiwyg4all.module.cjs`
-
-    If you are working on module/bundler based projects:
-
-    ```bash
-    npm i wysiwyg4all
-    ```
-
-    Then, import the library from your project main file:
-
-    ```js
-    import { Wysiwyg4All } from 'wysiwyg4all';
-    import 'wysiwyg4all/css';
-    ```
-
-
-2. Inside  **&lt;body>**, create **&lt;div>** with an id ('myeditor' ,for example) and give custom css style. Buttons can be created to actuate wysiwyg functionality. We added a button which will change text size to **'h1'** at the **'onclick'** event using `wysiwyg.command('h1')` function. Diverse command options can be selected, which are listed in below [List of Wysiwyg4All commands](#List-of-Wysiwyg4All-commands). Of course, the button design can be customized by your own taste. 
-
-    <br />
-
-    <u>**_Example 1_**</u>
-
-    ```html
-    <div id="myeditor" style="width: 512px; padding:1rem; border: solid 1px teal"></div>
-    <button onclick="wysiwyg.command('h1')">
-        H1
-    </button>
-    ```
-    <br />
-
-## Default settings
-
-In **Wysiwyg4All** function, you shuold set default properties for element id, placeholder string, spell check, highlight color, last line blank, hash-tag and URL link, log mutation. Add Wysiwyg4All default setting script inside your **&lt;script**&gt;. The **&lt;script>** tag should come after closing the **&lt;/body**&gt; tag. Following script is an example for setting some of the default properties. **Wysiwyg4All** function will be created under the name of **wysiwyg** in the entire examples.
-
-<br />
-
-<u>**_Example 2_**</u>
-
-```js
-let wysiwyg = new Wysiwyg4All({
-    //set ID of target <DIV>.
-    elementId: 'myeditor',
-
-    // Add placeholder string.
-    placeholder: 'Build your custom wysiwyg',
-
-    // Set spellcheck to true/false.
-    spellcheck: false, 
-
-    // Set color scheme of wysiwyg (HTML color name | hex | rgb | hsl).
-    highlightColor: 'teal',
-
-    // When set to true, blank line will always be added on the last line of text area.
-    lastLineBlank: false,
-
-    // When set to true, wysiwyg will auto detect hashtag strings.
-    hashtag: true,
-
-    // When set to true, wysiwyg will auto detect url strings
-    urllink: true,
-
-    // When set to true, wysiwyg will output DOM mutation data via callback function.
-    logMutation: false,
-
-    // font size for each display
-    fontSize: {
-        desktop: 18, // Can be css value: '18px', '2em'... etc. When number is given, it normalizes to 'px'
-        tablet: 16, // (max-width: 899px) Optional, if not given, inherits from desktop size.
-        phone: 14, // (max-width: 599px) Optional, if not given, inherits from tablet size.
-        
-        // header sizes below -
-        h1: 4.2, // Can be css value: '18px', '2em'... etc. When number is given, it normalizes to 'em'
-        h2: 3.56,
-        h3: 2.92,
-        h4: 2.28,
-        h5: 1.64,
-        h6: 1.15,
-        small: 0.8,
-    },
-})
-```
-<br />
-
-### Command tracker
-
-Callback function is used to log properties of **command tracker**, **images**, **hashtags**, **URL links**, **caret position** and **log mutation**. Include callback function inside your **&lt;script>**.
-<br/>
-Following code example shows default setting of `.commandTracker`, which shows current status of the text style in the console log.
-
-<br />
-
-<u>**_Example 3_**</u>
-
-```js
-let wysiwyg = new Wysiwyg4All({
-    callback: c => {
-        if (c.commandTracker) {
-            let ct = c.commandTracker;
-            console.log(ct)
-            if (typeof ct.color === 'string')
-            // change the color wheel input value based on the position of the caret
-            document.getElementById('colorInput').value = ct.color;
-            else
-            // If color output is true(boolean), the current color is the highlight color
-            document.getElementById('colorInput').value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
-        }
-        return c;
-    }
-})
-```
-<br />
-
-### Image style
-
-Image style can be pre-processed in `.image`. Following code example shows setting default width size of image by 8rem with border of red color, border width of 2px and triggering 'image clicked' message pop-up alert on the 'onclick' event. 
-
-<br />
-
-<u>**_Example 4_**</u>
-
-```js
-    let wysiwyg = new Wysiwyg4All({
-        callback: c => {
-            if (c.image) {
-                // you can modify image element before it gets loaded
-                console.log({image: c.image});
-                for (let img of c.image) {
-                       img.style = {
-                           width: '20rem',
-                           border: 'solid 2px red'
-                       };
-    
-                       img.onclick = () => {
-                           alert(`image clicked!`);
-                       };
-                }
-            }
-            return c;
-        }
-    })
-```
-<br />
-
-### Hashtag style
-
-Default hashtag properties can be modified in `.hashtag `. Following code example shows setting default color of hashtag as red and giving message pop-up alert, whenever clicking hashtag string. 
-
-<br />
-
-<u>**_Example 5_**</u>
-
-```js
-    let wysiwyg = new Wysiwyg4All({
-        callback: c => {
-            if (c.hashtag) {
-                console.log({hashtag: c.hashtag});
-                for (let h of c.hashtag) {
-    
-                       h.style = {
-                           color: 'red'
-                       };
-    
-                       h.onclick = () => {
-                           alert(`${h.tag} clicked!`);
-                       };
-                }
-            }
-            return c;
-        }
-    })
-```
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/hashtag.gif" width="500">
-
-<br />
-
-### URL style
-
-Default URL link properties can be modified in `.urllink`.  Following code example shows setting default color of URL link as red and displaying message pop-up alert, whenever clicking URL string. 
-
-<br />
-
-<u>**_Example 6_**</u>
-
-```js
-let wysiwyg = new Wysiwyg4All({
-    callback: c => {
-        if (c.urllink) {
-            console.log({urllink: c.urllink});
-            for (let u of c.urllink) {
-                   u.style = {
-                       color: 'red'
-                   };
-                u.onclick = () => {
-                    alert(`${u.url} clicked!`);
-                };
-            }
-        }
-        return c;
-})
-```
-
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/url%20link.gif" width="500">
-
-<br />
-
-### Caret position
-
-Default caret position properties can be modified in `.caratPosition` . Copy and paste the following code example. Specific details can be referred in API manual.
-
-<br />
-
-<u>**_Example 7_**</u>
-
-```js
-let wysiwyg = new Wysiwyg4All({
-    callback: c => {
-        if (c.caratPosition) {
-            // Tracks carat position
-            // Make carat to be always within the viewport
-            let viewPortHeight = Math.min(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-            let minusWhenOutOfView = viewPortHeight - c.caratPosition.top;
-            if (minusWhenOutOfView < 0)
-                window.scrollBy(0, -minusWhenOutOfView);
-        }
-        return c;
-    }
-})
-```
-
-<br />
-
-### Log mutation
-
-Default log mutation properties can be modified in `.mutation` . Copy and paste the following code example. Specific details can be referred in API manual.
-
-<br />
-
-<u>**_Example 8_**</u>
-
-```js
-    let wysiwyg = new Wysiwyg4All({
-        callback: c => {
-            if (c.mutation) {
-                // outputs dom mutation information
-                console.log({mutation: c.mutation});
-            }
-            return c;
-        }
-    })
-```
-
-
-<br />
-
-
-### Custom element type
-
-HTML string or node element can be assigned in `wysiwyg.command()` element value. In the following example code, smile emoji (😀) is loaded in the custom element that would be added inline, whenever `customElement()` function is called such as by using customElement [command button](#Custom-element-insertion). Following code should be included in **&lt;script>**.
-
-<br />
-
-<u>**_Example 9_**</u>
-
-```js
-let customElement = () => {
-    // add smile emoji. This can be html string (ex - <div>Hello</div>) or node element (ex - document.createElement('div'))
-    wysiwyg.command({
-        element: '&#128512;'
-    });
-};
-```
-
-<br />
-
-### Export data
-
-`wysiwyg.export()` should be included in **&lt;script>**. It exports brief summary of Document Object Model(DOM) including HTML element.
-
-<br />
-
-<u>**_Example 10_**</u>
-
-```js
-let export_data = () => {
-    wysiwyg.export(pre => {
-        console.log(pre);
-    }).then(e => {
-        console.log(e);
-    });
-};
-```
-
-<br />
-
-# List of Wysiwyg4All commands
-
-The Wysiwyg can edit text styles and text input field in diverse manners by using `wysiwyg.command()` function. Buttons can be created inside your **&lt;body>** as shown in the [Getting started](#getting-started) example, and to activate commands on 'onclick' event. The list of the command inputs is shown in the following. 
-
-### Text style
-
-`wysiwyg.command('bold' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'small' | 'italic' | 'underline' | 'strike')` changes the text style by bold, heading level (h1 ~ h6), small letter, italic, underline or strike.
-
-<br />
-
-<u>**_Example 11_**</u>
+Add the bundle and stylesheet inside `<head>`:
 
 ```html
-<button onclick="wysiwyg.command('h1')">
-    H1
-</button>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wysiwyg4all@latest/dist/wysiwyg4all.css" />
 ```
+
+### Bundler usage
+
+```bash
+npm i wysiwyg4all
+```
+
+```js
+import { Wysiwyg4All } from "wysiwyg4all";
+import "wysiwyg4all/css";
+```
+
+### Quick example
+
+```html
+<div id="myeditor" style="width: 512px; padding: 1rem; border: solid 1px teal"></div>
+
+<button onclick="wysiwyg.command('h1')">H1</button>
+<button onclick="wysiwyg.command('bold')">Bold</button>
+<button onclick="wysiwyg.command('color')">Highlight Color</button>
+<input id="colorInput" type="color" oninput="wysiwyg.command({ color: this.value })" />
+<input id="bgInput" type="color" oninput="wysiwyg.command({ backgroundColor: this.value })" />
+
+<script>
+  const wysiwyg = new Wysiwyg4All({
+    elementId: "myeditor"
+  });
+</script>
+```
+
+## Configuration
+
+```js
+const wysiwyg = new Wysiwyg4All({
+  elementId: "myeditor",
+  editable: true,
+  placeholder: "Build your custom WYSIWYG",
+  spellcheck: false,
+  highlightColor: "teal", // color string or CSS variable map object
+  html: "<p>Initial content</p>",
+  hashtag: true,
+  urllink: true,
+  fontSize: {
+    desktop: 18, // px when number is passed
+    tablet: 16,
+    phone: 14,
+    h1: 4.2, // em when number is passed
+    h2: 3.56,
+    h3: 2.92,
+    h4: 2.28,
+    h5: 1.64,
+    h6: 1.15,
+    small: 0.8
+  },
+  extensions: [],
+  callback: (payload) => payload
+});
+```
+
+Notes:
+- `lastLineBlank` and `logMutation` are not active options in the current version.
+- `highlightColor` can be a color string (`"#0d9488"`, `"teal"`, `"rgb(...)"`) or a color scheme object.
+
+## Callback payload
+
+The callback can receive updates for:
+- `commandTracker`
+- `range`
+- `caratPosition`
+- `loading`
+- `image`
+- `hashtag`
+- `urllink`
+
+Example:
+
+```js
+const colorInput = document.getElementById("colorInput");
+const bgInput = document.getElementById("bgInput");
+
+const wysiwyg = new Wysiwyg4All({
+  elementId: "myeditor",
+  callback: (c) => {
+    if (c.commandTracker) {
+      const ct = c.commandTracker;
+      console.log("commandTrackerColor", ct.color, "commandTrackerBg", ct.backgroundColor);
+
+      // Keep pickers in sync with caret position style.
+      if (colorInput && typeof ct.color === "string" && ct.color) {
+        colorInput.value = ct.color;
+      }
+      if (bgInput && typeof ct.backgroundColor === "string" && ct.backgroundColor) {
+        bgInput.value = ct.backgroundColor;
+      }
+    }
+
+    return c;
+  }
+});
+```
+
+`commandTracker.color` and `commandTracker.backgroundColor` are strings in hex form when resolvable (for example `#0d9488`).
+
+## Commands
+
+Use `wysiwyg.command(...)`.
+
+### Inline style commands
+
+```js
+wysiwyg.command("bold");
+wysiwyg.command("italic");
+wysiwyg.command("underline");
+wysiwyg.command("strike");
+wysiwyg.command("h1");
+wysiwyg.command("h2");
+wysiwyg.command("h3");
+wysiwyg.command("h4");
+wysiwyg.command("h5");
+wysiwyg.command("h6");
+wysiwyg.command("small");
+```
+
+Behavior:
+- These commands toggle on/off when applied to selected text.
+- For collapsed caret selections, style is applied to the next typed characters.
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txt%20style.gif" width="500">
 
-### ⚠️ Warning
+### Text color and background color
 
-When executing wysiwyg commands, the text selection in wysiwyg should be present.
+```js
+// Uses current highlightColor
+wysiwyg.command("color");
 
-For some browsers, wysiwyg text selection can be disabled the moment the user clicks on the command button.
-To prevent this, it might be a good idea to prevent default on command buttons:
+// Explicit text color
+wysiwyg.command({ color: "#ef4444" });
 
-```html
-<button onmousedown="event.preventDefault()" onclick="wysiwyg.command('h1')">
-    H1
-</button>
-```
+// Explicit background color
+wysiwyg.command({ backgroundColor: "#fef08a" });
 
-<br />
-
-### **Text color**
-`wysiwyg.command('color')` changes the text color ('black') to **wysiwyg** default highlight color ('teal' in this example). 
-
-<br />
-
-<u>**_Example 12_**</u>
-
-```html
-<button onclick="wysiwyg.command('color')">
-    Color
-</button>
-```
-
-<br />
-
-Other color choice can be provided to user by creating HTML color picker.
-
-<br />
-
-<u>**_Example 13_**</u>
-
-```html
-<input id='colorInput' type='color' oninput="wysiwyg.command({color: event.target.value})"/>
+// Color string shortcut is also supported
+wysiwyg.command("#3b82f6");
 ```
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/txtcolor.gif" width="500">
 
-<br />
+### Layout and block commands
 
-### **Divider**
-`wysiwyg.command('divider')`adds horizontal line below the current text position.
-
-<br />
-
-<u>**_Example 14_**</u>
-
-```html
-<button onclick="wysiwyg.command('divider')">
-    Divider
-</button>
+```js
+wysiwyg.command("alignLeft");
+wysiwyg.command("alignCenter");
+wysiwyg.command("alignRight");
+wysiwyg.command("quote");
+wysiwyg.command("unorderedList");
+wysiwyg.command("orderedList");
+wysiwyg.command("divider");
+wysiwyg.command("image");
 ```
 
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Divider.PNG" width="500">
-
-<br />
-
-### **Quote**
-
-`wysiwyg.command('quote')`adds block quote on the selected line. Note that the default highlight color is applied on the block quote.
-
-<br />
-
-<u>**_Example 15_**</u>
-
-```html
-<button onclick="wysiwyg.command('Quote')">
-    Quote
-</button>
-```
-
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Quote.PNG" width="500">
-
-<br />
-
-### **List**
-
-`wysiwyg.command('unorderedList')` adds unordered list and`wysiwyg.command('orderedList')`adds ordered list on the selected line.  Following code shows creating command button to add unorderedList.
-
-<br />
-
-<u>**_Example 16_**</u>
-
-```html
-<button onclick="wysiwyg.command('unorderedList')">
-    Unordered list
-</button>
-```
-
-<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/unordered%20list.gif" width="500">
-
-<br />
-
-### **Text alignment**
-
-`wysiwyg.command('alignLeft')` , `wysiwyg.command('alignCenter')`  or `wysiwyg.command('alignRight')`aligns selected text to the left, center or to the right. Following code shows creating command button for aligning text to the center of the text area. Clicking the command button again restore to the initial alignment.
-
-<br />
-
-<u>**_Example 17_**</u>
-
-```html
-<button onclick="wysiwyg.command('alignCenter')">
-    Align center
-</button>
-```
+Alignment preview:
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/text%20alignment.gif" width="500">
 
-<br />
+Quote preview:
 
-### Image insertion
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Quote.PNG" width="500">
 
-`wysiwyg.command('image')` adds image below selected line. By clicking the 'image' command button, directory panel pops up and opening the image will make insertion into the text input field.
+List preview:
 
-<br />
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/unordered%20list.gif" width="500">
 
-<u>**_Example 18_**</u>
+Divider preview:
 
-```html
-<button onclick="wysiwyg.command('image')">
-    Image
-</button>
-```
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Divider.PNG" width="500">
+
+Image insertion preview:
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/Image%20insertion.gif" width="500">
 
-<br />
+### Custom insertion
 
-### Custom element insertion
+```js
+// Text node insertion
+wysiwyg.command({ element: "Hello" });
 
-`customElement()` adds pre-loaded HTML string or node elements inside a line. Smile emoji will be inserted whenever 'Smile' button is clicked in the following example as it was pre-loaded in the [default setting](#Custom-element-type) custom element example.
+// HTMLElement insertion
+const badge = document.createElement("span");
+badge.textContent = "NEW";
+badge.style.background = "#111827";
+badge.style.color = "#fff";
+badge.style.padding = "2px 6px";
+badge.style.borderRadius = "999px";
 
-<br />
-
-<u>**_Example 19_**</u>
-
-```html
-<button onclick="customElement()">
-  Smile
-</button>
+wysiwyg.command({
+  element: badge,
+  elementId: "custom_badge",
+  style: {
+    marginLeft: "8px"
+  }
+});
 ```
 
 <img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/emoji.gif" width="500">
 
-<br />
+## Image, hashtag, and URL decorators
+
+Use callback payloads to decorate generated tokens and uploaded images.
+
+```js
+const wysiwyg = new Wysiwyg4All({
+  elementId: "myeditor",
+  hashtag: true,
+  urllink: true,
+  callback: (c) => {
+    if (c.image) {
+      for (const img of c.image) {
+        img.style = {
+          width: "20rem",
+          border: "solid 2px red"
+        };
+      }
+    }
+
+    if (c.hashtag) {
+      for (const h of c.hashtag) {
+        h.style = { color: "red" };
+      }
+    }
+
+    if (c.urllink) {
+      for (const u of c.urllink) {
+        u.style = { color: "red" };
+      }
+    }
+
+    return c;
+  }
+});
+```
+
+Hashtag preview:
+
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/hashtag.gif" width="500">
+
+URL preview:
+
+<img src="https://github.com/broadwayinc/wysiwyg4all/blob/main/Manual%20figures/url%20link.gif" width="500">
+
+## Loading and exporting
+
+```js
+await wysiwyg.loadHTML("<p>Hello world</p>", true);
+
+const exported = await wysiwyg.export((setup) => {
+  // optional preprocessing before export
+  return setup;
+});
+
+console.log(exported.html);
+console.log(exported.text);
+console.log(exported.title);
+```
 
 ## License
 
-This project is licensed under the terms of the [MIT license](https://github.com/broadwayinc/colormangle/blob/main/LICENSE).
-
+This project is licensed under the terms of the [MIT license](https://github.com/broadwayinc/wysiwyg4all/blob/main/LICENSE).
