@@ -21,7 +21,8 @@
 
 //  placeholder
 ._wysiwyg4all[contenteditable='true'][placeholder]:empty::before,
-._wysiwyg4all[contenteditable='true'][placeholder]:has(> br:only-child)::before {
+._wysiwyg4all[contenteditable='true'][placeholder]:has(> br:only-child)::before,
+._wysiwyg4all[contenteditable='true'][placeholder]:has(> p:only-child > br:only-child)::before {
     color: var(--placeholder);
     content: attr(placeholder);
     word-break: break-word;
@@ -30,6 +31,7 @@
     line-height: 1.6em;
     letter-spacing: 0.025em;
     cursor: text;
+    position: absolute;
 }
 
 //  wysiwyg
@@ -47,7 +49,7 @@
     display: block;
     // overflow: hidden;
     user-select: text;
-
+    position: relative;
     .wysiwyg-fontSize-normal();
 
     &:focus {
