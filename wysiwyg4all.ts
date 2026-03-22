@@ -2130,8 +2130,21 @@ export class Wysiwyg4All {
 	}
 
 	private async runCommandTrackerUpdate(): Promise<void> {
-		this.captureRange();
-		const currentRange = this.range;
+		let currentRange: Range | null = null;
+		const sel = window.getSelection();
+		if (
+			sel &&
+			sel.rangeCount > 0 &&
+			this.element.contains(sel.anchorNode) &&
+			this.element.contains(sel.focusNode)
+		) {
+			currentRange = this.normalizeEditorRange(sel.getRangeAt(0));
+		}
+
+		if (!currentRange) {
+			this.captureRange();
+			currentRange = this.range;
+		}
 		const active = document.activeElement;
 		const isColorInputActive = active instanceof HTMLInputElement && active.type === "color";
 		const isColorPickerInteractionActive =
@@ -2171,7 +2184,10 @@ export class Wysiwyg4All {
 				tracker.backgroundColor = this.resolveTrackerBackgroundColor(element);
 
 				for (const [command, cls] of Object.entries(this.styleTagOfCommand)) {
+					const stopOwner = element.closest(`.${cls}_stop`) as HTMLElement | null;
 					const owner = element.closest(`.${cls}`) as HTMLElement | null;
+					if (stopOwner && owner && owner.contains(stopOwner)) continue;
+					if (stopOwner && !owner) continue;
 					if (!owner) continue;
 					if (command === "color" || command === "backgroundColor") continue;
 					(tracker as any)[command] = true;
