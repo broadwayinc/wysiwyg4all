@@ -1575,6 +1575,18 @@ export class Wysiwyg4All {
 		return null;
 	}
 
+	private findOutermostAncestorWithClass(node: Node, className: string): HTMLElement | null {
+		let current: Node | null = node.nodeType === Node.TEXT_NODE ? node.parentNode : node;
+		let outermost: HTMLElement | null = null;
+		while (current && current !== this.element) {
+			if (current instanceof HTMLElement && current.classList.contains(className)) {
+				outermost = current;
+			}
+			current = current.parentNode;
+		}
+		return outermost;
+	}
+
 	private collectPreservedInlineStyles(ancestor: HTMLElement, excludeClass: string): {
 		classes: string[];
 		color?: string;
@@ -1754,14 +1766,43 @@ export class Wysiwyg4All {
 
 		const range = this.splitRangeBoundaries(this.range.cloneRange());
 
+		const collapsedOutermostAncestor = range.collapsed
+			? this.findOutermostAncestorWithClass(range.startContainer, className)
+			: null;
 		const startAncestor = this.findClosestAncestorWithClass(range.startContainer, className);
 		const endAncestor = this.findClosestAncestorWithClass(range.endContainer, className);
-		const breakoutAncestor = startAncestor && startAncestor === endAncestor ? startAncestor : null;
+		const breakoutAncestor = range.collapsed
+			? collapsedOutermostAncestor
+			: (startAncestor && startAncestor === endAncestor ? startAncestor : null);
 
 		if (range.collapsed) {
 			if (breakoutAncestor) {
+				const stop = document.createElement("span");
+				stop.classList.add(`${className}_stop`);
+				const stopAnchor = document.createTextNode("\u200B");
+				stop.append(stopAnchor);
+
+				if (this.isCollapsedStyleAnchorSpan(breakoutAncestor)) {
+					const parent = breakoutAncestor.parentNode;
+					if (!parent) return;
+					const nextSibling = breakoutAncestor.nextSibling;
+					breakoutAncestor.remove();
+					parent.insertBefore(stop, nextSibling);
+					const after = document.createRange();
+					after.setStart(stopAnchor, 1);
+					after.collapse(true);
+					this.restoreLastSelection(after);
+					this.backupCurrentRange(after, { bypassNormalize: true });
+					this.element.focus({ preventScroll: true });
+					this.ensureRootHasSafeLine();
+					return;
+				}
+
+				const parent = breakoutAncestor.parentNode;
+				if (!parent) return;
+				parent.insertBefore(stop, breakoutAncestor.nextSibling);
 				const after = document.createRange();
-				after.setStartAfter(breakoutAncestor);
+				after.setStart(stopAnchor, 1);
 				after.collapse(true);
 				this.restoreLastSelection(after);
 				this.backupCurrentRange(after, { bypassNormalize: true });
