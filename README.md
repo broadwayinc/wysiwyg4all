@@ -74,10 +74,6 @@ const wysiwyg = new Wysiwyg4All({
 });
 ```
 
-Notes:
-- `lastLineBlank` and `logMutation` are not active options in the current version.
-- `highlightColor` can be a color string (`"#0d9488"`, `"teal"`, `"rgb(...)"`) or a color scheme object.
-
 ## Callback payload
 
 The callback can receive updates for:
