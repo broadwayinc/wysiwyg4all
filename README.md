@@ -2,7 +2,7 @@
 
 [Getting started](#getting-started) | [Configuration](#configuration) | [Callback payload](#callback-payload) | [Commands](#commands) | [License](#license)
 
-Wysiwyg4All is a lightweight, extensible WYSIWYG editor for web apps.
+Wysiwyg4All is a lightweight, free extensible WYSIWYG editor for web apps.
 
 ## Getting started
 
