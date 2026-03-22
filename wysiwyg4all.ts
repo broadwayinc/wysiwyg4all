@@ -63,9 +63,27 @@ type CommandObject = {
 
 type CommandInput = BuiltInCommand | CommandObject | string;
 
-type TrackerValue = boolean | string;
-
-type CommandTracker = Record<string, TrackerValue>;
+type CommandTracker = {
+	"quote": boolean;
+	"unorderedList": boolean;
+	"orderedList": boolean;
+	"alignLeft": boolean;
+	"alignCenter": boolean;
+	"alignRight": boolean;
+	"h1": boolean;
+	"h2": boolean;
+	"h3": boolean;
+	"h4": boolean;
+	"h5": boolean;
+	"h6": boolean;
+	"small": boolean;
+	"bold": boolean;
+	"italic": boolean;
+	"underline": boolean;
+	"strike": boolean;
+	"color": string;
+	"backgroundColor": string;
+};
 
 type ImageData = {
 	elementId: string;
@@ -106,14 +124,10 @@ type CallbackPayload = {
 	commandTracker?: CommandTracker;
 	range?: Range | null;
 	caratPosition?: DOMRect | null;
-	mutation?: unknown[];
 	loading?: boolean;
 	image?: ImageData[];
 	hashtag?: HashtagData[];
 	urllink?: UrlData[];
-	custom?: CustomData[];
-	removed?: Record<string, unknown[]>;
-	paste?: ClipboardEvent;
 };
 
 type ExportPayload = {
@@ -155,9 +169,6 @@ export type Wysiwyg4AllOptions = {
 	// lastLineBlank?: boolean;
 	hashtag?: boolean;
 	urllink?: boolean;
-	logMutation?: boolean;
-	logExecution?: boolean;
-	logNormalizeRemoval?: boolean;
 	extensions?: ExtensionFactory[];
 };
 
@@ -266,9 +277,6 @@ export class Wysiwyg4All {
 	private callback: Wysiwyg4AllOptions["callback"];
 	private readonly hashtagEnabled: boolean;
 	private readonly urlEnabled: boolean;
-	private readonly logExecution: boolean;
-	private readonly logMutation: boolean;
-	private readonly logNormalizeRemoval: boolean;
 	private lastKey: string | null = null;
 	private suspendSelectionCaptureForColorPicker = false;
 	private colorCommandDebounceTimer: number | null = null;
@@ -306,10 +314,6 @@ export class Wysiwyg4All {
 		this.callback = option.callback;
 		this.hashtagEnabled = !!option.hashtag;
 		this.urlEnabled = !!option.urllink;
-		this.logExecution = !!option.logExecution;
-		this.logMutation = !!option.logMutation;
-		this.logNormalizeRemoval = !!option.logNormalizeRemoval;
-		// this.lastLineBlank = !!option.lastLineBlank;
 
 		this.styleTagOfCommand = { ...CLASS_BY_COMMAND };
 		this.highlightColor = tryNormalizeColor(
@@ -340,13 +344,6 @@ export class Wysiwyg4All {
 		void this.loadHTML(option.html || "", option.editable ?? true).catch((err) => {
 			console.error(err);
 		});
-	}
-
-	private log(message: string, data?: unknown): void {
-		if (this.logExecution) {
-			if (data === undefined) console.log(message);
-			else console.log(message, data);
-		}
 	}
 
 	private initializeCommandTracker(): void {
@@ -501,8 +498,8 @@ export class Wysiwyg4All {
 				const stillOnColorInput = nextActive instanceof HTMLInputElement && nextActive.type === "color";
 				if (stillOnColorInput) return;
 				this.suspendSelectionCaptureForColorPicker = false;
-				this.captureRange();
-				this.updateCommandTracker();
+				// this.captureRange();
+				// this.updateCommandTracker();
 			}, 0);
 			return;
 		}
@@ -516,12 +513,11 @@ export class Wysiwyg4All {
 			if (!(active instanceof HTMLInputElement && active.type === "color")) {
 				this.suspendSelectionCaptureForColorPicker = false;
 			} else {
-			return;
+				return;
 			}
 		}
 		this.captureRange();
 		this.updateCommandTracker();
-		// this.ensureLastLineBlank();
 	};
 
 	private onKeyDown = (ev: KeyboardEvent): void => {
@@ -586,14 +582,6 @@ export class Wysiwyg4All {
 			}
 		}
 	}
-
-	// private ensureLastLineBlank(force = false): void {
-	// 	if (!this.lastLineBlank && !force) return;
-	// 	const last = this.element.lastElementChild;
-	// 	if (!last || last.tagName !== "P" || (last.textContent || "").trim() !== "") {
-	// 		this.element.append(this.createEmptyParagraph());
-	// 	}
-	// }
 
 	private createEmptyParagraph(seed?: string): HTMLParagraphElement {
 		const p = document.createElement("p");
@@ -985,13 +973,13 @@ export class Wysiwyg4All {
 		return normalized;
 	}
 
-	private restoreLastSelection(range: Range | null=this.rangeBackup): void {
+	private restoreLastSelection(range: Range | null = this.rangeBackup): void {
 		if (!range) return;
 		const normalized = this.normalizeEditorRange(range);
 		if (!normalized) return;
 		const sel = window.getSelection();
 		if (!sel) return;
-		
+
 		this.range = normalized;
 		sel.removeAllRanges();
 		sel.addRange(normalized);
@@ -1034,10 +1022,6 @@ export class Wysiwyg4All {
 		if (!track) return;
 
 		this.observer = new MutationObserver((mutations) => {
-			// if (this.logMutation) {
-			// 	void this.safeCallback({ mutation: mutations as unknown[] });
-			// }
-
 			for (const mutation of mutations) {
 				if (mutation.type !== "childList") continue;
 				const target = mutation.target;
@@ -1164,14 +1148,6 @@ export class Wysiwyg4All {
 					el.tagName !== "BR" &&
 					el.tagName !== "HR"
 				) {
-					if (this.logNormalizeRemoval) {
-						console.log("_normalizeDocument(): queued node removal", {
-							tagName: el.tagName,
-							id: el.id || null,
-							className: el.className || null,
-							parentTagName: el.parentElement?.tagName || null,
-						});
-					}
 					toRemove.push(el);
 				}
 			}
@@ -2165,9 +2141,9 @@ export class Wysiwyg4All {
 			const sel = window.getSelection();
 			const liveRange =
 				sel &&
-				sel.rangeCount > 0 &&
-				this.element.contains(sel.anchorNode) &&
-				this.element.contains(sel.focusNode)
+					sel.rangeCount > 0 &&
+					this.element.contains(sel.anchorNode) &&
+					this.element.contains(sel.focusNode)
 					? this.normalizeEditorRange(sel.getRangeAt(0))
 					: null;
 
@@ -2202,15 +2178,10 @@ export class Wysiwyg4All {
 				} else {
 					this.wrapSelectionWithClass(CLASS_BY_COMMAND[action as InlineClassCommand], action as InlineClassCommand);
 				}
-
-				// this.updateCommandTracker();
-				// return;
 			}
 
 			else if (["alignLeft", "alignCenter", "alignRight"].includes(action)) {
 				this.applyAlignment(action as AlignCommand);
-				// this.updateCommandTracker();
-				// return;
 			}
 
 			else if (action === "divider") {
@@ -2218,17 +2189,14 @@ export class Wysiwyg4All {
 				this.insertNodeAtSelection(hr, true);
 				this.ensureCaretAfterNonTextElement(hr);
 				this.backupCurrentRange();
-				// return;
 			}
 
 			else if (action === "quote") {
-				// this.captureRange();
 				if (this.range) {
 					const quoteParent = this.getContainingQuote(this.range.startContainer);
 					if (quoteParent) {
 						this.unwrapQuote(quoteParent);
 						this.normalizeDocument();
-						// return;
 					}
 				}
 
@@ -2239,7 +2207,6 @@ export class Wysiwyg4All {
 				this.ensureTrailingEditableLineAfter(quote);
 				this.setSelectionAtStart(quoteLine);
 				this.backupCurrentRange();
-				// return;
 			}
 
 			else if (action === "unorderedList" || action === "orderedList") {
@@ -2251,13 +2218,10 @@ export class Wysiwyg4All {
 				this.ensureTrailingEditableLineAfter(list);
 				this.setSelectionAtStart(li);
 				this.backupCurrentRange();
-				// return;
 			}
 
 			else if (action === "image") {
-				// this.captureRange();
 				this.imageInput.click();
-				// return;
 			}
 
 			else {
@@ -2378,7 +2342,6 @@ export class Wysiwyg4All {
 
 				const isTextNode = node.nodeType === Node.TEXT_NODE;
 				this.insertNodeAtSelection(node, !isTextNode);
-				// if (customElement && action.insert !== true) {
 				if (customElement) {
 					this.ensureCaretAfterNonTextElement(customElement);
 				}

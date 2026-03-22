@@ -11,67 +11,68 @@
 <div class="wysiwyg-wrap">
     <div id="myeditor" style="padding:1rem; border: solid 1px teal"></div>
 </div>
+<br>
 <!-- command examples below -->
-<button onclick="wysiwyg.command('bold')">
+<button onclick="wysiwyg.command('bold')" id="bold">
     Bold
 </button>
-<button onclick="wysiwyg.command('h1')">
+<button onclick="wysiwyg.command('h1')" id="h1">
     H1
 </button>
-<button onclick="wysiwyg.command('h2')">
+<button onclick="wysiwyg.command('h2')" id="h2">
     H2
 </button>
-<button onclick="wysiwyg.command('h3')">
+<button onclick="wysiwyg.command('h3')" id="h3">
     H3
 </button>
-<button onclick="wysiwyg.command('h4')">
+<button onclick="wysiwyg.command('h4')" id="h4">
     H4
 </button>
-<button onclick="wysiwyg.command('h5')">
+<button onclick="wysiwyg.command('h5')" id="h5">
     H5
 </button>
-<button onclick="wysiwyg.command('h6')">
+<button onclick="wysiwyg.command('h6')" id="h6">
     H6
 </button>
-<button onclick="wysiwyg.command('small')">
+<button onclick="wysiwyg.command('small')" id="small">
     Small
 </button>
-<button onclick="wysiwyg.command('italic')">
+<button onclick="wysiwyg.command('italic')" id="italic">
     Italic
 </button>
-<button onclick="wysiwyg.command('underline')">
+<button onclick="wysiwyg.command('underline')" id="underline">
     Underline
 </button>
-<button onclick="wysiwyg.command('strike')">
+<button onclick="wysiwyg.command('strike')" id="strike">
     Strike
 </button>
 
 <input id='colorInput' type='color' oninput="wysiwyg.command({color: event.target.value})" />
-<!-- .command('color') changes text to highlight color set on constructor -->
 <input id='backgroundColorInput' type='color' oninput="wysiwyg.command({backgroundColor: event.target.value})" />
 <button onclick="wysiwyg.command('color')">
+    <!-- .command('color') changes text to highlight color set on constructor -->
     Color
 </button>
 <button onclick="wysiwyg.command('divider')">
     Divider
 </button>
 <!-- Highlight color is applied on quote -->
-<button onclick="wysiwyg.command('quote')">
+<button onclick="wysiwyg.command('quote')" id="quote">
     Quote
 </button>
-<button onclick="wysiwyg.command('unorderedList')">
+<button onclick="wysiwyg.command('unorderedList')" id="unorderedList">
     Unordered list
 </button>
-<button onclick="wysiwyg.command('orderedList')">
+<button onclick="wysiwyg.command('orderedList')" id="orderedList">
     Ordered list
 </button>
-<button onclick="wysiwyg.command('alignLeft')">
+<button onclick="wysiwyg.command('alignLeft')" id="alignLeft">
     Align left
 </button>
-<button onclick="wysiwyg.command('alignCenter')">
+<button onclick="wysiwyg.command('alignCenter')" id="alignCenter">
     Align center
 </button>
-<button onclick="wysiwyg.command('alignRight')">
+<button onclick="wysiwyg.command('alignRight')" id="alignRight">
     Align right
 </button>
 <!-- check out the callback to pre process image element before load -->
@@ -89,7 +90,16 @@
 <button onclick="exportData()">
     Export
 </button>
-
+<style>
+    button, input[type="color"] {
+        height: 2em;
+        vertical-align: middle;
+        margin-bottom: 0.5rem;
+    }
+    button {
+        background-color: white;
+    }
+</style>
 <script>
     let wysiwyg = new Wysiwyg4All({
         elementId: 'myeditor',
@@ -103,7 +113,6 @@
         //     desktop: "18px",
         //     tablet: "16px",
         //     phone: "14px",
-
         //     h1: 4.2,
         //     h2: 3.56,
         //     h3: 2.92,
@@ -112,9 +121,8 @@
         //     h6: 1.15,
         //     small: 0.8,
         // },
-        // logMutation: true,
-        // logExecution: true,
         callback: c => {
+            console.log(c)
             if (c.caratPosition) {
                 // Tracks carat position
                 // Make carat to be always within the viewport
@@ -126,27 +134,60 @@
             }
 
             if (c.commandTracker) {
+                // {
+                //     "quote": boolean;
+                //     "unorderedList": boolean;
+                //     "orderedList": boolean;
+                //     "alignLeft": boolean;
+                //     "alignCenter": boolean;
+                //     "alignRight": boolean;
+                //     "h1": boolean;
+                //     "h2": boolean;
+                //     "h3": boolean;
+                //     "h4": boolean;
+                //     "h5": boolean;
+                //     "h6": boolean;
+                //     "small": boolean;
+                //     "bold": boolean;
+                //     "italic": boolean;
+                //     "underline": boolean;
+                //     "strike": boolean;
+                //     "color": string;
+                //     "backgroundColor": string;
+                // };
                 let ct = c.commandTracker;
                 const colorInput = document.getElementById('colorInput');
                 const backgroundColorInput = document.getElementById('backgroundColorInput');
 
-                if (colorInput instanceof HTMLInputElement) {
-                    if (typeof ct.color === 'string')
-                        // change the color wheel input value based on the position of the caret
-                        colorInput.value = ct.color;
-                    else
-                        // If color output is true(boolean), the current color is the highlight color
-                        colorInput.value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
+                for(let k in ct) {
+                    let el = document.getElementById(k);
+                    if (el) {
+                        if (ct[k] === true) {
+                            el.style.backgroundColor = 'lightgray';
+                        } else if (ct[k] === false) {
+                            el.style.backgroundColor = 'white';
+                        }
+                    }
                 }
 
-                if (backgroundColorInput instanceof HTMLInputElement) {
-                    if (typeof ct.backgroundColor === 'string')
-                        // change the color wheel input value based on the position of the caret
-                        backgroundColorInput.value = ct.backgroundColor;
-                    else
-                        // If color output is true(boolean), the current color is the highlight color
-                        backgroundColorInput.value = ct.backgroundColor ? wysiwyg.highlightColor : wysiwyg.defaultBackgroundColor;
+                if (typeof ct.color === 'string') {
+                    // change the color wheel input value based on the position of the caret
+                    colorInput.value = ct.color;
                 }
+                else {
+                    // If color output is true(boolean), the current color is the highlight color
+                    colorInput.value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
+                }
+
+                if (typeof ct.backgroundColor === 'string') {
+                    // change the color wheel input value based on the position of the caret
+                    backgroundColorInput.value = ct.backgroundColor;
+                }
+                else {
+                    // If color output is true(boolean), the current color is the highlight color
+                    backgroundColorInput.value = ct.backgroundColor ? wysiwyg.highlightColor : wysiwyg.defaultBackgroundColor;
+                }
+                
             }
 
             if (c.image) {
