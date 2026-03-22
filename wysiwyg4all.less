@@ -20,9 +20,7 @@
 }
 
 //  placeholder
-._wysiwyg4all[contenteditable='true'][placeholder]:empty::before,
-._wysiwyg4all[contenteditable='true'][placeholder]:has(> br:only-child)::before,
-._wysiwyg4all[contenteditable='true'][placeholder]:has(> p:only-child > br:only-child)::before {
+._wysiwyg4all._placeholderVisible[contenteditable='true'][placeholder]::before {
     color: var(--placeholder);
     content: attr(placeholder);
     word-break: break-word;

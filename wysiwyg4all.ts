@@ -997,6 +997,7 @@ export class Wysiwyg4All {
 		} else {
 			this.element.removeAttribute("placeholder");
 		}
+		this.updatePlaceholderVisibility();
 	}
 
 	public setSpellcheck(enabled: boolean): void {
@@ -1006,6 +1007,31 @@ export class Wysiwyg4All {
 	public setEditable(enabled: boolean): void {
 		this.element.setAttribute("contenteditable", enabled ? "true" : "false");
 		this.observeMutation(enabled);
+		this.updatePlaceholderVisibility();
+	}
+
+	private isEditorInPlaceholderState(): boolean {
+		if (this.element.childNodes.length === 0) return true;
+		if (this.element.childNodes.length !== 1) return false;
+
+		const only = this.element.firstChild;
+		if (!only) return true;
+		if (only.nodeType === Node.TEXT_NODE) {
+			const text = (only.textContent || "").split("\u200B").join("").trim();
+			return text.length === 0;
+		}
+
+		if (!(only instanceof HTMLElement)) return false;
+		if (only.tagName === "BR") return true;
+		if (only.tagName === "P") return this.isLineVisuallyEmpty(only);
+		return false;
+	}
+
+	private updatePlaceholderVisibility(): void {
+		const hasPlaceholder = !!this.element.getAttribute("placeholder")?.trim();
+		const editable = this.element.getAttribute("contenteditable") === "true";
+		const shouldShow = hasPlaceholder && editable && this.isEditorInPlaceholderState();
+		this.element.classList.toggle("_placeholderVisible", shouldShow);
 	}
 
 	public destroy(): void {
@@ -1055,11 +1081,14 @@ export class Wysiwyg4All {
 					target.append(document.createTextNode(""));
 				}
 			}
+
+			this.updatePlaceholderVisibility();
 		});
 
 		this.observer.observe(this.element, {
 			attributes: true,
 			childList: true,
+			characterData: true,
 			subtree: true,
 		});
 	}
@@ -2564,6 +2593,7 @@ export class Wysiwyg4All {
 		if (editable) this.setEditable(true);
 		if (this.element.childNodes.length === 0) this.element.append(this.createEmptyParagraph());
 		this.updateCommandTracker();
+		this.updatePlaceholderVisibility();
 	}
 
 	public async export(
