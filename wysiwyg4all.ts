@@ -290,7 +290,7 @@ export class Wysiwyg4All {
 	public hashtag_array: HashtagData[] = [];
 	public urllink_array: UrlData[] = [];
 	public custom_array: CustomData[] = [];
-	public commandTracker: CommandTracker = {};
+	public commandTracker: CommandTracker = {} as CommandTracker;
 	// public lastLineBlank: boolean;
 
 	constructor(option: Wysiwyg4AllOptions) {
@@ -1702,6 +1702,66 @@ export class Wysiwyg4All {
 		}
 	}
 
+	private isStyleAppliedToSelection(className: string): boolean {
+		this.captureRange();
+		if (!this.range) return false;
+
+		const focusNode = this.range.collapsed ? this.range.startContainer : this.range.commonAncestorContainer;
+		const element = focusNode.nodeType === Node.TEXT_NODE ? focusNode.parentElement : (focusNode as Element);
+		if (!element || !this.element.contains(element)) return false;
+
+		return !!element.closest(`.${className}`);
+	}
+
+	private removeStyleFromSelection(className: string, command: InlineClassCommand): void {
+		this.captureRange();
+		if (!this.range) return;
+
+		const range = this.splitRangeBoundaries(this.range.cloneRange());
+
+		const startAncestor = this.findClosestAncestorWithClass(range.startContainer, className);
+		const endAncestor = this.findClosestAncestorWithClass(range.endContainer, className);
+		const breakoutAncestor = startAncestor && startAncestor === endAncestor ? startAncestor : null;
+
+		if (range.collapsed) {
+			if (breakoutAncestor) {
+				const after = document.createRange();
+				after.setStartAfter(breakoutAncestor);
+				after.collapse(true);
+				this.restoreLastSelection(after);
+				this.backupCurrentRange(after, { bypassNormalize: true });
+				this.element.focus({ preventScroll: true });
+			}
+			return;
+		}
+
+		const inherited = breakoutAncestor
+			? this.collectPreservedInlineStyles(breakoutAncestor, className)
+			: { classes: [] as string[], color: undefined, backgroundColor: undefined };
+
+		const fragment = range.extractContents();
+		const wrapper = document.createElement("span");
+		for (const cls of inherited.classes) wrapper.classList.add(cls);
+		if (command !== "color" && inherited.color) wrapper.style.setProperty("color", inherited.color);
+		if (command !== "backgroundColor" && inherited.backgroundColor)
+			wrapper.style.setProperty("background-color", inherited.backgroundColor);
+		wrapper.append(fragment);
+
+		this.stripSameStyleFromFragment(wrapper, className, command);
+		wrapper.classList.remove(className);
+		if (command === "color") wrapper.style.removeProperty("color");
+		if (command === "backgroundColor") wrapper.style.removeProperty("background-color");
+
+		range.insertNode(wrapper);
+		if (breakoutAncestor) {
+			this.breakOutFromAncestor(wrapper, breakoutAncestor);
+		}
+
+		this.setSelectionAtEnd(wrapper);
+		this.normalizeDocument();
+		this.cleanupEmptyTextStyleElements();
+	}
+
 	private applyAlignment(command: AlignCommand): void {
 		this.captureRange();
 		if (!this.range) return;
@@ -1939,8 +1999,27 @@ export class Wysiwyg4All {
 
 	private updateCommandTracker(): void {
 		this.captureRange();
-		const tracker: CommandTracker = {};
-		for (const key of Object.keys(this.commandTracker)) tracker[key] = false;
+		const tracker = {
+			quote: false,
+			unorderedList: false,
+			orderedList: false,
+			alignLeft: false,
+			alignCenter: false,
+			alignRight: false,
+			h1: false,
+			h2: false,
+			h3: false,
+			h4: false,
+			h5: false,
+			h6: false,
+			small: false,
+			bold: false,
+			italic: false,
+			underline: false,
+			strike: false,
+			color: "",
+			backgroundColor: "",
+		} as CommandTracker;
 		if (!this.range) {
 			this.commandTracker = tracker;
 			return;
@@ -1958,12 +2037,12 @@ export class Wysiwyg4All {
 			if (!owner) continue;
 			if (command === "color") {
 				const color = owner.style.color ? tryNormalizeColor(owner.style.color) : null;
-				tracker.color = color || true;
+				tracker.color = (color || "") as any;
 			} else if (command === "backgroundColor") {
 				const color = owner.style.backgroundColor ? tryNormalizeColor(owner.style.backgroundColor) : null;
-				tracker.backgroundColor = color || true;
+				tracker.backgroundColor = (color || "") as any;
 			} else {
-				tracker[command] = true;
+				(tracker as any)[command] = true;
 			}
 		}
 
@@ -2173,10 +2252,17 @@ export class Wysiwyg4All {
 			}
 
 			else if ((Object.keys(CLASS_BY_COMMAND) as InlineClassCommand[]).includes(action as InlineClassCommand)) {
+				const className = CLASS_BY_COMMAND[action as InlineClassCommand];
 				if (action === "color") {
+					// Color command behaves as a setter for highlightColor.
 					this.wrapSelectionWithClass(CLASS_BY_COMMAND.color, "color", this.highlightColor);
 				} else {
-					this.wrapSelectionWithClass(CLASS_BY_COMMAND[action as InlineClassCommand], action as InlineClassCommand);
+					const isApplied = this.isStyleAppliedToSelection(className);
+					if (isApplied) {
+						this.removeStyleFromSelection(className, action as InlineClassCommand);
+					} else {
+						this.wrapSelectionWithClass(className, action as InlineClassCommand);
+					}
 				}
 			}
 

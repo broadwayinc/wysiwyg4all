@@ -47,8 +47,8 @@
     Strike
 </button>
 
-<input id='colorInput' type='color' oninput="wysiwyg.command({color: event.target.value})" />
-<input id='backgroundColorInput' type='color' oninput="wysiwyg.command({backgroundColor: event.target.value})" />
+<input id='colorInput' type='color' oninput="wysiwyg.command({color: this.value})" />
+<input id='backgroundColorInput' type='color' oninput="wysiwyg.command({backgroundColor: this.value})" />
 <button onclick="wysiwyg.command('color')">
     <!-- .command('color') changes text to highlight color set on constructor -->
     Color
@@ -156,9 +156,6 @@
                 //     "backgroundColor": string;
                 // };
                 let ct = c.commandTracker;
-                const colorInput = document.getElementById('colorInput');
-                const backgroundColorInput = document.getElementById('backgroundColorInput');
-
                 for(let k in ct) {
                     let el = document.getElementById(k);
                     if (el) {
@@ -170,24 +167,10 @@
                     }
                 }
 
-                if (typeof ct.color === 'string') {
-                    // change the color wheel input value based on the position of the caret
-                    colorInput.value = ct.color;
-                }
-                else {
-                    // If color output is true(boolean), the current color is the highlight color
-                    colorInput.value = ct.color ? wysiwyg.highlightColor : wysiwyg.defaultFontColor;
-                }
-
-                if (typeof ct.backgroundColor === 'string') {
-                    // change the color wheel input value based on the position of the caret
-                    backgroundColorInput.value = ct.backgroundColor;
-                }
-                else {
-                    // If color output is true(boolean), the current color is the highlight color
-                    backgroundColorInput.value = ct.backgroundColor ? wysiwyg.highlightColor : wysiwyg.defaultBackgroundColor;
-                }
-                
+                const colorInput = document.getElementById('colorInput');
+                const backgroundColorInput = document.getElementById('backgroundColorInput');
+                colorInput.value = ct.color || wysiwyg.defaultFontColor;
+                backgroundColorInput.value = ct.backgroundColor || wysiwyg.defaultBackgroundColor;
             }
 
             if (c.image) {
