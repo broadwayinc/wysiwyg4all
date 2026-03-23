@@ -1,17 +1,17 @@
 {
   "name": "wysiwyg4all",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Free opensource minimal WYSIWYG editor for web developers",
   "main": "dist/wysiwyg4all.module.cjs",
   "module": "dist/wysiwyg4all.module.js",
   "types": "dist/wysiwyg4all.d.ts",
-  "browser": "dist/wysiwyg4all.js",
+  "browser": "dist/wysiwyg4all.module.js",
   "unpkg": "dist/wysiwyg4all.js",
   "jsdelivr": "dist/wysiwyg4all.js",
   "exports": {
     ".": {
       "types": "./dist/wysiwyg4all.d.ts",
-      "browser": "./dist/wysiwyg4all.js",
+      "browser": "./dist/wysiwyg4all.module.js",
       "require": "./dist/wysiwyg4all.module.cjs",
       "import": "./dist/wysiwyg4all.module.js",
       "default": "./dist/wysiwyg4all.module.js"
@@ -44,9 +44,7 @@
   "license": "MIT",
   "devDependencies": {
     "less": "^4.6.4",
-    "tsup": "^8.3.5"
-  },
-  "dependencies": {
+    "tsup": "^8.3.5",
     "basic-node-server": "^1.1.0"
   }
 }
